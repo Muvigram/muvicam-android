@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
@@ -39,11 +40,19 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
+import com.estsoft.muvicam.anim.SingleBoundInterpolator;
 import com.estsoft.muvicam.model.Music;
+import com.estsoft.muvicam.ui.home.HomeActivity;
+import com.estsoft.muvicam.ui.share.ShareActivity;
 
 import java.io.File;
 import java.io.IOException;
@@ -88,7 +97,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   @BindView(R.id.camera_shoot_button)
   ImageButton mShootButton;
   @BindView(R.id.camera_music_button)
-  ImageButton mMusicButton;
+  AlbumArtButton mMusicButton;
   @BindView(R.id.camera_library_button)
   ImageButton mLibraryButton;
   @BindView(R.id.camera_selfie_mode_button)
@@ -100,17 +109,45 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   @BindView(R.id.camera_texture_view)
   ResizableTextureView mTextureView;
 
+//  public static Animation getClickingAnimation(Context context, double amplitude) {
+//    Animation animation = AnimationUtils.loadAnimation(context, R.anim.clicking);
+//    return animation;
+//  }
+
+  @OnClick(R.id.camera_music_cut_button)
+  public void _SeekToPlayer(View v) {
+    // v.startAnimation(getClickingAnimation(getActivity(), 3.0));
+    if (mPlayer != null) {
+      mPlayer.seekTo(30000);
+    }
+  }
+
+
   @OnClick(R.id.camera_selfie_mode_button)
-  public void _ShiftSelfieMode(/*View v*/) {
+  public void _ShiftSelfieMode(View v) {
+    // v.startAnimation(getClickingAnimation(getActivity(), 3.0));
     closeCamera();
     mSelfieMode = !mSelfieMode;
     openCamera();
   }
 
+  @OnClick(R.id.camera_ok_button)
+  public void _CompleteVideo(View v) {
+    if (!mVideoStack.isEmpty()) {
+      // v.startAnimation(getClickingAnimation(getActivity(), 3.0));
+      Stack<File> tempStack = mVideoStack;
+      mVideoStack.clear();
+      // getActivity().startActivity(ShareActivity.newIntent(getActivity(), tempStack));
+    }
+  }
+
   @OnClick(R.id.camera_texture_view)
   public void _triggerFocus(/*View v*/) {
-    startPlaying();
-    // TODO
+    if (mPlayer != null && mPlayer.isPlaying()) {
+      pausePlaying();
+    } else {
+      startPlaying();
+    }
   }
 
   @OnTouch(R.id.camera_shoot_button)
@@ -318,15 +355,9 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           break;
         case UI_LOGIC_ACTIVATE_OK_BUTTON:
           mOkButton.setImageResource(R.drawable.camera_ok_button_active_30dp);
-          mOkButton.setOnClickListener(v -> {
-            while (!mVideoStack.isEmpty()) {
-              popVideoFile();
-            }
-          });
           break;
         case UI_LOGIC_DEACTIVATE_OK_BUTTON:
           mOkButton.setImageResource(R.drawable.camera_ok_button_inactive_30dp);
-          mOkButton.setOnClickListener(null);
           break;
         default:
           // Nothing to do.
@@ -637,32 +668,37 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   public void updateMusic(Music music) {
     if (music != null) {
       mMusic = music;
+      if (music.thumbnail() != null) {
+        mMusicButton.setAlbumArt(music.thumbnail());
+      }
     }
-
+    setUpMusicPlayer();
   }
 
-
-  private void startPlaying() {
-    if (mPlayer != null && mPlayer.isPlaying()) {
-      mPlayer.pause();
-    } else if (mPlayer != null) {
-      mPlayer.start();
+  public void setUpMusicPlayer() {
+    if (mPlayer != null) {
+      mPlayer.reset();
     } else {
       mPlayer = new MediaPlayer();
-      try {
-        mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        if (mMusic == null) {
-          mPlayer.setDataSource(getResources().getAssets()
-              .openFd("silence_15_sec.mp3").getFileDescriptor());
-        } else {
-          mPlayer.setDataSource(getContext(), mMusic.uri());
-        }
-        mPlayer.prepare();
-        mPlayer.start();
-
-      } catch (IOException e) {
-        Timber.e("prepare() failed");
+    }
+    try {
+      mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+      if (mMusic == null) {
+        mPlayer.setDataSource(getResources().getAssets()
+            .openFd("silence_15_sec.mp3").getFileDescriptor());
+      } else {
+        mPlayer.setDataSource(getContext(), mMusic.uri());
       }
+      mPlayer.prepare();
+
+    } catch (IOException e) {
+      Timber.e("prepare() failed");
+    }
+  }
+
+  private void startPlaying() {
+    if (mPlayer != null) {
+      mPlayer.start();
     }
 
   }
@@ -718,7 +754,9 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   private void stopRecordingVideo() {
     mMediaRecorder.stop();
-
+    if (mPlayer != null) {
+      pausePlaying();
+    }
     Activity activity = getActivity();
     if (null != activity) {
       Toast.makeText(activity, "Video saved: " + mVideoFile.toString(),
@@ -830,6 +868,9 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           updatePreview();
 
           mMediaRecorder.start();
+          if (mPlayer != null) {
+            startPlaying();
+          }
         }
 
         @Override
