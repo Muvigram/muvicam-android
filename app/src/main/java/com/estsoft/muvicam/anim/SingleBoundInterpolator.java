@@ -4,7 +4,7 @@ package com.estsoft.muvicam.anim;
  * Created by jaylim on 12/16/2016.
  */
 
-public class SingleBoundInterpolator extends android.view.animation.BounceInterpolator {
+public class SingleBoundInterpolator implements android.view.animation.Interpolator {
   private double mAmplitude = 1.0;
 
   public SingleBoundInterpolator(double amplitude) {
