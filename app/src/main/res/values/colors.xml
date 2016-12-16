@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Theme color -->
+    <color name="colorPrimary">@color/grey_white_1000</color>
+    <color name="colorPrimaryDark">@color/grey_700</color>
+    <color name="colorAccent">@color/grey_black_1000</color>
+
+    <!-- Text color -->
+    <color name="textBlack">@color/grey_black_1000</color>
+    <color name="textWhite">@color/grey_white_1000</color>
+    <color name="textDarkGrey">@color/grey_800</color>
+    <color name="textGrey">@color/grey_600</color>
+    <color name="textLightGrey">@color/grey_400</color>
+
+    <!-- Line color -->
+    <color name="lineDarkGrey">@color/grey_800</color>
+    <color name="lineLightGrey">@color/grey_500</color>
+
+    <!-- Plain color -->
+    <color name="backgroundWhite">@color/grey_white_1000</color>
+    <color name="backgroundLightGrey">@color/grey_300</color>
+</resources>

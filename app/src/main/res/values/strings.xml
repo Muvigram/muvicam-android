@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Muvicam</string>
+
+    <!-- camera package -->
+    <string name="camera_shoot_button_desc">Start shooting a video.</string>
+    <string name="camera_music_button_desc">Select a background music.</string>
+    <string name="camera_library_button_desc">Choose videos from library.</string>
+    <string name="camera_selfie_mode_button_desc">Shift into selfie or scene mode.</string>
+    <string name="camera_request_permission">This sample needs permission for camera, audio, and storage access.</string>
+    <string name="camera_camera_error">This device doesn\'t support Camera2 API.</string>
+
+
+    <!-- music package -->
+    <string name="music_search_title">Select background music</string>
+    <string name="music_search_hint">search music</string>
+    <string name="music_album_desc">Album cover.</string>
+
+    <string name="music_search_empty_musics">There arn\'t any musics</string>
+    <string name="music_search_error_loading">There was a problem loading the musics.</string>
+
+
+
+    <!-- dialog factory -->
+    <string name="dialog_action_ok">OK</string>
+    <string name="dialog_action_cancel">Cancel</string>
+    <string name="dialog_error_title">Sorry</string>
+</resources>
