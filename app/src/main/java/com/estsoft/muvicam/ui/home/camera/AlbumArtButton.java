@@ -97,9 +97,5 @@ public class AlbumArtButton extends ImageButton {
     }
     canvas.drawCircle(getMeasuredWidth() / 2, getMeasuredHeight() / 2,
         getMeasuredWidth() * 0.1f, mInnerCirclePaint);
-
-    if (isAlbumArt) {
-      mThumbnail.recycle();
-    }
   }
 }
