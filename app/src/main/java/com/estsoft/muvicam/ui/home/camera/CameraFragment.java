@@ -109,14 +109,13 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   @BindView(R.id.camera_texture_view)
   ResizableTextureView mTextureView;
 
-//  public static Animation getClickingAnimation(Context context, double amplitude) {
-//    Animation animation = AnimationUtils.loadAnimation(context, R.anim.clicking);
-//    return animation;
-//  }
+  public static Animation getClickingAnimation(Context context) {
+    return AnimationUtils.loadAnimation(context, R.anim.clicking);
+  }
 
   @OnClick(R.id.camera_music_cut_button)
   public void _SeekToPlayer(View v) {
-    // v.startAnimation(getClickingAnimation(getActivity(), 3.0));
+     v.startAnimation(getClickingAnimation(getActivity()));
     if (mPlayer != null) {
       mPlayer.seekTo(30000);
     }
@@ -125,7 +124,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_selfie_mode_button)
   public void _ShiftSelfieMode(View v) {
-    // v.startAnimation(getClickingAnimation(getActivity(), 3.0));
+     v.startAnimation(getClickingAnimation(getActivity()));
     closeCamera();
     mSelfieMode = !mSelfieMode;
     openCamera();
@@ -134,7 +133,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   @OnClick(R.id.camera_ok_button)
   public void _CompleteVideo(View v) {
     if (!mVideoStack.isEmpty()) {
-      // v.startAnimation(getClickingAnimation(getActivity(), 3.0));
+       v.startAnimation(getClickingAnimation(getActivity()));
       Stack<File> tempStack = mVideoStack;
       mVideoStack.clear();
       // getActivity().startActivity(ShareActivity.newIntent(getActivity(), tempStack));
@@ -143,17 +142,18 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_texture_view)
   public void _triggerFocus(/*View v*/) {
-    if (mPlayer != null && mPlayer.isPlaying()) {
-      pausePlaying();
-    } else {
-      startPlaying();
-    }
+//    if (mPlayer != null && mPlayer.isPlaying()) {
+//      pausePlaying();
+//    } else {
+//      startPlaying();
+//    }
   }
 
   @OnTouch(R.id.camera_shoot_button)
   public boolean _shootVideo(View v, MotionEvent e) {
     switch (e.getAction()) {
       case MotionEvent.ACTION_DOWN:
+        v.startAnimation(getClickingAnimation(getActivity()));
         mShootButton.setImageResource(R.drawable.camera_shoot_button_hold_70dp);
         setUpVideoFile();
         startRecordingVideo();
@@ -700,12 +700,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     if (mPlayer != null) {
       mPlayer.start();
     }
-
-  }
-
-  private void stopPlaying() {
-    mPlayer.release();
-    mPlayer = null;
   }
 
   private void pausePlaying() {
@@ -714,6 +708,11 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     } else {
       mPlayer.start();
     }
+  }
+
+  private void stopPlaying() {
+    mPlayer.release();
+    mPlayer = null;
   }
 
 
