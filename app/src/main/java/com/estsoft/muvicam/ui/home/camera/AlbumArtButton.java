@@ -9,6 +9,8 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.widget.ImageButton;
 
@@ -51,13 +53,15 @@ public class AlbumArtButton extends ImageButton {
   }
 
   private boolean isAlbumArt = false;
-  private  Bitmap mThumbnail;
+  private Bitmap mThumbnail;
   private Rect mSrcRect;
   private Rect mDestRect;
 
-  public void setAlbumArt(Bitmap thumbnail) {
+  public void setAlbumArt(@Nullable Bitmap thumbnail) {
+    if (thumbnail == null) {
+      return;
+    }
     isAlbumArt = true;
-    Timber.e("/*/*/*/**/*/*/*/MeasuredWidth %d : %d\n", getMeasuredWidth(), getMeasuredHeight());
     mThumbnail = AlbumArtButton.getCroppedBitmap(thumbnail);
     mSrcRect = new Rect(0, 0, mThumbnail.getWidth(), mThumbnail.getHeight());
     mDestRect = new Rect(0, 0, getMeasuredWidth(), getMeasuredHeight());
@@ -89,7 +93,6 @@ public class AlbumArtButton extends ImageButton {
   @Override
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
-    Timber.e("/*/*/*/**/*/*/*/MeasuredWidth %d : %d\n", getMeasuredWidth(), getMeasuredHeight());
     if (isAlbumArt) {
       canvas.drawBitmap(mThumbnail, mSrcRect, mDestRect, mBackgroundPaint);
     } else {
