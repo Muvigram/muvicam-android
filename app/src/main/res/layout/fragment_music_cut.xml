@@ -14,7 +14,7 @@
         android:layout_marginBottom="10dp"
         android:layout_marginEnd="30dp"
         android:background="@color/transparent"
-        android:src="@drawable/camera_music_cut_button_30dp"/>
+        android:src="@drawable/camera_cut_button_active_30dp"/>
 
     <TextView
         android:layout_width="match_parent"

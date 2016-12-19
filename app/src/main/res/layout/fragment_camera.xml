@@ -53,7 +53,7 @@
         android:background="#35FFFFFF"/>
 
     <ImageButton
-        android:id="@+id/camera_selfie_mode_button"
+        android:id="@+id/camera_selfie_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/camera_base_line"
@@ -61,19 +61,19 @@
         android:layout_marginBottom="10dp"
         android:background="#00000000"
         android:contentDescription="@string/camera_selfie_mode_button_desc"
-        android:src="@drawable/camera_selfie_mode_button_30dp"/>
+        android:src="@drawable/camera_selfie_button_active_30dp"/>
 
     <ImageButton
-        android:id="@+id/camera_music_cut_button"
+        android:id="@+id/camera_cut_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/camera_base_line"
         android:layout_marginBottom="10dp"
         android:layout_marginEnd="10dp"
-        android:layout_toStartOf="@id/camera_selfie_mode_button"
+        android:layout_toStartOf="@id/camera_selfie_button"
         android:background="#00000000"
         android:contentDescription="@string/camera_selfie_mode_button_desc"
-        android:src="@drawable/camera_music_cut_button_30dp"/>
+        android:src="@drawable/camera_cut_button_active_30dp"/>
 
     <ImageButton
         android:id="@+id/camera_ok_button"
@@ -82,7 +82,7 @@
         android:layout_alignBottom="@id/camera_base_line"
         android:layout_marginBottom="10dp"
         android:layout_marginStart="10dp"
-        android:layout_toEndOf="@id/camera_selfie_mode_button"
+        android:layout_toEndOf="@id/camera_selfie_button"
         android:background="#00000000"
         android:contentDescription="@string/camera_selfie_mode_button_desc"
         android:src="@drawable/camera_ok_button_inactive_30dp"/>

@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 
 import com.estsoft.muvicam.R;
+import com.estsoft.muvicam.model.Music;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -23,8 +24,16 @@ import timber.log.Timber;
 
 public class MusicCutFragment extends Fragment {
 
-  public static MusicCutFragment newInstance() {
-    return new MusicCutFragment();
+  private static final String ARG_MUSIC = "MusicCutFragment.arg_music";
+  private static final String ARG_OFFSET = "MusicCutFragment.arg_offset";
+
+  public static MusicCutFragment newInstance(Music music, int offset) {
+    MusicCutFragment fragment = new MusicCutFragment();
+    Bundle args = new Bundle();
+    args.putParcelable(ARG_MUSIC, music);
+    args.putInt(ARG_OFFSET, offset);
+    fragment.setArguments(args);
+    return fragment;
   }
 
   private int mOffset = 30000;
@@ -36,10 +45,21 @@ public class MusicCutFragment extends Fragment {
 
   @OnClick(R.id.music_cut_complete_button)
   public void _completeMusicCut() {
-    // TODO update music seek
+    CameraFragment parentFragment = ((CameraFragment) getParentFragment());
     Timber.e("Music_Cut");
-    ((CameraFragment) getParentFragment()).cutMusic(mOffset);
+
+    FragmentManager pcfm = parentFragment.getChildFragmentManager();
+    Fragment fragment = pcfm.findFragmentById(R.id.camera_container_music_cut);
+
+    pcfm.beginTransaction()
+        .remove(fragment)
+        .commit();
+    parentFragment.requestUiChange(CameraFragment.UI_LOGIC_SHOW_ALL_BUTTONS);
+
+    parentFragment.cutMusic(mOffset);
   }
+
+
 
   @Nullable
   @Override

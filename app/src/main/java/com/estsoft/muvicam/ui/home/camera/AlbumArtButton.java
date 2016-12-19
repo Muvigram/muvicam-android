@@ -15,6 +15,7 @@ import android.util.AttributeSet;
 import android.widget.ImageButton;
 
 import com.estsoft.muvicam.R;
+import com.estsoft.muvicam.model.Music;
 
 import timber.log.Timber;
 
@@ -39,6 +40,7 @@ public class AlbumArtButton extends ImageButton {
 
   private Paint mBackgroundPaint;
   private Paint mInnerCirclePaint;
+  private RectF mBackgroundRectF;
 
   private void init(AttributeSet attrs) {
     // If any, get attributeSets
@@ -49,24 +51,32 @@ public class AlbumArtButton extends ImageButton {
     mInnerCirclePaint = new Paint();
     mInnerCirclePaint.setColor(getResources().getColor(R.color.yellow_700));
     mInnerCirclePaint.setStrokeWidth(1.0f);
-
   }
 
   private boolean isAlbumArt = false;
   private Bitmap mThumbnail;
   private Rect mSrcRect;
-  private Rect mDestRect;
 
-  public void setAlbumArt(@Nullable Bitmap thumbnail) {
-    if (thumbnail == null) {
-      return;
+  public void setAlbumArt(@Nullable Music music) {
+    if (music == null) {
+      isAlbumArt = false;
+      if (mThumbnail != null) {
+        mThumbnail.recycle();
+        mThumbnail = null;
+      }
+      mSrcRect = null;
+      invalidate();
+    } else {
+      isAlbumArt = true;
+      mThumbnail = AlbumArtButton.getCroppedBitmap(music.thumbnail());
+      mSrcRect = new Rect(0, 0, mThumbnail.getWidth(), mThumbnail.getHeight());
+      invalidate();
     }
-    isAlbumArt = true;
-    mThumbnail = AlbumArtButton.getCroppedBitmap(thumbnail);
-    mSrcRect = new Rect(0, 0, mThumbnail.getWidth(), mThumbnail.getHeight());
-    mDestRect = new Rect(0, 0, getMeasuredWidth(), getMeasuredHeight());
+  }
 
-    invalidate();
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
   }
 
   private static Bitmap getCroppedBitmap(Bitmap thumbnail) {
@@ -93,10 +103,13 @@ public class AlbumArtButton extends ImageButton {
   @Override
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
+    if (mBackgroundRectF == null) {
+      mBackgroundRectF = new RectF(0, 0, getMeasuredWidth(), getMeasuredHeight());
+    }
     if (isAlbumArt) {
-      canvas.drawBitmap(mThumbnail, mSrcRect, mDestRect, mBackgroundPaint);
+      canvas.drawBitmap(mThumbnail, mSrcRect, mBackgroundRectF, mBackgroundPaint);
     } else {
-      canvas.drawOval(0.0f, 0.0f, getMeasuredWidth(), getMeasuredHeight(), mBackgroundPaint);
+      canvas.drawOval(mBackgroundRectF, mBackgroundPaint);
     }
     canvas.drawCircle(getMeasuredWidth() / 2, getMeasuredHeight() / 2,
         getMeasuredWidth() * 0.1f, mInnerCirclePaint);
