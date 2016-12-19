@@ -16,7 +16,6 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.AudioManager;
-import android.media.MediaActionSound;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -184,12 +183,12 @@ public class CameraFragment extends Fragment implements CameraMvpView {
         mShootButton.setImageResource(R.drawable.camera_shoot_button_hold_70dp);
         requestUiChange(UI_LOGIC_HIDE_PERIPHERAL_BUTTONS);
         setUpVideoFile();
-        startRecordingVideo();
+        startRecording();
         return true;
       case MotionEvent.ACTION_UP:
         mShootButton.setImageResource(R.drawable.camera_shoot_button_release_70dp);
         requestUiChange(UI_LOGIC_SHOW_PERIPHERAL_BUTTONS);
-        stopRecordingVideo();
+        stopRecording();
         return true;
       default:
         return false;
@@ -240,8 +239,10 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   public void onResume() {
     super.onResume();
     startBackgroundThread();
-    openPlayer();                     // player
-    setUpPlayer();
+    openPlayer();   // player
+    setUpPlayer();  //
+    openRecorder();
+
     if (mTextureView.isAvailable()) { // camera
       openCamera();
     } else {
@@ -252,7 +253,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   @Override
   public void onPause() {
     closePlayer();  // player
-    closeSession(); // session
+    closeRecorder();
     closeCamera();  // camera
     stopBackgroundThread();
     super.onPause();
@@ -304,7 +305,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   }
 
   // STEP - TEXTURE VIEW //////////////////////////////////////////////////////////////////////////
-
 
   private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
@@ -462,14 +462,11 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   private Semaphore mCameraOpenCloseLock = new Semaphore(1);
 
-  private MediaActionSound mShutter;
-
   private String mCameraId;
 
   private CameraDevice mCameraDevice;
 
   private void openCamera() {
-
     if (!hasPermissionsGranted(VIDEO_PERMISSIONS)) {
       requestVideoPermissions();
       return;
@@ -495,41 +492,12 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     }
   }
 
-  private void closeCamera() {
-    try {
-      mCameraOpenCloseLock.acquire();
-
-      if (null != mShutter) {
-        mShutter.release();
-        mShutter = null;
-      }
-      if (null != mCameraDevice) {
-        mCameraDevice.close();
-        mCameraDevice = null;
-      }
-      if (null != mMediaRecorder) {
-        mMediaRecorder.release();
-        mMediaRecorder = null;
-      }
-    } catch (InterruptedException e) {
-      throw new RuntimeException("Interrupted while trying to lock camera closing.", e);
-    } finally {
-      mCameraOpenCloseLock.release();
-    }
-  }
-
   private final CameraDevice.StateCallback mStateCallback = new CameraDevice.StateCallback() {
     @Override
     public void onOpened(@NonNull CameraDevice camera) {
-
       mCameraDevice = camera;
-
-      // mShutter = new MediaActionSound();
-      // mShutter.load(MediaActionSound.START_VIDEO_RECORDING);
-
       mCameraOpenCloseLock.release();
-
-      startPreview();
+      startPreviewing();
     }
 
     @Override
@@ -537,6 +505,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       mCameraOpenCloseLock.release();
       camera.close();
       mCameraDevice = null;
+      /* need validation */
     }
 
     @Override
@@ -544,12 +513,28 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       mCameraOpenCloseLock.release();
       camera.close();
       mCameraDevice = null;
+      /* need validation */
       Activity activity = getActivity();
       if (null != activity) {
         activity.finish();
       }
     }
   };
+
+  private void closeCamera() {
+    closeSession(); // session
+    try {
+      mCameraOpenCloseLock.acquire();
+      if (null != mCameraDevice) {
+        mCameraDevice.close();
+        mCameraDevice = null;
+      }
+    } catch (InterruptedException e) {
+      throw new RuntimeException("Interrupted while trying to lock camera closing.", e);
+    } finally {
+      mCameraOpenCloseLock.release();
+    }
+  }
 
   // STEP - SETUP CAMERA OUTPUT ///////////////////////////////////////////////////////////////DONE
 
@@ -561,8 +546,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   private Size mVideoSize;
   private Size mPreviewSize;
-
-  private MediaRecorder mMediaRecorder;
 
   private final static int BASE_DIMENSION_WIDTH = 0;
   private final static int BASE_DIMENSION_HEIGHT = 1;
@@ -730,73 +713,22 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   }
 
-
-  // STEP - SETUP MEDIA RECORDER //////////////////////////////////////////////////////////////////
-
-  private void setUpMediaRecorder() throws IOException {
-    if (mMediaRecorder == null) {
-      mMediaRecorder = new MediaRecorder();
-    } else {
-      mMediaRecorder.reset();
-    }
-    // Set media source, output format, and output path.
-    if (mMusic == null) {
-      mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-    }
-    mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
-    mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-    mMediaRecorder.setOutputFile(mVideoFile.getAbsolutePath());
-
-    // Set media source detail
-    if (mMusic == null) {
-      mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-      mMediaRecorder.setAudioSamplingRate(48000);
-    }
-    mMediaRecorder.setVideoEncodingBitRate(10000000);
-    mMediaRecorder.setVideoFrameRate(30);
-    mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
-    mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-
-    mMediaRecorder.setOrientationHint(mSensorOrientation);
-
-    mMediaRecorder.prepare();
-  }
-
-  private void startRecordingVideo() {
-    createRecordSession();
-  }
-
-  private void stopRecordingVideo() {
-    mMediaRecorder.stop();
-    pausePlayer();
-    Activity activity = getActivity();
-    if (null != activity) {
-      Toast.makeText(activity, "Video saved: " + mVideoFile.toString(),
-          Toast.LENGTH_SHORT).show();
-      Timber.d("Video saved: %s\n", mVideoFile.toString());
-    }
-
-    pushVideoFile();
-    mVideoFile = null;
-
-    startPreview();
-  }
-
   // STEP - CONTROL PREVIEW ///////////////////////////////////////////////////////////////////////
 
   private CaptureRequest.Builder mCaptureRequestBuilder;
 
-  private void startPreview() {
+  private void startPreviewing() {
     createPreviewSession();
   }
 
-  private void updatePreview() {
-    mCaptureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
-    try {
-      mSession.setRepeatingRequest(mCaptureRequestBuilder.build(), null, mBackgroundHandler);
-    } catch (CameraAccessException e) {
-      e.printStackTrace();
-    }
+  private void startRecording() {
+    createRecordSession();
+  }
+
+  private void stopRecording() {
+    stopRecorder();
+    pausePlayer();
+    startPreviewing();
   }
 
   // STEP - CREATE SESSION ////////////////////////////////////////////////////////////////////////
@@ -823,11 +755,32 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     }
   }
 
+  CameraCaptureSession.StateCallback mPreviewSessionStateCallback = new CameraCaptureSession.StateCallback() {
+
+    @Override
+    public void onConfigured(@NonNull CameraCaptureSession previewSession) {
+      mSession = previewSession;
+
+      // start capture request
+      mCaptureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+      try {
+        mSession.setRepeatingRequest(mCaptureRequestBuilder.build(), null, mBackgroundHandler);
+      } catch (CameraAccessException e) {
+        e.printStackTrace();
+      }
+    }
+
+    @Override
+    public void onConfigureFailed(@NonNull CameraCaptureSession previewSession) {
+    }
+  };
+
   private void createRecordSession() {
     try {
       Timber.e("createRecordSession %b\n", (Looper.myLooper() == Looper.getMainLooper()));
-      setUpMediaRecorder();
-
+      if (!isRecorderAvailable) { /* TODO - refactoring */
+        setUpRecorder();
+      }
       // Surface texture
       SurfaceTexture texture = mTextureView.getSurfaceTexture();
       assert texture != null;
@@ -835,7 +788,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       Surface previewSurface = new Surface(texture);
 
       // Recorder surface
-      Surface recorderSurface = mMediaRecorder.getSurface();
+      Surface recorderSurface = mRecorder.getSurface();
 
       List<Surface> surfaces = new ArrayList<>();
       surfaces.add(previewSurface);
@@ -850,8 +803,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       mCameraDevice.createCaptureSession(surfaces, mRecordSessionStateCallback, mBackgroundHandler);
     } catch (CameraAccessException e) {
       Timber.e(e, "CameraAccessException from creating capture session for recording.");
-    } catch (IOException e) {
-      Timber.e(e, "IOException from setting up media recorder.");
     }
   }
 
@@ -860,27 +811,22 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     @Override
     public void onConfigured(@NonNull CameraCaptureSession recordSession) {
       mSession = recordSession;
-      updatePreview();
 
-      mMediaRecorder.start();
+      // start capture request
+      mCaptureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+      try {
+        mSession.setRepeatingRequest(mCaptureRequestBuilder.build(), null, mBackgroundHandler);
+      } catch (CameraAccessException e) {
+        e.printStackTrace();
+      }
+
+      // media recorder
+      startRecorder();
       startPlayer();
     }
 
     @Override
     public void onConfigureFailed(@NonNull CameraCaptureSession recordSession) {
-    }
-  };
-
-  CameraCaptureSession.StateCallback mPreviewSessionStateCallback = new CameraCaptureSession.StateCallback() {
-
-    @Override
-    public void onConfigured(@NonNull CameraCaptureSession previewSession) {
-      mSession = previewSession;
-      updatePreview();
-    }
-
-    @Override
-    public void onConfigureFailed(@NonNull CameraCaptureSession previewSession) {
     }
   };
 
@@ -892,7 +838,92 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     }
   }
 
-  // STEP - SETUP MUSIC PLAYER ////////////////////////////////////////////////////////////////DONE
+  // STEP - MEDIA RECORDER ////////////////////////////////////////////////////////////////////DONE
+
+  private MediaRecorder mRecorder;
+
+  private boolean isRecorderAvailable = false; /* TODO - refactoring */
+
+  public void openRecorder() {
+    isRecorderAvailable = false;
+    if (mRecorder == null) {
+      mRecorder = new MediaRecorder();
+    } else {
+      mRecorder.reset();
+    }
+  }
+
+  public void closeRecorder() {
+    isRecorderAvailable = false;
+    if (mRecorder != null) {
+      mRecorder.release();
+      mRecorder = null;
+    }
+  }
+
+  public void setUpRecorder() {
+    try {
+      if (mMusic == null) {
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+      }
+      mRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+      mRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+      mRecorder.setOutputFile(mVideoFile.getAbsolutePath());
+
+      // Set media source detail
+      if (mMusic == null) {
+        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+        mRecorder.setAudioSamplingRate(48000);
+      }
+      mRecorder.setVideoEncodingBitRate(10000000);
+      mRecorder.setVideoFrameRate(30);
+      mRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
+      mRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+
+      mRecorder.setOrientationHint(mSensorOrientation);
+      mRecorder.prepare();
+
+      isRecorderAvailable = true;
+    } catch (IOException e) {
+      mRecorder.reset();
+      e.printStackTrace();
+    }
+  }
+
+  public void startRecorder() {
+    isRecorderAvailable = false;
+    try {
+      mRecorder.start();
+    } catch (IllegalStateException e) {
+      e.printStackTrace();
+      mRecorder.reset();
+      setUpRecorder();
+    }
+  }
+
+  public void stopRecorder() {
+    isRecorderAvailable = false;
+    try {
+      mRecorder.stop();
+      // TODO - push file into the video stack
+      // pushVideoFile();
+      // mVideoFile = null;
+    } catch (IllegalStateException e) {
+      e.printStackTrace();
+      // TODO - delete recent file
+    } finally {
+      mRecorder.reset();
+      setUpRecorder();
+    }
+  }
+
+  public void resetRecorder() {
+    isRecorderAvailable = false;
+    mRecorder.reset();
+  }
+
+
+  // STEP - MUSIC PLAYER //////////////////////////////////////////////////////////////////////DONE
 
   private Music mMusic = null;
   private int mOffset = 0;
