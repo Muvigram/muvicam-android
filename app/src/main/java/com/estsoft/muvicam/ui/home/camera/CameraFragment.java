@@ -48,6 +48,7 @@ import android.widget.Toast;
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.util.FileUtil;
+import com.jakewharton.rxbinding.view.RxView;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,8 +67,9 @@ import java.util.concurrent.TimeUnit;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import butterknife.OnTouch;
 import butterknife.Unbinder;
+import rx.Observable;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 import static com.estsoft.muvicam.util.AnimationUtil.*;
@@ -152,9 +154,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       public void onAnimationEnd(Animation animation) {
           saveAllFilesInStack();
           if (mVideoStack.isEmpty()) {
-            requestUiChange(UI_LOGIC_DEACTIVATE_OK_BUTTON);
-            requestUiChange(UI_LOGIC_ACTIVATE_CUT_BUTTON);
-            requestUiChange(UI_LOGIC_ACTIVATE_SELFIE_BUTTON);
+            requestUiChange(UI_LOGIC_BEFORE_SHOOTING);
           }
       }
     }));
@@ -165,33 +165,37 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     popVideoFile();
   }
 
-  @OnTouch(R.id.camera_shoot_button)
-  public boolean _shootVideo(View v, MotionEvent e) {
-    switch (e.getAction()) {
-      case MotionEvent.ACTION_DOWN:
-        v.startAnimation(getClickingAnimation(getActivity()));
-        mShootButton.setImageResource(R.drawable.camera_shoot_button_hold_70dp);
-        requestUiChange(UI_LOGIC_HIDE_PERIPHERAL_BUTTONS);
-        startRecording();
-        return true;
-      case MotionEvent.ACTION_UP:
-        mShootButton.setImageResource(R.drawable.camera_shoot_button_release_70dp);
-        requestUiChange(UI_LOGIC_SHOW_PERIPHERAL_BUTTONS);
-        stopRecording();
-        return true;
-      default:
-        return false;
-
-    }
-  }
-
   // STEP - VIEW BINDING //////////////////////////////////////////////////////////////////////////
+
+  private boolean isDown = false;
+  private boolean isSubscribed = false;
+  private boolean isSessionCreated = false;
+  private boolean isRecording = false;
+
 
   @Nullable
   @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_camera, container, false);
     mUnbinder = ButterKnife.bind(this, view);
+    final Observable<MotionEvent> sharedObservable = RxView.touches(mShootButton).share();
+
+    sharedObservable
+        .filter(e -> e.getAction() == MotionEvent.ACTION_DOWN)
+        .filter(this::holdButton)
+        .filter(this::shootButtonDown)
+        .debounce(400, TimeUnit.MILLISECONDS, Schedulers.newThread())
+        .subscribe(this::startRecording);
+
+    sharedObservable
+        .filter(e -> e.getAction() == MotionEvent.ACTION_UP
+            || e.getAction() == MotionEvent.ACTION_OUTSIDE)
+        .filter(this::releaseButton)
+        .filter(this::preventSubscribe)
+        .filter(this::preventCreateSession)
+        .filter(this::preventRecording)
+        .subscribe(this::stopRecording);
+
     return view;
   }
 
@@ -215,6 +219,60 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     // }
     super.onDestroy();
   }
+
+  // STEP - VIDEO RECORDING BUTTON INTERACTION ////////////////////////////////////NEED REFACTORING
+
+  public boolean holdButton(MotionEvent motionEvent) {
+    requestUiChange(UI_LOGIC_DOWN_SHOOT_BUTTON);
+    return true;
+  }
+
+  public boolean shootButtonDown(MotionEvent motionEvent) {
+    if (isDown) throw new RuntimeException(); // Unexpected but for defensive code
+    Timber.i("mShootButton/ACTION_DOWN");
+
+    isDown = true;
+    return true;
+  }
+
+  public void startRecording(MotionEvent motionEvent) {
+    Timber.i("mShootButton/EVENT_SUBSCRIBED");
+    if (!isDown) { // Prevented by method "preventSubscribe"
+      return;
+    }
+    isSubscribed = true;
+    startRecording();
+  }
+
+  public boolean releaseButton(MotionEvent motionEvent) {
+    requestUiChange(UI_LOGIC_UP_SHOOT_BUTTON);
+    return true;
+  }
+
+  public boolean preventSubscribe(MotionEvent motionEvent) {
+    if (!isDown) throw new RuntimeException(); // Unexpected but for defensive code
+    isDown = false;
+    return isSubscribed;
+  }
+
+  public boolean preventCreateSession(MotionEvent motionEvent) {
+    if (!isSubscribed) throw new RuntimeException(); // Unexpected but for defensive code
+    isSubscribed = false;
+    return isSessionCreated;
+  }
+
+  public boolean preventRecording(MotionEvent motionEvent) {
+    if (!isSessionCreated) throw new RuntimeException(); // Unexpected but for defensive code
+    isSessionCreated = false;
+    return isRecording;
+
+  }
+
+  public void stopRecording(MotionEvent motionEvent) {
+    if (!isRecording) throw new RuntimeException(); // Unexpected but for defensive code
+    stopRecording();
+  }
+
 
   // STEP - LIFECYCLE /////////////////////////////////////////////////////////////////////////////
 
@@ -286,9 +344,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
     }
     if (!mVideoStack.isEmpty()) {
-      requestUiChange(UI_LOGIC_ACTIVATE_OK_BUTTON);
-      requestUiChange(UI_LOGIC_DEACTIVATE_CUT_BUTTON);
-      requestUiChange(UI_LOGIC_DEACTIVATE_SELFIE_BUTTON);
+      requestUiChange(UI_LOGIC_DURING_SHOOTING);
     }
 
   }
@@ -300,9 +356,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       Timber.e("Pop the file file the stack %s\n", mVideoFile.toString());
     }
     if (mVideoStack.isEmpty()) {
-      requestUiChange(UI_LOGIC_DEACTIVATE_OK_BUTTON);
-      requestUiChange(UI_LOGIC_ACTIVATE_CUT_BUTTON);
-      requestUiChange(UI_LOGIC_ACTIVATE_SELFIE_BUTTON);
+      requestUiChange(UI_LOGIC_BEFORE_SHOOTING);
     }
   }
 
@@ -323,7 +377,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
             e.printStackTrace();
           } finally {
             Toast.makeText(getActivity(), "SAVE : " + mDir.toString() + fileName, Toast.LENGTH_SHORT).show();
-            Timber.e("Save the file %s\n", mDir.toString() + fileName);
+            Timber.e("Save the file $$ dir : %s, file : %s\n", mDir.toString(), fileName);
           }
         }
       }.run();
@@ -644,10 +698,12 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   private CaptureRequest.Builder mCaptureRequestBuilder;
 
   private void startPreviewing() {
+    requestUiChange(UI_LOGIC_SHOW_PERIPHERAL_BUTTONS);
     createPreviewSession();
   }
 
   private void startRecording() {
+    requestUiChange(UI_LOGIC_HIDE_PERIPHERAL_BUTTONS);
     createRecordSession();
   }
 
@@ -697,11 +753,15 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       surfaces.add(previewSurface);
       surfaces.add(recorderSurface);
 
+      if (!isSubscribed) { // Prevent by method "preventCreateSession"
+        return;
+      }
+      isSessionCreated = true;
+
       mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
       mCaptureRequestBuilder.addTarget(previewSurface);
       mCaptureRequestBuilder.addTarget(recorderSurface);
 
-      // noinspection ArraysAsListWithZeroOrOneArgument
       closeSession();
       mCameraDevice.createCaptureSession(surfaces, mRecordSessionStateCallback, mBackgroundHandler);
     } catch (CameraAccessException e) {
@@ -750,6 +810,12 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       } catch (CameraAccessException e) {
         e.printStackTrace();
       }
+
+      if (!isSessionCreated) { // Prevent by method "preventRecording"
+        startPreviewing();
+        return;
+      }
+      isRecording = true;
 
       // media recorder
       startRecorder();
@@ -827,7 +893,8 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
     } catch (IllegalStateException e) {
       e.printStackTrace();
-      // TODO - delete recent file
+    } catch (RuntimeException e) {
+      Timber.e(e, "Recording length was too short : ");
     } finally {
       mRecorder.reset();
       setUpRecorder();
@@ -1043,6 +1110,11 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   public static final int UI_LOGIC_HIDE_ALL_BUTTONS = 0x012;
 
   public static final int UI_LOGIC_UPDATE_COMPLETE = 0x013;
+  public static final int UI_LOGIC_BEFORE_SHOOTING = 0x014;
+  public static final int UI_LOGIC_DURING_SHOOTING = 0x015;
+
+  public static final int UI_LOGIC_DOWN_SHOOT_BUTTON = 0x016;
+  public static final int UI_LOGIC_UP_SHOOT_BUTTON = 0x017;
 
   @Retention(RetentionPolicy.SOURCE)
   @IntDef({UI_LOGIC_RELEASE_CAPTURE_BUTTON, UI_LOGIC_HOLD_CAPTURE_BUTTON,
@@ -1051,7 +1123,9 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       UI_LOGIC_ACTIVATE_SELFIE_BUTTON, UI_LOGIC_DEACTIVATE_SELFIE_BUTTON,
       UI_LOGIC_SHOW_PERIPHERAL_BUTTONS, UI_LOGIC_HIDE_PERIPHERAL_BUTTONS,
       UI_LOGIC_SHOW_ALL_BUTTONS, UI_LOGIC_HIDE_ALL_BUTTONS,
-      UI_LOGIC_UPDATE_COMPLETE})
+      UI_LOGIC_UPDATE_COMPLETE,
+      UI_LOGIC_BEFORE_SHOOTING, UI_LOGIC_DURING_SHOOTING,
+      UI_LOGIC_DOWN_SHOOT_BUTTON, UI_LOGIC_UP_SHOOT_BUTTON})
   public @interface UiLogic {}
 
   private static final String UI_LOGIC = "UiLogic";
@@ -1073,6 +1147,16 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       int uiLogicRequest = msg.getData().getInt(UI_LOGIC);
 
       switch (uiLogicRequest) {
+        case UI_LOGIC_BEFORE_SHOOTING:
+          mCutButton.setImageResource(R.drawable.camera_cut_button_active_30dp);
+          mSelfieButton.setImageResource(R.drawable.camera_selfie_button_active_30dp);
+          mOkButton.setImageResource(R.drawable.camera_ok_button_inactive_30dp);
+          break;
+        case UI_LOGIC_DURING_SHOOTING:
+          mCutButton.setImageResource(R.drawable.camera_cut_button_inactive_30dp);
+          mSelfieButton.setImageResource(R.drawable.camera_selfie_button_inactive_30dp);
+          mOkButton.setImageResource(R.drawable.camera_ok_button_active_30dp);
+          break;
         case UI_LOGIC_SHOW_ALL_BUTTONS:
           mShootButton.setVisibility(View.VISIBLE);
           /*  */
@@ -1092,6 +1176,14 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           mOkButton.setVisibility(View.INVISIBLE);
           mMusicButton.setVisibility(View.INVISIBLE);
           mLibraryButton.setVisibility(View.INVISIBLE);
+          break;
+        case UI_LOGIC_DOWN_SHOOT_BUTTON:
+          mShootButton.setImageResource(R.drawable.camera_shoot_button_hold_70dp);
+          mShootButton.startAnimation(getAnimation(getActivity(), R.anim.clicking_101));
+          break;
+        case UI_LOGIC_UP_SHOOT_BUTTON:
+          mShootButton.setImageResource(R.drawable.camera_shoot_button_release_70dp);
+          mShootButton.startAnimation(getAnimation(getActivity(), R.anim.clicking_101));
           break;
         case UI_LOGIC_RELEASE_CAPTURE_BUTTON:
           mShootButton.setImageResource(R.drawable.camera_shoot_button_release_70dp);

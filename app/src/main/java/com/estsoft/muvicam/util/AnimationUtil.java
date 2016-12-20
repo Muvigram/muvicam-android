@@ -27,11 +27,11 @@ public class AnimationUtil {
   }
 
   public static Animation getClickingAnimation(Context context) {
-    return AnimationUtils.loadAnimation(context, R.anim.clicking);
+    return AnimationUtils.loadAnimation(context, R.anim.clicking_105);
   }
 
   public static Animation getClickingAnimation(Context context, Animation.AnimationListener listener) {
-    Animation animation = AnimationUtils.loadAnimation(context, R.anim.clicking);
+    Animation animation = AnimationUtils.loadAnimation(context, R.anim.clicking_105);
     animation.setAnimationListener(listener);
     return animation;
   }
