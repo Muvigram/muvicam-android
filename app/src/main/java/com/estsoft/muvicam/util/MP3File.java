@@ -2,32 +2,30 @@ package com.estsoft.muvicam.util;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import timber.log.Timber;
 
 /**
+ * Sound files for mp3 format. It is compatible with MPEG 1/2 Audio Layer 3.
+ *
  * Created by jaylim on 12/21/2016.
  */
-
-public class CheapMP3 extends CheapSoundFile {
+public class MP3File extends SoundFile {
 
   // Member variables representing frame data
-  private int mNumFrames;
-  private int[] mFrameGains;
+  private int mCurFrameNum;
+  private int[] mGlobalGains;
   private int mFileSize;
   private int mAvgBitRate;
   private int mGlobalSampleRate;
   private int mGlobalChannels;
 
   // Member variables used during initialization
-  private int mMaxFrames;
+  private int mMaxFrameNum;
   private int mBitrateSum;
-  private int mMinGain;
-  private int mMaxGain;
 
-  public CheapMP3(File inputFile) throws IllegalStateException {
+  public MP3File(File inputFile) throws IllegalStateException {
     super(inputFile);
     if (!isMP3(mInputFile.getName().toLowerCase())) {
       IllegalArgumentException e = new IllegalArgumentException();
@@ -42,36 +40,74 @@ public class CheapMP3 extends CheapSoundFile {
     }
   }
 
-  @Override
-  public int getNumFrames() {
-    return mNumFrames;
+  /**
+   * The total number of frames extracted from music file and
+   * processed by the internal algorithm..
+   *
+   * @return Total number of frames
+   */
+  public int getCurFrameNum() {
+    return mCurFrameNum;
   }
 
+  /**
+   * Frame size is the number of samples contained in a frame. It is constant
+   * and always 384 samples for Layer I and 1152 samples for Layer II and Layer III.
+   *
+   * @return Constant {@code 1152}
+   */
   @Override
   public int getSamplesPerFrame() {
     return 1152;
   }
 
-  @Override
-  public int[] getFrameGains() {
-    return mFrameGains;
+  /**
+   * Global gains which is decoded from each frame's side information. This value
+   * specifies the quantization step size of each frame.
+   * </p>
+   * The global gains will be used to represent the loudness of sound in each frame.
+   *
+   * @return The global gains corresponding to each frame.
+   */
+  public int[] getGlobalGains() {
+    return mGlobalGains;
   }
 
+  /**
+   * Size of input file.
+   *
+   * @return Size of input file.
+   */
   @Override
   public int getFileSizeBytes() {
     return mFileSize;
   }
 
+  /**
+   * Average bitrate of the file.
+   *
+   * @return Average bit rate.
+   */
   @Override
-  public int getAvgBitrateKbps() {
+  public int getAvgBitrate() {
     return mAvgBitRate;
   }
 
+  /**
+   * Sample rate of the file.
+   *
+   * @return The global sample rate.
+   */
   @Override
   public int getSampleRate() {
     return mGlobalSampleRate;
   }
 
+  /**
+   * The number of channels.
+   *
+   * @return The number of channels.
+   */
   @Override
   public int getChannels() {
     return mGlobalChannels;
@@ -83,12 +119,9 @@ public class CheapMP3 extends CheapSoundFile {
   }
 
   public void readFile() throws IOException {
-    mNumFrames = 0;   // This is for counting the number of frames
-    mMaxFrames = 64;  // This will grow as needed
-    mFrameGains = new int[mMaxFrames];
-
-    mMinGain = 255;
-    mMaxGain = 0;
+    mCurFrameNum = 0;   // This is for counting the number of frames
+    mMaxFrameNum = 64;  // This will grow as needed
+    mGlobalGains = new int[mMaxFrameNum];
 
     mBitrateSum = 0;
 
@@ -101,18 +134,12 @@ public class CheapMP3 extends CheapSoundFile {
     int offset = 0;
     byte[] buffer = new byte[BUFFER_LEN];
     while (pos < mFileSize - BUFFER_LEN) {
-
+      int read = BUFFER_LEN;
       // Read 12 bytes at a time and look for a sync code (0xFF)
       // Ex. FF FB E2 44 F1 06 07 F9 7E D3 93 6F
       while (offset < BUFFER_LEN) {
         offset += stream.read(buffer, offset, BUFFER_LEN - offset);
       }
-
-//      StringBuilder stringBuilder = new StringBuilder("");
-//      for (byte b : buffer) {
-//        stringBuilder.append(" " + b + "[" + Integer.toHexString(b) + "]");
-//      }
-//      Log.e("DECODING", stringBuilder.toString());
 
       // [First byte] - look for a sync code (0xFF) and
       // pose bufferOffset where the sync code is (0xFF)
@@ -132,11 +159,11 @@ public class CheapMP3 extends CheapSoundFile {
       }
 
       // [Second byte] - Check for V1L3 or V2L3
-      int mpgVersion = 0;
+      int version = 0;
       if (buffer[1] == xFA || buffer[1] == xFB) {
-        mpgVersion = MPEG_V1_L3; // xFA, xFB means 11 of position (20, 19) - V1 L3
+        version = MPEG_V1_L3; // xFA, xFB means 11 of position (20, 19) - V1 L3
       } else if (buffer[1] == xF2|| buffer[1] == xF3) {
-        mpgVersion = MPEG_V2_L3; // xF2, xF3 means 10 of position (20, 19) - V2 L3
+        version = MPEG_V2_L3; // xF2, xF3 means 10 of position (20, 19) - V2 L3
       } else { // Invalid MPEG version.
         bufferOffset = 1;
         for (int i = 0; i < BUFFER_LEN - bufferOffset; i++)
@@ -149,7 +176,7 @@ public class CheapMP3 extends CheapSoundFile {
       // [Third byte] has the bitrate and samplerate
       int bitRate;
       int sampleRate;
-      if (mpgVersion == MPEG_V1_L3) {
+      if (version == MPEG_V1_L3) {
         bitRate = BITRATES_V1_L3[(buffer[2] & 0xF0) >> 4];    /* Get (15-12) position bits */
         sampleRate = SAMPLERATES_V1[(buffer[2] & 0x0C) >> 2]; /* Get (11-10) position bits */
       } else {
@@ -159,15 +186,15 @@ public class CheapMP3 extends CheapSoundFile {
 
       if (bitRate == 0 || sampleRate == 0) {
         bufferOffset = 2;
-        for (int i = 0; i < 12 - bufferOffset; i++)
+        for (int i = 0; i < BUFFER_LEN - bufferOffset; i++)
           buffer[i] = buffer[bufferOffset + i];
         pos += bufferOffset;
-        offset = 12 - bufferOffset;
+        offset = BUFFER_LEN - bufferOffset;
         continue;
       }
 
-      // Padding bit (9), Private bit (8), and Channel mode (7, 6)
-      // Assume frame is valid from here.
+      // Assume frame is valid after this line.
+
       mGlobalSampleRate = sampleRate;
 
       // padding bit (9) : 0 - frame is not padded, 1 - frame is padded
@@ -175,77 +202,106 @@ public class CheapMP3 extends CheapSoundFile {
       // For Layer I slot is 32 bits long, for Layer II and Layer III slot is 8 bits long.
       int padding = (buffer[2] & 2) >> 1;
 
-      int frameLen = 144 * bitRate * 1000 / sampleRate + padding;
+      // Frame length is length of a frame when compressed. It is calculated in slots.
+      // One slot is 4 bytes long for Layer I, and one byte long for Layer II and Layer III.
+      // When you are reading MPEG file you must calculate this to be able to find each
+      // consecutive frame. Remember, frame length may change from frame to frame
+      // due to padding or bitrate switching.
+      int frameSizeInByte = 144 * (bitRate * 1000) / sampleRate + padding;
 
-      // Channel mode (7, 6)
-      int gain;
+      // (8) ignore private bit
+
+      // (7, 6) : Channel mode, ignore (5, 4) which is only used in joint stereo mode.
+      int globalGain;
       if ((buffer[3] & 0xC0) == 0xC0) { /* 11 - Single channel */
         mGlobalChannels = 1;
-        if (mpgVersion == MPEG_V1_L3) {
-          gain = ((buffer[10] & 0x01) << 7) +
-              ((buffer[11] & 0xFE) >> 1);
-        } else {
-          gain = ((buffer[9] & 0x03) << 6) +
-              ((buffer[10] & 0xFC) >> 2);
+        if (version == MPEG_V1_L3) { /* 2 channels for 2 granule */
+          // First global gain from side information : [10:11] - 0000|0001|1111|1110
+          globalGain = 0;
+          for (int i = 0; i < 2 * mGlobalChannels; i++) {
+            globalGain += ((buffer[10] & 0x01) << 7) + ((buffer[11] & 0xFE) >> 1);
+            read += stream.skip(43L);
+            read += stream.read(buffer, 0, BUFFER_LEN);
+          }
+          globalGain /= (2 * mGlobalChannels);
+
+        } else { /* MPEG_V2_L3 */
+          // First global gain from side information : [09:10] - 0000|0011|1111|1100
+          globalGain = ((buffer[9]  & 0x03) << 6) + ((buffer[10] & 0xFC) >> 2);
         }
+
       } else { /* else - dual channel, joint stereo, stereo */
         mGlobalChannels = 2;
-        if (mpgVersion == MPEG_V1_L3) {
-          gain = ((buffer[9]  & 0x7F) << 1) +
-              ((buffer[10] & 0x80) >> 7);
-        } else {
-          gain = 0;  // ???
-        }
-      }
+        if (version == MPEG_V1_L3) {
+          // First global gain from side information : [11:12] - 0111|1111|1000|0000
+          globalGain = 0;
+          for (int i = 0; i < 2 * mGlobalChannels; i++) {
+            globalGain += ((buffer[11] & 0x7F) << 1) + ((buffer[12] & 0x80) >> 7);
+            read += stream.skip(47L);
+            read += stream.read(buffer, 0, BUFFER_LEN);
+          }
+          globalGain /= (2 * mGlobalChannels);
+
+        } else { /* MPEG_V2_L3 */
+          // First global gain from side information : [09:10] - 0000|0001|1111|1110
+          globalGain = 0;
+          for (int i = 0; i < mGlobalChannels; i++) {
+            globalGain += ((buffer[9]  & 0x01) << 1) + ((buffer[10] & 0xFE) >> 7);
+            read += stream.skip(47L);
+            read += stream.read(buffer, 0, BUFFER_LEN);
+          }
+          globalGain /= mGlobalChannels;
+
+        } // if (version == MPEG_VI_L3)
+      } // if ((buffer[3] & 0xC0) == 0xC0)
 
       mBitrateSum += bitRate;
 
-      mFrameGains[mNumFrames] = gain;
-      if (gain < mMinGain)
-        mMinGain = gain;
-      if (gain > mMaxGain)
-        mMaxGain = gain;
+      if (globalGain < 0 || globalGain > 255) {
+        RuntimeException e = new RuntimeException();
+        Timber.e(e, "Global gain, in frame #%d, is out of bound : %d", mCurFrameNum, globalGain);
+        throw e;
+      }
+      mGlobalGains[mCurFrameNum] = globalGain;
 
-      mNumFrames++;
-      if (mNumFrames == mMaxFrames) {
+      mCurFrameNum++;
+      if (mCurFrameNum == mMaxFrameNum) {
 
-        mAvgBitRate = mBitrateSum / mNumFrames;
-        int totalFramesGuess =
-            ((mFileSize / mAvgBitRate) * sampleRate) / 144000;
-        int newMaxFrames = totalFramesGuess * 11 / 10;
-        if (newMaxFrames < mMaxFrames * 2)
-          newMaxFrames = mMaxFrames * 2;
+        mAvgBitRate = mBitrateSum / mCurFrameNum;
+        int expectedTotalFrameSize = ((mFileSize / mAvgBitRate) * sampleRate) / 144000;
+        int newMaxFrames = expectedTotalFrameSize * 11 / 10;
 
-        int[] newOffsets = new int[newMaxFrames];
-        int[] newLens = new int[newMaxFrames];
+        if (newMaxFrames < mMaxFrameNum * 2)
+          newMaxFrames = mMaxFrameNum * 2;
+
         int[] newGains = new int[newMaxFrames];
-        for (int i = 0; i < mNumFrames; i++) {
-          newGains[i] = mFrameGains[i];
+        for (int i = 0; i < mCurFrameNum; i++) {
+          newGains[i] = mGlobalGains[i];
         }
-        mFrameGains = newGains;
-        mMaxFrames = newMaxFrames;
+        mGlobalGains = newGains;
+        mMaxFrameNum = newMaxFrames;
       }
 
-      stream.skip(frameLen - 12);
+      stream.skip(frameSizeInByte - read);
 
-      pos += frameLen;
+      pos += frameSizeInByte;
       offset = 0;
     }
 
     // We're done reading the file, do some postprocessing
-    if (mNumFrames > 0)
-      mAvgBitRate = mBitrateSum / mNumFrames;
+    if (mCurFrameNum > 0)
+      mAvgBitRate = mBitrateSum / mCurFrameNum;
     else
       mAvgBitRate = 0;
   }
 
-  private final static int BUFFER_LEN = 12;  /* Buffer length */
+  private final static int BUFFER_LEN = 16;  /* Buffer length */
 
   // (31-24) : Frame sync code (all bits set)
   private final static int xFF = 0xFFFFFFff; /* 0xFF; [11111111; -1  */
 
-  // (23-21) : Frame sync code (continued from 31-24)
-  // (20, 19) : MPEG Audio version ID, (18, 17) Layer description, (16) protection bit
+  // (23-21) : Frame sync code (continued from 31-24) 111]
+  // (20, 19) : MPEG Audio version ID, (18, 17) : Layer description, (16) : protection bit
   private final static int xFA = 0xFFFFFFfa; /* 0xFa; 111][11][01][0]; -5  */
   private final static int xFB = 0xFFFFFFfb; /* 0xFb; 111][11][01][1]; -6  */
   private final static int xF2 = 0xFFFFFFf2; /* 0xF2; 111][10][01][0]; -14 */

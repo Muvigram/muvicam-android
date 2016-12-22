@@ -5,29 +5,31 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
+ * ADT for sound files.
+ *
  * Created by jaylim on 12/21/2016.
  */
 
 
-public abstract class CheapSoundFile {
+public abstract class SoundFile {
 
   protected File mInputFile = null;
 
-  public CheapSoundFile(File inputFile) throws IllegalStateException {
+  public SoundFile(File inputFile) throws IllegalStateException {
     mInputFile = inputFile;
   }
 
   public abstract void readFile() throws IOException;
 
-  public abstract int getNumFrames();
+  public abstract int getCurFrameNum();
 
   public abstract int getSamplesPerFrame();
 
-  public abstract int[] getFrameGains();
+  public abstract int[] getGlobalGains();
 
   public abstract int getFileSizeBytes();
 
-  public abstract int getAvgBitrateKbps();
+  public abstract int getAvgBitrate();
 
   public abstract int getSampleRate();
 
