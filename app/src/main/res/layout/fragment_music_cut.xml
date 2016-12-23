@@ -19,15 +19,15 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/amber_200"
         android:padding="5dp"
         android:text="Scroll to cut music"
         android:textAlignment="center"
         android:textColor="@color/textDarkGrey"
         android:textSize="20sp"/>
 
-    <View
+    <com.estsoft.muvicam.ui.home.camera.WaveformView
+        android:id="@+id/music_cut_waveform"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:background="@color/amber_200"/>
+        android:layout_height="120dp"
+        android:background="@color/backgroundOpaqueGrey"/>
 </LinearLayout>

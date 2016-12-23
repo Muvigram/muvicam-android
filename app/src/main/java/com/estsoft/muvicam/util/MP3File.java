@@ -14,12 +14,17 @@ import timber.log.Timber;
 public class MP3File extends SoundFile {
 
   // Member variables representing frame data
-  private int mCurFrameNum;
+  private int mTotalFrameNum;
   private int[] mGlobalGains;
+  // TODO - private int[] mLGlobalGains;
+  // TODO - private int[] mRGlobalGains;
   private int mFileSize;
   private int mAvgBitRate;
   private int mGlobalSampleRate;
   private int mGlobalChannels;
+
+  private int mMaxGain = -1;
+  private int mMinGain = 257;
 
   // Member variables used during initialization
   private int mMaxFrameNum;
@@ -40,14 +45,24 @@ public class MP3File extends SoundFile {
     }
   }
 
+  @Override
+  public int getMaxGain() {
+    return mMaxGain;
+  }
+
+  @Override
+  public int getMinGain() {
+    return mMinGain;
+  }
+
   /**
    * The total number of frames extracted from music file and
    * processed by the internal algorithm..
    *
    * @return Total number of frames
    */
-  public int getCurFrameNum() {
-    return mCurFrameNum;
+  public int getTotalFrameNum() {
+    return mTotalFrameNum;
   }
 
   /**
@@ -119,7 +134,7 @@ public class MP3File extends SoundFile {
   }
 
   public void readFile() throws IOException {
-    mCurFrameNum = 0;   // This is for counting the number of frames
+    mTotalFrameNum = 0;   // This is for counting the number of frames
     mMaxFrameNum = 64;  // This will grow as needed
     mGlobalGains = new int[mMaxFrameNum];
 
@@ -255,19 +270,22 @@ public class MP3File extends SoundFile {
         } // if (version == MPEG_VI_L3)
       } // if ((buffer[3] & 0xC0) == 0xC0)
 
+      mMaxGain = (globalGain > mMaxGain) ? globalGain : mMaxGain;
+      mMinGain = (globalGain < mMinGain) ? globalGain : mMinGain;
+
       mBitrateSum += bitRate;
 
       if (globalGain < 0 || globalGain > 255) {
         RuntimeException e = new RuntimeException();
-        Timber.e(e, "Global gain, in frame #%d, is out of bound : %d", mCurFrameNum, globalGain);
+        Timber.e(e, "Global gain, in frame #%d, is out of bound : %d", mTotalFrameNum, globalGain);
         throw e;
       }
-      mGlobalGains[mCurFrameNum] = globalGain;
+      mGlobalGains[mTotalFrameNum] = globalGain;
 
-      mCurFrameNum++;
-      if (mCurFrameNum == mMaxFrameNum) {
+      mTotalFrameNum++;
+      if (mTotalFrameNum == mMaxFrameNum) {
 
-        mAvgBitRate = mBitrateSum / mCurFrameNum;
+        mAvgBitRate = mBitrateSum / mTotalFrameNum;
         int expectedTotalFrameSize = ((mFileSize / mAvgBitRate) * sampleRate) / 144000;
         int newMaxFrames = expectedTotalFrameSize * 11 / 10;
 
@@ -275,7 +293,7 @@ public class MP3File extends SoundFile {
           newMaxFrames = mMaxFrameNum * 2;
 
         int[] newGains = new int[newMaxFrames];
-        for (int i = 0; i < mCurFrameNum; i++) {
+        for (int i = 0; i < mTotalFrameNum; i++) {
           newGains[i] = mGlobalGains[i];
         }
         mGlobalGains = newGains;
@@ -289,8 +307,8 @@ public class MP3File extends SoundFile {
     }
 
     // We're done reading the file, do some postprocessing
-    if (mCurFrameNum > 0)
-      mAvgBitRate = mBitrateSum / mCurFrameNum;
+    if (mTotalFrameNum > 0)
+      mAvgBitRate = mBitrateSum / mTotalFrameNum;
     else
       mAvgBitRate = 0;
   }

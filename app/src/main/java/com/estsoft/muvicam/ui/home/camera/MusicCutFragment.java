@@ -43,6 +43,9 @@ public class MusicCutFragment extends Fragment {
   @BindView(R.id.music_cut_complete_button)
   ImageButton mCompleteButton;
 
+  @BindView(R.id.music_cut_waveform)
+  WaveformView mWaveformView;
+
   @OnClick(R.id.music_cut_complete_button)
   public void _completeMusicCut() {
     CameraFragment parentFragment = ((CameraFragment) getParentFragment());
@@ -59,8 +62,6 @@ public class MusicCutFragment extends Fragment {
     parentFragment.cutMusic(mOffset);
   }
 
-
-
   @Nullable
   @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -70,8 +71,36 @@ public class MusicCutFragment extends Fragment {
   }
 
   @Override
+  public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    Music music = getArguments().getParcelable(ARG_MUSIC);
+    int offset = getArguments().getInt(ARG_OFFSET);
+    mWaveformView.setSoundFile(music, offset);
+    mWaveformView.setListener(mWaveformListener);
+  }
+
+  @Override
   public void onDestroyView() {
     mUnbinder.unbind();
     super.onDestroyView();
   }
+
+  public WaveformView.WaveformListener mWaveformListener = new WaveformView.WaveformListener() {
+    private float mXStart;
+
+    @Override
+    public void waveformTouchStart(float x) {
+      mXStart = x;
+    }
+
+    @Override
+    public void waveformTouchMove(float x) {
+      mWaveformView.moveOffset(x - mXStart);
+    }
+
+    @Override
+    public void waveformTouchEnd() {
+      mOffset = mWaveformView.fixOffset();
+    }
+  };
 }

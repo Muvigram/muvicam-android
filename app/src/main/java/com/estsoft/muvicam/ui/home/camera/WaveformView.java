@@ -1,10 +1,12 @@
 package com.estsoft.muvicam.ui.home.camera;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.SeekBar;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Music;
@@ -14,35 +16,154 @@ import com.estsoft.muvicam.util.SoundFile;
 import java.io.File;
 
 /**
- *
  * Created by jaylim on 12/21/2016.
  */
 
 public class WaveformView extends View {
 
-  public interface WaveformListener {
-    public void waveformTouchStart(float x);
-    public void waveformTouchMove(float x);
-    public void waveformTouchEnd();
-    public void waveformFling(float x);
-    public void waveformDraw();
-  }
-
-  protected Paint mBackgroundPaint;
-  protected Paint mPlayheadPaint;
-  protected Paint mBeforeHeadPaint;
-  protected Paint mAfterHeadPaint;
+  private final static int TIME_LENGTH = 15;
 
   // Sample rate
-  protected SoundFile mSoundFile;
+  private SoundFile mSoundFile;
 
-  protected int mOffset;
-  // Sample rate = number of samples / second
-  protected int mSampleRate;
-  // Frame Size = Sample Rate * number of channels
-  protected int mSamplesPerFrame;
+  private float mOffset;
+  private int mSampleRate;
+  private int mSamplesPerFrame;
 
-  protected WaveformListener mListener;
+  private int mFrameOffset;
+  private int mFrameLength;
+  private int mFrameCur;
+
+  private float mScaledInterval;
+
+  private int mMaxGain;
+  private int mMinGain;
+  private int mAvgGain;
+
+  private Paint mPlayheadPaint;
+  private Paint mBeforeHeadPaint;
+  private Paint mAfterHeadPaint;
+
+  private boolean mMusicUpdated = false;
+
+  private WaveformListener mListener;
+
+  public WaveformView(Context context) {
+    this(context, null);
+  }
+
+  public WaveformView(Context context, AttributeSet attrs) {
+    this(context, attrs, 0);
+  }
+
+  public WaveformView(Context context, AttributeSet attrs, int defStyleAttr) {
+    super(context, attrs, defStyleAttr);
+    init(attrs, defStyleAttr);
+  }
+
+  private void init(AttributeSet attrs, int defStyleAttr) {
+
+    mPlayheadPaint = new Paint();
+    mPlayheadPaint.setAntiAlias(false);
+    mPlayheadPaint.setColor(getResources().getColor(R.color.red_A700));
+    mBeforeHeadPaint = new Paint();
+    mBeforeHeadPaint.setAntiAlias(false);
+    mBeforeHeadPaint.setColor(getResources().getColor(R.color.backgroundWhite));
+    mAfterHeadPaint = new Paint();
+    mAfterHeadPaint.setAntiAlias(false);
+    mAfterHeadPaint.setColor(getResources().getColor(R.color.backgroundLightGrey));
+
+  }
+
+  public void setListener(WaveformListener listener) {
+    mListener = listener;
+  }
+
+  public int fixOffset() {
+    invalidate();
+    mOffset = getOffset(mFrameOffset, mSampleRate, mSamplesPerFrame);
+    return (int) (mOffset * 1000);
+  }
+
+  public void moveOffset(float displacement) {
+    int frameOffset = getFrameNumber(displacement, mScaledInterval, mFrameOffset);
+    if (frameOffset < 0 || frameOffset + mFrameLength > mSoundFile.getTotalFrameNum()) {
+      return;
+    }
+    mFrameOffset = frameOffset;
+    mFrameCur = mFrameOffset;
+    invalidate();
+  }
+
+  public boolean hasSoundFile() {
+    return mSoundFile != null;
+  }
+
+  public void setSoundFile(Music music, float offset) {
+    mMusicUpdated = true;
+    File file = new File(music.uri().toString());
+    mOffset = offset;
+
+    mSoundFile = new MP3File(file);
+    mSampleRate = mSoundFile.getSampleRate();
+    mSamplesPerFrame = mSoundFile.getSamplesPerFrame();
+
+    mFrameOffset = getFrameNumber(offset, mSampleRate, mSamplesPerFrame);
+    mFrameLength = getFrameNumber(TIME_LENGTH, mSampleRate, mSamplesPerFrame);
+    mFrameCur = mFrameOffset;
+
+    mMaxGain = mSoundFile.getMaxGain();
+    mMinGain = mSoundFile.getMinGain();
+    mAvgGain = (mMaxGain + mMinGain) / 2;
+    invalidate();
+  }
+
+  @Override
+  protected void onDraw(Canvas canvas) {
+    super.onDraw(canvas);
+    if (mSoundFile == null) {
+      return;
+    }
+
+    int w = getMeasuredWidth();
+    int h = getMeasuredHeight();
+
+    if (mMusicUpdated) {
+      mScaledInterval = getScaledInterval(mFrameLength, getMeasuredWidth());
+      float strokeWidth = getScaledStrokeWidth(mScaledInterval);
+      mAfterHeadPaint.setStrokeWidth(strokeWidth);
+      mBeforeHeadPaint.setStrokeWidth(strokeWidth);
+      mMusicUpdated = false;
+    }
+
+    float sh;
+    float sx;
+
+    for (int i = mFrameOffset; i < mFrameCur; i++) {
+      sh = getScaledHeight(i, mSoundFile.getGlobalGains(), mMaxGain, mAvgGain, h);
+      sx = getScaledInterval(i, mFrameOffset, mFrameLength, w);
+      canvas.drawLine(sx, h/2.0f - sh, sx, h/2.0f + sh, mBeforeHeadPaint);
+    }
+
+    sh = getScaledHeight(mFrameCur, mSoundFile.getGlobalGains(), mMaxGain, mAvgGain, h);
+    sx = getScaledInterval(mFrameCur, mFrameOffset, mFrameLength, w);
+    canvas.drawLine(sx, 0f, sx, sh * 2f, mPlayheadPaint);
+
+    for (int i = mFrameCur + 1; i < mFrameOffset + mFrameLength; i++) {
+      sh = getScaledHeight(i, mSoundFile.getGlobalGains(), mMaxGain, mAvgGain, h);
+      sx = getScaledInterval(i, mFrameOffset, mFrameLength, w);
+      canvas.drawLine(sx, h/2.0f - sh, sx, h/2.0f + sh, mBeforeHeadPaint);
+
+    }
+  }
+
+  public interface WaveformListener {
+    public void waveformTouchStart(float x);
+
+    public void waveformTouchMove(float x);
+
+    public void waveformTouchEnd();
+  }
 
   @Override
   public boolean onTouchEvent(MotionEvent event) {
@@ -60,87 +181,33 @@ public class WaveformView extends View {
     return true;
   }
 
-  public WaveformView(Context context) {
-    this(context, null);
+  public static float getOffset(int frameOffset, int sampleRate, int samplesPerFrame) {
+    return (frameOffset - 1.0f) / sampleRate * samplesPerFrame;
   }
 
-  public WaveformView(Context context, AttributeSet attrs) {
-    this(context, attrs, 0);
+  public static int getFrameNumber(float dp, float scaledInterval, int mFrameOffset) {
+    int displacement = (int) (dp / scaledInterval);
+    return mFrameOffset + displacement;
   }
 
-  public WaveformView(Context context, AttributeSet attrs, int defStyleAttr) {
-    super(context, attrs, defStyleAttr);
-    init(attrs, defStyleAttr);
+  public static int getFrameNumber(float seconds, int sampleRate, int samplesPerFrame) {
+    return (int) (1.0 * seconds * sampleRate / samplesPerFrame + 1);
   }
 
-  private void init(AttributeSet attrs, int defStyleAttr) {
-
-    mBackgroundPaint = new Paint();
-    mBackgroundPaint.setAntiAlias(false);
-    mBackgroundPaint.setColor(getResources().getColor(R.color.backgroundOpaqueGrey));
-    mPlayheadPaint = new Paint();
-    mPlayheadPaint.setAntiAlias(false);
-    mPlayheadPaint.setColor(getResources().getColor(R.color.red_A700));
-    mBeforeHeadPaint = new Paint();
-    mBeforeHeadPaint.setAntiAlias(false);
-    mBeforeHeadPaint.setColor(getResources().getColor(R.color.backgroundWhite));
-    mAfterHeadPaint = new Paint();
-    mAfterHeadPaint.setAntiAlias(false);
-    mAfterHeadPaint.setColor(getResources().getColor(R.color.backgroundLightGrey));
-
+  private static float getScaledHeight(int i, int[] frameGain, int maxGain, int avgGain, int viewHeight) {
+    return (frameGain[i] - avgGain) * (viewHeight / 2.0f) / (maxGain - avgGain);
   }
 
-  public boolean hasSoundFile() {
-    return mSoundFile != null;
+  private static float getScaledInterval(int frameLength, int viewWidth) {
+    return viewWidth / frameLength;
   }
 
-  public void setSoundFile(Music music) {
-    File file = new File(music.uri().toString());
-
-    mSoundFile = new MP3File(file);
-
-    mSampleRate = mSoundFile.getSampleRate();
-    mSamplesPerFrame = mSoundFile.getSamplesPerFrame();
-    // TODO - computeDoublesForAllZoomLevels();
+  private static float getScaledInterval(int i, int frameOffset, int frameLength, int viewWidth) {
+    return (i - frameOffset - 0.5f) * viewWidth / frameLength;
   }
 
-  protected float adjustGains(int i, int numFrames, int[] frameGains) {
-    int x = Math.min(i, numFrames);
-    if (numFrames < 2) {
-      return frameGains[x];
-    } else {
-      // TODO - !
-      if (x == 0) {
-        return (frameGains[0] / 2.0f) + (frameGains[1] / 2.0f);
-      } else if (x == numFrames - 1) {
-        return (frameGains[numFrames - 2] / 2.0f) + (frameGains[numFrames - 1] / 2.0f);
-      } else {
-        return (frameGains[x - 1] / 3.0f) + (frameGains[x] / 3.0f) + (frameGains[x + 1] / 3.0f);
-      }
-    }
+  private static float getScaledStrokeWidth(float scaledInterval) {
+    return scaledInterval * 2 / 3;
   }
-
-  float scaleFactor = 1.0f;
-
-  protected void computeDoubles() {
-    final int frameNum = mSoundFile.getCurFrameNum();
-
-    float maxGain = 1.0f;
-    for (int i = 0; i < frameNum; i++) {
-      float gain = adjustGains(i, frameNum, mSoundFile.getGlobalGains());
-      if (gain > maxGain) {
-        maxGain = gain;
-      }
-    } // find maxGain
-    scaleFactor = 1.0f;
-    if (maxGain > 255.0) {
-      scaleFactor = 255 / maxGain;
-    } // calculate scale factor to normalize
-
-
-    //TODO - !
-
-  }
-
 
 }

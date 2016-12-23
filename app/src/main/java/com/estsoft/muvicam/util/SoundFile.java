@@ -19,9 +19,13 @@ public abstract class SoundFile {
     mInputFile = inputFile;
   }
 
+  public abstract int getMaxGain();
+
+  public abstract int getMinGain();
+
   public abstract void readFile() throws IOException;
 
-  public abstract int getCurFrameNum();
+  public abstract int getTotalFrameNum();
 
   public abstract int getSamplesPerFrame();
 
