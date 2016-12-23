@@ -73,7 +73,7 @@
         android:layout_toStartOf="@id/camera_selfie_button"
         android:background="#00000000"
         android:contentDescription="@string/camera_selfie_mode_button_desc"
-        android:src="@drawable/camera_cut_button_active_30dp"/>
+        android:src="@drawable/camera_cut_button_inactive_30dp"/>
 
     <ImageButton
         android:id="@+id/camera_ok_button"

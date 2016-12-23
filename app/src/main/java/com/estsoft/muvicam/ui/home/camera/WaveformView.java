@@ -15,6 +15,8 @@ import com.estsoft.muvicam.util.SoundFile;
 
 import java.io.File;
 
+import timber.log.Timber;
+
 /**
  * Created by jaylim on 12/21/2016.
  */
@@ -87,6 +89,7 @@ public class WaveformView extends View {
 
   public void moveOffset(float displacement) {
     int frameOffset = getFrameNumber(displacement, mScaledInterval, mFrameOffset);
+    Timber.e("[moveOffset] displacement : %10.4f, frameOffset : %d", displacement, frameOffset);
     if (frameOffset < 0 || frameOffset + mFrameLength > mSoundFile.getTotalFrameNum()) {
       return;
     }
@@ -130,6 +133,7 @@ public class WaveformView extends View {
 
     if (mMusicUpdated) {
       mScaledInterval = getScaledInterval(mFrameLength, getMeasuredWidth());
+      Timber.e("mScaledInterval %f [%d, %d]", mScaledInterval, mFrameLength, getMeasuredWidth());
       float strokeWidth = getScaledStrokeWidth(mScaledInterval);
       mAfterHeadPaint.setStrokeWidth(strokeWidth);
       mBeforeHeadPaint.setStrokeWidth(strokeWidth);

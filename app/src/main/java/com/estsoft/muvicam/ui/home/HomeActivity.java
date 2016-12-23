@@ -20,6 +20,7 @@ import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.ui.base.BaseActivity;
 import com.estsoft.muvicam.ui.home.camera.CameraFragment;
+import com.estsoft.muvicam.ui.home.camera.ControllableViewPager;
 import com.estsoft.muvicam.ui.home.music.MusicFragment;
 
 import java.util.Arrays;
@@ -63,7 +64,8 @@ public class HomeActivity extends BaseActivity {
   @Inject
   HomePagerAdapter mPagerAdapter;
 
-  @BindView(R.id.home_view_pager) ViewPager mViewPager;
+  @BindView(R.id.home_view_pager)
+  ControllableViewPager mViewPager;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -131,6 +133,18 @@ public class HomeActivity extends BaseActivity {
       super.onBackPressed();
     } else {
       backToCamera(null);
+    }
+  }
+
+  public void enableScroll() {
+    if(mViewPager.getCurrentItem() == PAGE_CAMERA) {
+      mViewPager.enableScroll();
+    }
+  }
+
+  public void disableScroll() {
+    if(mViewPager.getCurrentItem() == PAGE_CAMERA) {
+      mViewPager.disableScroll();
     }
   }
 }

@@ -95,7 +95,8 @@ public class MusicCutFragment extends Fragment {
 
     @Override
     public void waveformTouchMove(float x) {
-      mWaveformView.moveOffset(x - mXStart);
+      mWaveformView.moveOffset(mXStart - x);
+      mXStart = x;
     }
 
     @Override

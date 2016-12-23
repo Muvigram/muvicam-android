@@ -47,6 +47,7 @@ import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Music;
+import com.estsoft.muvicam.ui.home.HomeActivity;
 import com.estsoft.muvicam.util.FileUtil;
 import com.jakewharton.rxbinding.view.RxView;
 
@@ -162,7 +163,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_texture_view)
   public void _triggerFocus(/*View v*/) {
-    popVideoFile();
+    // popVideoFile();
   }
 
   // STEP - VIEW BINDING //////////////////////////////////////////////////////////////////////////
@@ -932,7 +933,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       mPlayer.setOnPreparedListener(mp -> {
         mp.seekTo(mOffset);
         mPlayer = mp;
-        requestUiChange(UI_LOGIC_UPDATE_COMPLETE);
+        requestUiChange(UI_LOGIC_MUSIC_UPDATE_COMPLETE);
       });
     } else { // Reset player so that becomes
       mPlayer.reset();
@@ -1109,7 +1110,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   public static final int UI_LOGIC_SHOW_ALL_BUTTONS = 0x011;
   public static final int UI_LOGIC_HIDE_ALL_BUTTONS = 0x012;
 
-  public static final int UI_LOGIC_UPDATE_COMPLETE = 0x013;
+  public static final int UI_LOGIC_MUSIC_UPDATE_COMPLETE = 0x013;
   public static final int UI_LOGIC_BEFORE_SHOOTING = 0x014;
   public static final int UI_LOGIC_DURING_SHOOTING = 0x015;
 
@@ -1123,7 +1124,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       UI_LOGIC_ACTIVATE_SELFIE_BUTTON, UI_LOGIC_DEACTIVATE_SELFIE_BUTTON,
       UI_LOGIC_SHOW_PERIPHERAL_BUTTONS, UI_LOGIC_HIDE_PERIPHERAL_BUTTONS,
       UI_LOGIC_SHOW_ALL_BUTTONS, UI_LOGIC_HIDE_ALL_BUTTONS,
-      UI_LOGIC_UPDATE_COMPLETE,
+      UI_LOGIC_MUSIC_UPDATE_COMPLETE,
       UI_LOGIC_BEFORE_SHOOTING, UI_LOGIC_DURING_SHOOTING,
       UI_LOGIC_DOWN_SHOOT_BUTTON, UI_LOGIC_UP_SHOOT_BUTTON})
   public @interface UiLogic {}
@@ -1142,23 +1143,35 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   /* FUNC - UI Thread Handler */
   Handler mUiThreadHandler = new Handler(Looper.getMainLooper()) {
+
+    private boolean scrollable = true;
+
     @Override
     public void handleMessage(Message msg) {
       int uiLogicRequest = msg.getData().getInt(UI_LOGIC);
 
       switch (uiLogicRequest) {
         case UI_LOGIC_BEFORE_SHOOTING:
-          mCutButton.setImageResource(R.drawable.camera_cut_button_active_30dp);
+          if (mMusic != null) {
+            mCutButton.setImageResource(R.drawable.camera_cut_button_active_30dp);
+          } else {
+            mCutButton.setImageResource(R.drawable.camera_cut_button_inactive_30dp);
+          }
           mSelfieButton.setImageResource(R.drawable.camera_selfie_button_active_30dp);
           mOkButton.setImageResource(R.drawable.camera_ok_button_inactive_30dp);
+          ((HomeActivity)getActivity()).enableScroll();
+          scrollable = true;
           break;
         case UI_LOGIC_DURING_SHOOTING:
           mCutButton.setImageResource(R.drawable.camera_cut_button_inactive_30dp);
           mSelfieButton.setImageResource(R.drawable.camera_selfie_button_inactive_30dp);
           mOkButton.setImageResource(R.drawable.camera_ok_button_active_30dp);
+          ((HomeActivity)getActivity()).disableScroll();
+          scrollable = false;
           break;
         case UI_LOGIC_SHOW_ALL_BUTTONS:
           mShootButton.setVisibility(View.VISIBLE);
+          mBaseLineView.setVisibility(View.VISIBLE);
           /*  */
         case UI_LOGIC_SHOW_PERIPHERAL_BUTTONS:
           mCutButton.setVisibility(View.VISIBLE);
@@ -1166,9 +1179,15 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           mOkButton.setVisibility(View.VISIBLE);
           mMusicButton.setVisibility(View.VISIBLE);
           mLibraryButton.setVisibility(View.VISIBLE);
+          if (scrollable) {
+            ((HomeActivity)getActivity()).enableScroll();
+          } else {
+            ((HomeActivity)getActivity()).disableScroll();
+          }
           break;
         case UI_LOGIC_HIDE_ALL_BUTTONS:
           mShootButton.setVisibility(View.INVISIBLE);
+          mBaseLineView.setVisibility(View.INVISIBLE);
           /*  */
         case UI_LOGIC_HIDE_PERIPHERAL_BUTTONS:
           mCutButton.setVisibility(View.INVISIBLE);
@@ -1176,6 +1195,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           mOkButton.setVisibility(View.INVISIBLE);
           mMusicButton.setVisibility(View.INVISIBLE);
           mLibraryButton.setVisibility(View.INVISIBLE);
+          ((HomeActivity)getActivity()).disableScroll();
           break;
         case UI_LOGIC_DOWN_SHOOT_BUTTON:
           mShootButton.setImageResource(R.drawable.camera_shoot_button_hold_70dp);
@@ -1209,9 +1229,14 @@ public class CameraFragment extends Fragment implements CameraMvpView {
         case UI_LOGIC_DEACTIVATE_OK_BUTTON:
           mOkButton.setImageResource(R.drawable.camera_ok_button_inactive_30dp);
           break;
-        case UI_LOGIC_UPDATE_COMPLETE:
+        case UI_LOGIC_MUSIC_UPDATE_COMPLETE:
           mMusicButton.setAlbumArt(mMusic);
           mMusicButton.startAnimation(getAnimation(getActivity(), R.anim.rotating));
+          if (mMusic != null) {
+            mCutButton.setImageResource(R.drawable.camera_cut_button_active_30dp);
+          } else {
+            mCutButton.setImageResource(R.drawable.camera_cut_button_inactive_30dp);
+          }
           break;
         default:
           // Nothing to do.
