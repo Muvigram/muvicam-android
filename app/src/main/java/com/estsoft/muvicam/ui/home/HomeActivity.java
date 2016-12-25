@@ -2,14 +2,12 @@ package com.estsoft.muvicam.ui.home;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Camera;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.MainThread;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
-import android.view.MotionEvent;
-import android.view.View;
+import android.support.v4.app.FragmentManager;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -21,6 +19,7 @@ import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.ui.base.BaseActivity;
 import com.estsoft.muvicam.ui.home.camera.CameraFragment;
 import com.estsoft.muvicam.ui.home.camera.ControllableViewPager;
+import com.estsoft.muvicam.ui.home.camera.MusicCutFragment;
 import com.estsoft.muvicam.ui.home.music.MusicFragment;
 
 import java.util.Arrays;
@@ -137,10 +136,23 @@ public class HomeActivity extends BaseActivity {
     return mHomeComponent;
   }
 
+  private boolean isCuttingVideo;
+
+  public void setCuttingVideo(boolean cuttingVideo) {
+    isCuttingVideo = cuttingVideo;
+  }
+
   @Override
   public void onBackPressed() {
     if (mViewPager.getCurrentItem() == PAGE_CAMERA) {
-      super.onBackPressed();
+      if (isCuttingVideo) {
+        CameraFragment childFragment = (CameraFragment) mPagerAdapter.getItem(PAGE_CAMERA);
+        FragmentManager cfm = childFragment.getChildFragmentManager();
+        MusicCutFragment fragment = (MusicCutFragment) cfm.findFragmentById(R.id.camera_container_music_cut);
+        fragment._cancelMusicCut();
+      } else {
+        super.onBackPressed();
+      }
     } else {
       backToCamera(null);
     }

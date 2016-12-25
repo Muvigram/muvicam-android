@@ -1,5 +1,6 @@
 package com.estsoft.muvicam.ui.home.camera;
 
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,6 +13,7 @@ import android.widget.ImageButton;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Music;
+import com.estsoft.muvicam.ui.home.HomeActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -39,6 +41,11 @@ public class MusicCutFragment extends Fragment {
 
   // Millisecond
   private int mOffset;
+  private int mTempOffset;
+
+  private MediaPlayer mPlayer;
+
+  private CameraFragment mParentFragment;
 
   Unbinder mUnbinder;
 
@@ -50,18 +57,33 @@ public class MusicCutFragment extends Fragment {
 
   @OnClick(R.id.music_cut_complete_button)
   public void _completeMusicCut() {
-    CameraFragment parentFragment = ((CameraFragment) getParentFragment());
-    Timber.e("Music_Cut : %d", mOffset);
-
-    FragmentManager pcfm = parentFragment.getChildFragmentManager();
+    mOffset = mTempOffset;
+    FragmentManager pcfm = mParentFragment.getChildFragmentManager();
     Fragment fragment = pcfm.findFragmentById(R.id.camera_container_music_cut);
 
     pcfm.beginTransaction()
         .remove(fragment)
         .commit();
-    parentFragment.requestUiChange(CameraFragment.UI_LOGIC_FINISH_CUT_MUSIC);
+    mParentFragment.requestUiChange(CameraFragment.UI_LOGIC_FINISH_CUT_MUSIC);
+    mParentFragment.cutMusic(mOffset);
+  }
 
-    parentFragment.cutMusic(mOffset);
+  public void _cancelMusicCut() {
+    FragmentManager pcfm = mParentFragment.getChildFragmentManager();
+    Fragment fragment = pcfm.findFragmentById(R.id.camera_container_music_cut);
+
+    pcfm.beginTransaction()
+        .remove(fragment)
+        .commit();
+    mParentFragment.requestUiChange(CameraFragment.UI_LOGIC_FINISH_CUT_MUSIC);
+    mParentFragment.cutMusic(mOffset);
+  }
+
+  @Override
+  public void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    mParentFragment = ((CameraFragment) getParentFragment());
+    ((HomeActivity) getActivity()).setCuttingVideo(true);
   }
 
   @Nullable
@@ -77,7 +99,7 @@ public class MusicCutFragment extends Fragment {
     super.onViewCreated(view, savedInstanceState);
     Uri uri = getArguments().getParcelable(ARG_MUSIC);
     mOffset = getArguments().getInt(ARG_OFFSET);
-    mWaveformView.setSoundFile(uri, mOffset / 1000.0f);
+    mWaveformView.setSoundFile(uri, millisecToSec(mOffset));
     mWaveformView.setListener(mWaveformListener);
   }
 
@@ -85,6 +107,12 @@ public class MusicCutFragment extends Fragment {
   public void onDestroyView() {
     mUnbinder.unbind();
     super.onDestroyView();
+  }
+
+  @Override
+  public void onDestroy() {
+    ((HomeActivity) getActivity()).setCuttingVideo(false);
+    super.onDestroy();
   }
 
   public WaveformView.WaveformListener mWaveformListener = new WaveformView.WaveformListener() {
@@ -103,7 +131,17 @@ public class MusicCutFragment extends Fragment {
 
     @Override
     public void waveformTouchEnd() {
-      mOffset = (int) (1000 * mWaveformView.fixOffset());
+      mTempOffset = secToMillisec(mWaveformView.fixOffset());
+      mParentFragment.cutMusic(mTempOffset);
+      mParentFragment.startPlayer();
     }
   };
+
+  public static int secToMillisec(float sec) {
+    return (int) (sec * 1000);
+  }
+
+  public static float millisecToSec(int millisec) {
+    return millisec / 1000.0f;
+  }
 }

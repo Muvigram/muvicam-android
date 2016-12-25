@@ -212,7 +212,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   @Override
   public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    requestUiChange(UI_LOGIC_RESTORE_UI_CONFIGURATION);
+//    requestUiChange(UI_LOGIC_RESTORE_UI_CONFIGURATION);
   }
 
   @Override
@@ -934,9 +934,9 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   }
 
   public void cutMusic(int musicOffset) {
-    stopPlayer();
+    pausePlayer();
     mOffset = musicOffset;
-    setUpPlayer();
+    mPlayer.seekTo(mOffset);
   }
 
   private MediaPlayer mPlayer;
@@ -1109,39 +1109,26 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   // STEP - UI MAIN THREAD ////////////////////////////////////////////////////////////////////DONE
 
   /* FUNC - UI LOGIC */
-//  public static final int UI_LOGIC_RELEASE_CAPTURE_BUTTON   = 0x0001;
-//  public static final int UI_LOGIC_HOLD_CAPTURE_BUTTON      = 0x0002;
-//  public static final int UI_LOGIC_ACTIVATE_OK_BUTTON       = 0x0003;
-//  public static final int UI_LOGIC_DEACTIVATE_OK_BUTTON     = 0x0004;
-//  public static final int UI_LOGIC_ACTIVATE_CUT_BUTTON      = 0x0005;
-//  public static final int UI_LOGIC_DEACTIVATE_CUT_BUTTON    = 0x0006;
-//  public static final int UI_LOGIC_ACTIVATE_SELFIE_BUTTON   = 0x0007;
-//  public static final int UI_LOGIC_DEACTIVATE_SELFIE_BUTTON = 0x0008;
-
   public static final int UI_LOGIC_RESTORE_UI_CONFIGURATION = 0x000;
 
-  public static final int UI_LOGIC_SHOW_PERIPHERAL_BUTTONS = 0x009;
-  public static final int UI_LOGIC_HIDE_PERIPHERAL_BUTTONS = 0x010;
-  public static final int UI_LOGIC_SHOW_ALL_BUTTONS = 0x011;
-  public static final int UI_LOGIC_HIDE_ALL_BUTTONS = 0x012;
+  public static final int UI_LOGIC_SHOW_PERIPHERAL_BUTTONS = 0x001;
+  public static final int UI_LOGIC_HIDE_PERIPHERAL_BUTTONS = 0x002;
+  public static final int UI_LOGIC_SHOW_ALL_BUTTONS = 0x003;
+  public static final int UI_LOGIC_HIDE_ALL_BUTTONS = 0x004;
 
-  public static final int UI_LOGIC_MUSIC_UPDATE_COMPLETE = 0x013;
+  public static final int UI_LOGIC_MUSIC_UPDATE_COMPLETE = 0x005;
 
-  public static final int UI_LOGIC_BEFORE_SHOOTING = 0x014;
-  public static final int UI_LOGIC_DURING_SHOOTING = 0x015;
+  public static final int UI_LOGIC_BEFORE_SHOOTING = 0x006;
+  public static final int UI_LOGIC_DURING_SHOOTING = 0x007;
 
-  public static final int UI_LOGIC_DOWN_SHOOT_BUTTON = 0x016;
-  public static final int UI_LOGIC_UP_SHOOT_BUTTON   = 0x017;
+  public static final int UI_LOGIC_DOWN_SHOOT_BUTTON = 0x008;
+  public static final int UI_LOGIC_UP_SHOOT_BUTTON   = 0x009;
 
-  public static final int UI_LOGIC_DURING_CUT_MUSIC = 0x018;
-  public static final int UI_LOGIC_FINISH_CUT_MUSIC = 0x019;
+  public static final int UI_LOGIC_DURING_CUT_MUSIC = 0x010;
+  public static final int UI_LOGIC_FINISH_CUT_MUSIC = 0x011;
 
   @Retention(RetentionPolicy.SOURCE)
   @IntDef({UI_LOGIC_RESTORE_UI_CONFIGURATION,
-      /*UI_LOGIC_RELEASE_CAPTURE_BUTTON, UI_LOGIC_HOLD_CAPTURE_BUTTON,
-      UI_LOGIC_ACTIVATE_OK_BUTTON, UI_LOGIC_DEACTIVATE_OK_BUTTON,
-      UI_LOGIC_ACTIVATE_CUT_BUTTON, UI_LOGIC_DEACTIVATE_CUT_BUTTON,
-      UI_LOGIC_ACTIVATE_SELFIE_BUTTON, UI_LOGIC_DEACTIVATE_SELFIE_BUTTON,*/
       UI_LOGIC_SHOW_PERIPHERAL_BUTTONS, UI_LOGIC_HIDE_PERIPHERAL_BUTTONS,
       UI_LOGIC_SHOW_ALL_BUTTONS, UI_LOGIC_HIDE_ALL_BUTTONS,
       UI_LOGIC_MUSIC_UPDATE_COMPLETE,
@@ -1266,30 +1253,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           mShootButton.setImageResource(R.drawable.camera_shoot_button_release_70dp);
           mShootButton.startAnimation(getAnimation(getActivity(), R.anim.clicking_101));
           break;
-//        case UI_LOGIC_RELEASE_CAPTURE_BUTTON:
-//          mShootButton.setImageResource(R.drawable.camera_shoot_button_release_70dp);
-//          break;
-//        case UI_LOGIC_HOLD_CAPTURE_BUTTON:
-//          mShootButton.setImageResource(R.drawable.camera_shoot_button_hold_70dp);
-//          break;
-//        case UI_LOGIC_ACTIVATE_CUT_BUTTON:
-//          mCutButton.setImageResource(R.drawable.camera_cut_button_active_30dp);
-//          break;
-//        case UI_LOGIC_DEACTIVATE_CUT_BUTTON:
-//          mCutButton.setImageResource(R.drawable.camera_cut_button_inactive_30dp);
-//          break;
-//        case UI_LOGIC_ACTIVATE_SELFIE_BUTTON:
-//          mSelfieButton.setImageResource(R.drawable.camera_selfie_button_active_30dp);
-//          break;
-//        case UI_LOGIC_DEACTIVATE_SELFIE_BUTTON:
-//          mSelfieButton.setImageResource(R.drawable.camera_selfie_button_inactive_30dp);
-//          break;
-//        case UI_LOGIC_ACTIVATE_OK_BUTTON:
-//          mOkButton.setImageResource(R.drawable.camera_ok_button_active_30dp);
-//          break;
-//        case UI_LOGIC_DEACTIVATE_OK_BUTTON:
-//          mOkButton.setImageResource(R.drawable.camera_ok_button_inactive_30dp);
-//          break;
         case UI_LOGIC_MUSIC_UPDATE_COMPLETE:
           mMusicButton.setAlbumArt(mMusic);
           mMusicButton.startAnimation(getAnimation(getActivity(), R.anim.rotating));
