@@ -32,9 +32,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
+ *
+ *
  * Created by jaylim on 12/12/2016.
  */
-
 public class HomeActivity extends BaseActivity {
 
   private final static String TAG = HomeActivity.class.getSimpleName();
@@ -59,7 +60,6 @@ public class HomeActivity extends BaseActivity {
   public static HomeActivity get(Fragment fragment) {
     return (HomeActivity) fragment.getActivity();
   }
-
 
   @Inject
   HomePagerAdapter mPagerAdapter;
@@ -87,6 +87,17 @@ public class HomeActivity extends BaseActivity {
     setUpViewPager();
   }
 
+  /* Restore state from restart activity. */
+  @Override
+  protected void onStart() {
+    super.onStart();
+    if (isScrollable()) {
+      enableScroll();
+    } else {
+      disableScroll();
+    }
+  }
+
   @Override
   protected void onDestroy() {
     if (mHomeComponent != null) {
@@ -94,7 +105,6 @@ public class HomeActivity extends BaseActivity {
     }
     super.onDestroy();
   }
-
 
   public void setFullscreen() {
     requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -136,6 +146,10 @@ public class HomeActivity extends BaseActivity {
     }
   }
 
+  public boolean isScrollable() {
+    return mViewPager.getCurrentItem() != PAGE_CAMERA || mViewPager.isScrollable();
+  }
+
   public void enableScroll() {
     if(mViewPager.getCurrentItem() == PAGE_CAMERA) {
       mViewPager.enableScroll();
@@ -148,3 +162,5 @@ public class HomeActivity extends BaseActivity {
     }
   }
 }
+
+

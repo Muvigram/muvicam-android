@@ -3,6 +3,7 @@ package com.estsoft.muvicam.ui.home.camera;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -81,10 +82,10 @@ public class WaveformView extends View {
     mListener = listener;
   }
 
-  public int fixOffset() {
+  public float fixOffset() {
     invalidate();
-    mOffset = getOffset(mFrameOffset, mSampleRate, mSamplesPerFrame);
-    return (int) (mOffset * 1000);
+    Timber.e("[fixOffset] frameOffset : %d", mFrameOffset);
+    return getOffset(mFrameOffset, mSampleRate, mSamplesPerFrame);
   }
 
   public void moveOffset(float displacement) {
@@ -102,16 +103,16 @@ public class WaveformView extends View {
     return mSoundFile != null;
   }
 
-  public void setSoundFile(Music music, float offset) {
+  public void setSoundFile(Uri uri, float offset) {
     mMusicUpdated = true;
-    File file = new File(music.uri().toString());
+    File file = new File(uri.toString());
     mOffset = offset;
 
     mSoundFile = new MP3File(file);
     mSampleRate = mSoundFile.getSampleRate();
     mSamplesPerFrame = mSoundFile.getSamplesPerFrame();
 
-    mFrameOffset = getFrameNumber(offset, mSampleRate, mSamplesPerFrame);
+    mFrameOffset = getFrameNumber(mOffset, mSampleRate, mSamplesPerFrame);
     mFrameLength = getFrameNumber(TIME_LENGTH, mSampleRate, mSamplesPerFrame);
     mFrameCur = mFrameOffset;
 

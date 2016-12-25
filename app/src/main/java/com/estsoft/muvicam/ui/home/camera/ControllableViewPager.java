@@ -38,4 +38,8 @@ public class ControllableViewPager extends ViewPager {
   public void disableScroll() {
     scrollable = false;
   }
+
+  public boolean isScrollable() {
+    return scrollable;
+  }
 }

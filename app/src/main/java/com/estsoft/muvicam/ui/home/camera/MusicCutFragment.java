@@ -1,5 +1,6 @@
 package com.estsoft.muvicam.ui.home.camera;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -27,16 +28,17 @@ public class MusicCutFragment extends Fragment {
   private static final String ARG_MUSIC = "MusicCutFragment.arg_music";
   private static final String ARG_OFFSET = "MusicCutFragment.arg_offset";
 
-  public static MusicCutFragment newInstance(Music music, int offset) {
+  public static MusicCutFragment newInstance(Uri uri, int offset) {
     MusicCutFragment fragment = new MusicCutFragment();
     Bundle args = new Bundle();
-    args.putParcelable(ARG_MUSIC, music);
+    args.putParcelable(ARG_MUSIC, uri);
     args.putInt(ARG_OFFSET, offset);
     fragment.setArguments(args);
     return fragment;
   }
 
-  private int mOffset = 30000;
+  // Millisecond
+  private int mOffset;
 
   Unbinder mUnbinder;
 
@@ -49,7 +51,7 @@ public class MusicCutFragment extends Fragment {
   @OnClick(R.id.music_cut_complete_button)
   public void _completeMusicCut() {
     CameraFragment parentFragment = ((CameraFragment) getParentFragment());
-    Timber.e("Music_Cut");
+    Timber.e("Music_Cut : %d", mOffset);
 
     FragmentManager pcfm = parentFragment.getChildFragmentManager();
     Fragment fragment = pcfm.findFragmentById(R.id.camera_container_music_cut);
@@ -57,7 +59,7 @@ public class MusicCutFragment extends Fragment {
     pcfm.beginTransaction()
         .remove(fragment)
         .commit();
-    parentFragment.requestUiChange(CameraFragment.UI_LOGIC_SHOW_ALL_BUTTONS);
+    parentFragment.requestUiChange(CameraFragment.UI_LOGIC_FINISH_CUT_MUSIC);
 
     parentFragment.cutMusic(mOffset);
   }
@@ -73,9 +75,9 @@ public class MusicCutFragment extends Fragment {
   @Override
   public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    Music music = getArguments().getParcelable(ARG_MUSIC);
-    int offset = getArguments().getInt(ARG_OFFSET);
-    mWaveformView.setSoundFile(music, offset);
+    Uri uri = getArguments().getParcelable(ARG_MUSIC);
+    mOffset = getArguments().getInt(ARG_OFFSET);
+    mWaveformView.setSoundFile(uri, mOffset / 1000.0f);
     mWaveformView.setListener(mWaveformListener);
   }
 
@@ -101,7 +103,7 @@ public class MusicCutFragment extends Fragment {
 
     @Override
     public void waveformTouchEnd() {
-      mOffset = mWaveformView.fixOffset();
+      mOffset = (int) (1000 * mWaveformView.fixOffset());
     }
   };
 }
