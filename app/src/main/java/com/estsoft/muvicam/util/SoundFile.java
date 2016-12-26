@@ -31,14 +31,8 @@ public abstract class SoundFile {
 
   public abstract int[] getGlobalGains();
 
-  public abstract int getFileSizeBytes();
-
-  public abstract int getAvgBitrate();
-
   public abstract int getSampleRate();
 
-  public abstract int getChannels();
-
-  public abstract String getFiletype();
+  public abstract void moderateGains();
 
 }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import rx.Observable;
 import timber.log.Timber;
 
 /**
@@ -30,6 +31,14 @@ public class MP3File extends SoundFile {
   private int mMaxFrameNum;
   private int mBitrateSum;
 
+  public static Observable<File> create(File inputFile) {
+    return Observable.create(subscriber -> {
+      subscriber.onNext(inputFile);
+      subscriber.onCompleted();
+    });
+  }
+
+
   public MP3File(File inputFile) throws IllegalStateException {
     super(inputFile);
     if (!isMP3(mInputFile.getName().toLowerCase())) {
@@ -43,6 +52,36 @@ public class MP3File extends SoundFile {
         e.printStackTrace();
       }
     }
+  }
+
+  @Override
+  public void moderateGains() {
+    mMaxGain = -1;
+    mMinGain = 257;
+
+    int[] temp = new int[mTotalFrameNum];
+    int[] histogram = new int[256];
+
+    for (int i = 0; i < mTotalFrameNum; i++) {
+      int val;
+      if (i == 0) {
+        val = (mGlobalGains[i] + mGlobalGains[i+1]) / 2;
+      } else if (i == mTotalFrameNum - 1) {
+        val = (mGlobalGains[i-1] + mGlobalGains[i]) / 2;
+      } else if (i == mTotalFrameNum - 2 || i == 1){
+        val = (mGlobalGains[i-1] + mGlobalGains[i] + mGlobalGains[i+1]) / 3;
+      } else {
+        val = (mGlobalGains[i-2] + mGlobalGains[i-1] + mGlobalGains[i] + mGlobalGains[i+1] + mGlobalGains[i+2]) / 5;
+      }
+
+      histogram[val] += 1;
+
+      mMaxGain = (val > mMaxGain) ? val : mMaxGain;
+      mMinGain = (val < mMinGain) ? val : mMinGain;
+
+      temp[i] = val;
+    }
+    mGlobalGains = temp;
   }
 
   @Override
@@ -89,26 +128,6 @@ public class MP3File extends SoundFile {
   }
 
   /**
-   * Size of input file.
-   *
-   * @return Size of input file.
-   */
-  @Override
-  public int getFileSizeBytes() {
-    return mFileSize;
-  }
-
-  /**
-   * Average bitrate of the file.
-   *
-   * @return Average bit rate.
-   */
-  @Override
-  public int getAvgBitrate() {
-    return mAvgBitRate;
-  }
-
-  /**
    * Sample rate of the file.
    *
    * @return The global sample rate.
@@ -116,21 +135,6 @@ public class MP3File extends SoundFile {
   @Override
   public int getSampleRate() {
     return mGlobalSampleRate;
-  }
-
-  /**
-   * The number of channels.
-   *
-   * @return The number of channels.
-   */
-  @Override
-  public int getChannels() {
-    return mGlobalChannels;
-  }
-
-  @Override
-  public String getFiletype() {
-    return "mp3";
   }
 
   public void readFile() throws IOException {

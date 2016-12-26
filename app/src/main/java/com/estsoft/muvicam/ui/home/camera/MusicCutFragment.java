@@ -3,6 +3,8 @@ package com.estsoft.muvicam.ui.home.camera;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,11 +16,15 @@ import android.widget.ImageButton;
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.ui.home.HomeActivity;
+import com.estsoft.muvicam.util.RxUtil;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
@@ -42,8 +48,6 @@ public class MusicCutFragment extends Fragment {
   // Millisecond
   private int mOffset;
   private int mTempOffset;
-
-  private MediaPlayer mPlayer;
 
   private CameraFragment mParentFragment;
 
@@ -104,6 +108,17 @@ public class MusicCutFragment extends Fragment {
   }
 
   @Override
+  public void onResume() {
+    super.onResume();
+  }
+
+  @Override
+  public void onPause() {
+    mParentFragment.stopSubscribePlayer();
+    super.onPause();
+  }
+
+  @Override
   public void onDestroyView() {
     mUnbinder.unbind();
     super.onDestroyView();
@@ -115,11 +130,14 @@ public class MusicCutFragment extends Fragment {
     super.onDestroy();
   }
 
+  Subscription mSubscription;
+
   public WaveformView.WaveformListener mWaveformListener = new WaveformView.WaveformListener() {
     private float mXStart;
 
     @Override
     public void waveformTouchStart(float x) {
+      mParentFragment.stopSubscribePlayer();
       mXStart = x;
     }
 
@@ -131,9 +149,29 @@ public class MusicCutFragment extends Fragment {
 
     @Override
     public void waveformTouchEnd() {
+      RxUtil.unsubscribe(mSubscription);
       mTempOffset = secToMillisec(mWaveformView.fixOffset());
       mParentFragment.cutMusic(mTempOffset);
       mParentFragment.startPlayer();
+      mSubscription = mParentFragment.startSubscribePlayer()
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribeOn(Schedulers.newThread())
+          .map(MusicCutFragment::millisecToSec)
+          .filter(sec -> {
+            if (mWaveformView != null && mWaveformView.isValidRunning(sec)) {
+              return true;
+            } else {
+              mParentFragment.pausePlayer();
+              mParentFragment.stopSubscribePlayer();
+              return false;
+            }
+          })
+          .subscribe(
+              sec -> mWaveformView.updateUi(sec),
+              Throwable::printStackTrace,
+              () -> mSubscription.unsubscribe()
+          );
+
     }
   };
 

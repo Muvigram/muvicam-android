@@ -10,12 +10,13 @@ import android.view.View;
 import android.widget.SeekBar;
 
 import com.estsoft.muvicam.R;
-import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.util.MP3File;
 import com.estsoft.muvicam.util.SoundFile;
 
 import java.io.File;
 
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
@@ -68,12 +69,18 @@ public class WaveformView extends View {
 
     mPlayheadPaint = new Paint();
     mPlayheadPaint.setAntiAlias(false);
+    mPlayheadPaint.setStyle(Paint.Style.STROKE);
+    mPlayheadPaint.setStrokeWidth(2.0f);
     mPlayheadPaint.setColor(getResources().getColor(R.color.red_A700));
     mBeforeHeadPaint = new Paint();
     mBeforeHeadPaint.setAntiAlias(false);
-    mBeforeHeadPaint.setColor(getResources().getColor(R.color.backgroundWhite));
+    mBeforeHeadPaint.setStyle(Paint.Style.STROKE);
+    mBeforeHeadPaint.setStrokeWidth(2.0f);
+    mBeforeHeadPaint.setColor(getResources().getColor(R.color.red_A700));
     mAfterHeadPaint = new Paint();
     mAfterHeadPaint.setAntiAlias(false);
+    mAfterHeadPaint.setStyle(Paint.Style.STROKE);
+    mAfterHeadPaint.setStrokeWidth(2.0f);
     mAfterHeadPaint.setColor(getResources().getColor(R.color.backgroundLightGrey));
 
   }
@@ -108,18 +115,31 @@ public class WaveformView extends View {
     File file = new File(uri.toString());
     mOffset = offset;
 
-    mSoundFile = new MP3File(file);
-    mSampleRate = mSoundFile.getSampleRate();
-    mSamplesPerFrame = mSoundFile.getSamplesPerFrame();
+    MP3File.create(file)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .map(MP3File::new)
+        .map(mp3 -> (SoundFile) mp3)
+        .filter(sound -> {
+          sound.moderateGains();
+          return true;
+        })
+        .subscribe(
+            sound -> {
+              mSampleRate = sound.getSampleRate();
+              mSamplesPerFrame = sound.getSamplesPerFrame();
+              mSoundFile = sound;
 
-    mFrameOffset = getFrameNumber(mOffset, mSampleRate, mSamplesPerFrame);
-    mFrameLength = getFrameNumber(TIME_LENGTH, mSampleRate, mSamplesPerFrame);
-    mFrameCur = mFrameOffset;
+              mFrameOffset = getFrameNumber(mOffset, mSampleRate, mSamplesPerFrame);
+              mFrameLength = getFrameNumber(TIME_LENGTH, mSampleRate, mSamplesPerFrame);
+              mFrameCur = mFrameOffset;
 
-    mMaxGain = mSoundFile.getMaxGain();
-    mMinGain = mSoundFile.getMinGain();
-    mAvgGain = (mMaxGain + mMinGain) / 2;
-    invalidate();
+              mMaxGain = mSoundFile.getMaxGain();
+              mMinGain = mSoundFile.getMinGain();
+              mAvgGain = (mMaxGain + mMinGain) / 2;
+              invalidate();
+            }
+        );
   }
 
   @Override
@@ -135,9 +155,9 @@ public class WaveformView extends View {
     if (mMusicUpdated) {
       mScaledInterval = getScaledInterval(mFrameLength, getMeasuredWidth());
       Timber.e("mScaledInterval %f [%d, %d]", mScaledInterval, mFrameLength, getMeasuredWidth());
-      float strokeWidth = getScaledStrokeWidth(mScaledInterval);
-      mAfterHeadPaint.setStrokeWidth(strokeWidth);
-      mBeforeHeadPaint.setStrokeWidth(strokeWidth);
+//      float strokeWidth = getScaledStrokeWidth(mScaledInterval);
+//      mAfterHeadPaint.setStrokeWidth(strokeWidth);
+//      mBeforeHeadPaint.setStrokeWidth(strokeWidth);
       mMusicUpdated = false;
     }
 
@@ -146,28 +166,28 @@ public class WaveformView extends View {
 
     for (int i = mFrameOffset; i < mFrameCur; i++) {
       sh = getScaledHeight(i, mSoundFile.getGlobalGains(), mMaxGain, mAvgGain, h);
-      sx = getScaledInterval(i, mFrameOffset, mFrameLength, w);
+      sx = getScaledXPosition(i, mFrameOffset, mFrameLength, w);
       canvas.drawLine(sx, h/2.0f - sh, sx, h/2.0f + sh, mBeforeHeadPaint);
     }
 
-    sh = getScaledHeight(mFrameCur, mSoundFile.getGlobalGains(), mMaxGain, mAvgGain, h);
-    sx = getScaledInterval(mFrameCur, mFrameOffset, mFrameLength, w);
-    canvas.drawLine(sx, 0f, sx, sh * 2f, mPlayheadPaint);
+//    sh = getScaledHeight(mFrameCur, mSoundFile.getGlobalGains(), mMaxGain, mAvgGain, h);
+//    sx = getScaledXPosition(mFrameCur, mFrameOffset, mFrameLength, w);
+//    canvas.drawLine(sx, 0f, sx, sh * 2.0f, mPlayheadPaint);
 
-    for (int i = mFrameCur + 1; i < mFrameOffset + mFrameLength; i++) {
+    for (int i = mFrameCur /*+ 1*/; i < mFrameOffset + mFrameLength; i++) {
       sh = getScaledHeight(i, mSoundFile.getGlobalGains(), mMaxGain, mAvgGain, h);
-      sx = getScaledInterval(i, mFrameOffset, mFrameLength, w);
-      canvas.drawLine(sx, h/2.0f - sh, sx, h/2.0f + sh, mBeforeHeadPaint);
+      sx = getScaledXPosition(i, mFrameOffset, mFrameLength, w);
+      canvas.drawLine(sx, h/2.0f - sh, sx, h/2.0f + sh, mAfterHeadPaint);
 
     }
   }
 
   public interface WaveformListener {
-    public void waveformTouchStart(float x);
+    void waveformTouchStart(float x);
 
-    public void waveformTouchMove(float x);
+    void waveformTouchMove(float x);
 
-    public void waveformTouchEnd();
+    void waveformTouchEnd();
   }
 
   @Override
@@ -184,6 +204,17 @@ public class WaveformView extends View {
         break;
     }
     return true;
+  }
+
+  public void updateUi(float sec) {
+    mFrameCur = getFrameNumber(sec, mSampleRate, mSamplesPerFrame);
+    invalidate();
+  }
+
+  public boolean isValidRunning(float sec) {
+    int cur = getFrameNumber(sec, mSampleRate, mSamplesPerFrame) + 1;
+    Timber.e("offset : %d, cur : %d, end : %d\n", mFrameOffset, cur, mFrameOffset + mFrameLength);
+    return (cur >= mFrameOffset && cur <= (mFrameOffset + mFrameLength));
   }
 
   public static float getOffset(int frameOffset, int sampleRate, int samplesPerFrame) {
@@ -207,7 +238,7 @@ public class WaveformView extends View {
     return viewWidth / frameLength;
   }
 
-  private static float getScaledInterval(int i, int frameOffset, int frameLength, int viewWidth) {
+  private static float getScaledXPosition(int i, int frameOffset, int frameLength, int viewWidth) {
     return (i - frameOffset - 0.5f) * viewWidth / frameLength;
   }
 

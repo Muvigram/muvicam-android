@@ -995,6 +995,28 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     }
   }
 
+  private boolean isStopped = false;
+
+  public Observable<Integer> startSubscribePlayer() {
+    isStopped = false;
+    return Observable.create(subscriber -> {
+      while (!isStopped) {
+        subscriber.onNext(mPlayer.getCurrentPosition());
+        try {
+          Thread.sleep(60);
+        } catch (InterruptedException e) {
+          subscriber.onError(e);
+          e.printStackTrace();
+        }
+      }
+      subscriber.onCompleted();
+    });
+  }
+
+  public void stopSubscribePlayer() {
+    isStopped = true;
+  }
+
   // STEP - PERMISSION FOR CAMERA /////////////////////////////////////////////////////////////DONE
 
   private static final String PERMISSION_DIALOG = "permissionDialog";
