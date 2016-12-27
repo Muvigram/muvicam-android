@@ -1,7 +1,11 @@
 package com.estsoft.muvicam.ui.home.music;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.graphics.Camera;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +16,7 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,6 +29,7 @@ import butterknife.Unbinder;
 import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.ui.home.HomeActivity;
+import com.estsoft.muvicam.ui.home.camera.CameraFragment;
 import com.estsoft.muvicam.ui.home.music.injection.MusicComponent;
 import com.estsoft.muvicam.ui.home.music.injection.MusicModule;
 import com.estsoft.muvicam.util.DialogFactory;
@@ -83,11 +89,27 @@ public class MusicFragment extends Fragment implements MusicMvpView {
     mPresenter.attachView(this);
   }
 
+  private static final String PERMISSION_DIALOG = "permissionDialog";
+  private static final int REQUEST_VIDEO_PERMISSIONS = 1;
+
   @Override
   public void onActivityCreated(@Nullable Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
     mRecyclerView.setAdapter(mAdapter);
     mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+    String permission = Manifest.permission.READ_EXTERNAL_STORAGE;
+    if (ActivityCompat.checkSelfPermission(getActivity(), permission)
+        != PackageManager.PERMISSION_GRANTED) {
+      if (shouldShowRequestPermissionRationale(permission)) {
+        CameraFragment.ConfirmationDialog.newInstance()
+            .show(getChildFragmentManager(), PERMISSION_DIALOG);
+      } else {
+        requestPermissions(new String[] {permission}, REQUEST_VIDEO_PERMISSIONS);
+      }
+      return;
+    }
+
     mPresenter.loadMusics();
   }
 

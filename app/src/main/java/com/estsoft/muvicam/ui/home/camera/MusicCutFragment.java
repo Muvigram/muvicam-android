@@ -167,9 +167,9 @@ public class MusicCutFragment extends Fragment {
             }
           })
           .subscribe(
-              sec -> mWaveformView.updateUi(sec),
+              mWaveformView::updateUi,
               Throwable::printStackTrace,
-              () -> mSubscription.unsubscribe()
+              () -> RxUtil.unsubscribe(mSubscription)
           );
 
     }

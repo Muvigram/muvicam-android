@@ -49,6 +49,8 @@ import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.ui.home.HomeActivity;
 import com.estsoft.muvicam.util.FileUtil;
+import com.estsoft.muvicam.util.RxUtil;
+import com.estsoft.muvicam.util.UnitConversionUtil;
 import com.jakewharton.rxbinding.view.RxView;
 
 import java.io.File;
@@ -70,6 +72,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 import rx.Observable;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
@@ -103,6 +107,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   @BindView(R.id.camera_texture_view)        ResizableTextureView mTextureView;
   @BindView(R.id.camera_container_music_cut) FrameLayout mMusicCutContainer;
   @BindView(R.id.camera_base_line)           View mBaseLineView;
+  @BindView(R.id.camera_stack_bar)           StackBar mStackBar;
 
   @OnClick(R.id.camera_cut_button)
   public void _musicCut(View v) {
@@ -164,7 +169,16 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_texture_view)
   public void _triggerFocus(/*View v*/) {
-    // popVideoFile();
+  }
+
+  @OnClick(R.id.camera_stack_bar)
+  public void _popRecentVideo(View v) {
+    if (mVideoStack.isEmpty()) {
+      return;
+    }
+    popVideoFile();
+    rewindPlayer(mStackBar.deleteRecentRecord() + mOffset);
+
   }
 
   // STEP - VIEW BINDING //////////////////////////////////////////////////////////////////////////
@@ -190,6 +204,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     mUnbinder = ButterKnife.bind(this, view);
 
     final Observable<MotionEvent> sharedObservable = RxView.touches(mShootButton).share();
+    // Start shooting
     sharedObservable
         .filter(e -> e.getAction() == MotionEvent.ACTION_DOWN)
         .filter(this::holdButton)
@@ -197,6 +212,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
         .debounce(400, TimeUnit.MILLISECONDS, Schedulers.newThread())
         .subscribe(this::startRecording);
 
+    // Stop shooting
     sharedObservable
         .filter(e -> e.getAction() == MotionEvent.ACTION_UP
             || e.getAction() == MotionEvent.ACTION_OUTSIDE)
@@ -267,7 +283,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   }
 
   public boolean shootButtonDown(MotionEvent motionEvent) {
-    if (isDown) throw new RuntimeException(); // Unexpected but for defensive code
+    if (isDown) throw new RuntimeException(); // Unexpected but, just defensive code
     Timber.i("mShootButton/ACTION_DOWN");
 
     isDown = true;
@@ -309,6 +325,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   public void stopRecording(MotionEvent motionEvent) {
     if (!isRecording) throw new RuntimeException(); // Unexpected but for defensive code
+    isRecording = false;
     stopRecording();
   }
 
@@ -326,6 +343,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   private File mDir;
   private File mVideoFile;
   private Stack<File> mVideoStack = new Stack<>();
+  private Stack<Integer> mOffsetStack = new Stack<>();
 
   private void setUpStorageDir() {
     File storageRoot = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
@@ -349,6 +367,39 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  Subscription mStackBarSubscription;
+
+  int recentTime;
+
+  public void setStackBarOnListen() {
+    RxUtil.unsubscribe(mStackBarSubscription);
+    mStackBarSubscription = startSubscribePlayer()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.newThread())
+            .filter(millisec -> {
+              if (!isRecording) {
+                stopSubscribePlayer();
+              }
+              return isRecording;
+            })
+            .map(millisec -> (millisec - mOffset))
+            .filter(millisec -> {
+              if (millisec >= 15000) {
+                stopRecording();
+                return false;
+              }
+              return true;
+            })
+            .subscribe(
+                mStackBar::updateStackBar,
+                Throwable::printStackTrace,
+                () -> {
+                  mStackBar.recordOffset();
+                  RxUtil.unsubscribe(mStackBarSubscription);
+                }
+            );
   }
 
   private void pushVideoFile() {
@@ -375,12 +426,13 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     }
   }
 
+  //
   private void saveAllFilesInStack() {
     int i = 0;
     for (Object obj : mVideoStack.toArray()) {
       File file = (File) obj;
-      String fileName = String.format(Locale.US, "%d_" + i++ + ".mp4",
-          System.currentTimeMillis());
+      String fileName = String.format(Locale.US, "%d_%d.mp4",
+          System.currentTimeMillis(), i++);
 
       new Thread() {
         @Override
@@ -832,6 +884,8 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       }
       isRecording = true;
 
+      setStackBarOnListen();
+
       // media recorder
       startRecorder();
       startPlayer();
@@ -920,6 +974,10 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     mRecorder.reset();
   }
 
+  // STEP - UPDATE STACK BAR //////////////////////////////////////////////////////////////////////
+
+
+
   // STEP - MUSIC PLAYER //////////////////////////////////////////////////////////////////////DONE
 
   private Music mMusic = null;
@@ -995,6 +1053,11 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     }
   }
 
+  public void rewindPlayer(int millisec) {
+    pausePlayer();
+    mPlayer.seekTo(millisec);
+  }
+
   private boolean isStopped = false;
 
   public Observable<Integer> startSubscribePlayer() {
@@ -1003,7 +1066,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       while (!isStopped) {
         subscriber.onNext(mPlayer.getCurrentPosition());
         try {
-          Thread.sleep(60);
+          Thread.sleep(50);
         } catch (InterruptedException e) {
           subscriber.onError(e);
           e.printStackTrace();
@@ -1063,7 +1126,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
       final Fragment parent = getParentFragment();
 
-      return new AlertDialog.Builder(getActivity())
+       return new AlertDialog.Builder(getActivity())
           .setMessage(R.string.camera_request_permission)
           .setPositiveButton(android.R.string.ok, (dialog, i) ->
               requestPermissions(VIDEO_PERMISSIONS, REQUEST_VIDEO_PERMISSIONS)
