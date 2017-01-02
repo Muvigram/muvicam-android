@@ -100,7 +100,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @BindView(R.id.camera_shoot_button)        ImageButton mShootButton;
   @BindView(R.id.camera_music_button)        AlbumArtButton mMusicButton;
-  @BindView(R.id.camera_library_button)      ImageButton mLibraryButton;
+  @BindView(R.id.camera_library_button)      LibraryThumbnailButton mLibraryButton;
   @BindView(R.id.camera_selfie_button)       ImageButton mSelfieButton;
   @BindView(R.id.camera_cut_button)          ImageButton mCutButton;
   @BindView(R.id.camera_ok_button)           ImageButton mOkButton;
@@ -228,7 +228,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   @Override
   public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-//    requestUiChange(UI_LOGIC_RESTORE_UI_CONFIGURATION);
+    mLibraryButton.updateThumbnailButton();
   }
 
   @Override

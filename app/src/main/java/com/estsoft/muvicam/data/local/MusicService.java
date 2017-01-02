@@ -11,6 +11,8 @@ import android.provider.MediaStore;
 import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.util.CursorObservable;
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 /**
  * Data service that finds musics from local drive and then provides them to presenter.
@@ -51,24 +53,20 @@ public class MusicService {
       return null;
     }
 
-    return CursorObservable.create(musicCursor)
+    return CursorObservable.create(musicCursor, false)
+        .onBackpressureBuffer(128) // for "MissingBackPressureException"
         .filter(this::isEnoughDuration)
-        .map(cursor -> {
-          Uri uri = getUri(cursor);
-          String title = getTitle(cursor);
-          String artist = getArtist(cursor);
-          Bitmap thumbnail = getThumbnail(cursor);
-          return Music.builder()
-              .setUri(uri)
-              .setTitle(title)
-              .setArtist(artist)
-              .setThumbnail(thumbnail)
-              .build();
-        });
+        .map(cursor -> Music.builder()
+            .setUri(getUri(cursor))
+            .setTitle(getTitle(cursor))
+            .setArtist(getArtist(cursor))
+            .setThumbnail(getThumbnail(cursor))
+            .build())
+        .doOnCompleted(musicCursor::close);
   }
 
   public boolean isEnoughDuration(Cursor cursor) {
-    return Integer.parseInt(cursor.getString(mDurationColumn)) > 15000;
+    return Long.parseLong(cursor.getString(mDurationColumn)) > 15000L;
   }
 
   public Uri getUri(Cursor cursor) {

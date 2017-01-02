@@ -57,8 +57,9 @@ public class AlbumArtButton extends ImageButton {
   private Bitmap mThumbnail;
   private Rect mSrcRect;
 
+  // TODO - change parameter to bitmap
   public void setAlbumArt(@Nullable Music music) {
-    if (music == null) {
+    if (music == null || music.thumbnail() == null) {
       isAlbumArt = false;
       if (mThumbnail != null) {
         mThumbnail.recycle();
@@ -72,11 +73,6 @@ public class AlbumArtButton extends ImageButton {
       mSrcRect = new Rect(0, 0, mThumbnail.getWidth(), mThumbnail.getHeight());
       invalidate();
     }
-  }
-
-  @Override
-  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
   }
 
   private static Bitmap getCroppedBitmap(Bitmap thumbnail) {
