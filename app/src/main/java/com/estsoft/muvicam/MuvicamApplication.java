@@ -25,6 +25,8 @@ public class MuvicamApplication extends Application {
   @Override
   public void onCreate() {
     super.onCreate();
+
+    // Timber
     Timber.plant(new Timber.DebugTree());
   }
 
