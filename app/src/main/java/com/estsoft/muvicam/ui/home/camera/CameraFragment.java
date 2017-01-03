@@ -974,10 +974,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     mRecorder.reset();
   }
 
-  // STEP - UPDATE STACK BAR //////////////////////////////////////////////////////////////////////
-
-
-
   // STEP - MUSIC PLAYER //////////////////////////////////////////////////////////////////////DONE
 
   private Music mMusic = null;
