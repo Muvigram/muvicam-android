@@ -11,6 +11,7 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"/>
 
+
     <com.estsoft.muvicam.ui.home.camera.StackBar
         android:id="@+id/camera_stack_bar"
         android:layout_width="match_parent"
@@ -22,6 +23,14 @@
         custom:backgroundColor="#7fd7dadb"
         custom:stackColor="#FFFFFF"
         custom:dividerColor="#E8474E"/>
+
+    <FrameLayout
+        android:id="@+id/camera_stack_trashbin_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_below="@id/camera_stack_bar"
+        android:orientation="vertical"/>
 
     <ImageButton
         android:id="@+id/camera_shoot_button"

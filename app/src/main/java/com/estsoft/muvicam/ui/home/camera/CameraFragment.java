@@ -1,12 +1,14 @@
 package com.estsoft.muvicam.ui.home.camera;
 
 import android.Manifest;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
+import android.graphics.drawable.Drawable;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -50,7 +52,6 @@ import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.ui.home.HomeActivity;
 import com.estsoft.muvicam.util.FileUtil;
 import com.estsoft.muvicam.util.RxUtil;
-import com.estsoft.muvicam.util.UnitConversionUtil;
 import com.jakewharton.rxbinding.view.RxView;
 
 import java.io.File;
@@ -98,16 +99,28 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   private Unbinder mUnbinder;
 
-  @BindView(R.id.camera_shoot_button)        ImageButton mShootButton;
-  @BindView(R.id.camera_music_button)        AlbumArtButton mMusicButton;
-  @BindView(R.id.camera_library_button)      LibraryThumbnailButton mLibraryButton;
-  @BindView(R.id.camera_selfie_button)       ImageButton mSelfieButton;
-  @BindView(R.id.camera_cut_button)          ImageButton mCutButton;
-  @BindView(R.id.camera_ok_button)           ImageButton mOkButton;
-  @BindView(R.id.camera_texture_view)        ResizableTextureView mTextureView;
-  @BindView(R.id.camera_container_music_cut) FrameLayout mMusicCutContainer;
-  @BindView(R.id.camera_base_line)           View mBaseLineView;
-  @BindView(R.id.camera_stack_bar)           StackBar mStackBar;
+  @BindView(R.id.camera_shoot_button)
+  ImageButton mShootButton;
+  @BindView(R.id.camera_music_button)
+  AlbumArtButton mMusicButton;
+  @BindView(R.id.camera_library_button)
+  LibraryThumbnailButton mLibraryButton;
+  @BindView(R.id.camera_selfie_button)
+  ImageButton mSelfieButton;
+  @BindView(R.id.camera_cut_button)
+  ImageButton mCutButton;
+  @BindView(R.id.camera_ok_button)
+  ImageButton mOkButton;
+  @BindView(R.id.camera_texture_view)
+  ResizableTextureView mTextureView;
+  @BindView(R.id.camera_container_music_cut)
+  FrameLayout mMusicCutContainer;
+  @BindView(R.id.camera_base_line)
+  View mBaseLineView;
+  @BindView(R.id.camera_stack_bar)
+  StackBar mStackBar;
+  @BindView(R.id.camera_stack_trashbin_container)
+  FrameLayout mStackTrashbinContainer;
 
   @OnClick(R.id.camera_cut_button)
   public void _musicCut(View v) {
@@ -171,15 +184,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   public void _triggerFocus(/*View v*/) {
   }
 
-  @OnClick(R.id.camera_stack_bar)
-  public void _popRecentVideo(View v) {
-    if (mVideoStack.isEmpty()) {
-      return;
-    }
-    popVideoFile();
-    rewindPlayer(mStackBar.deleteRecentRecord() + mOffset);
-
-  }
 
   // STEP - VIEW BINDING //////////////////////////////////////////////////////////////////////////
 
@@ -229,6 +233,17 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     mLibraryButton.updateThumbnailButton();
+  }
+
+  @Override
+  public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    super.onActivityCreated(savedInstanceState);
+    mTrashbinDrawable = new Drawable[]{
+        getResources().getDrawable(R.drawable.camera_trashbin_button_left_30dp),
+        getResources().getDrawable(R.drawable.camera_trashbin_button_center_30dp),
+        getResources().getDrawable(R.drawable.camera_trashbin_button_right_30dp)
+    };
+    createTrashbin();
   }
 
   @Override
@@ -330,14 +345,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   }
 
 
-  // STEP - LIFECYCLE /////////////////////////////////////////////////////////////////////////////
-
-
-  @Override
-  public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-    super.onActivityCreated(savedInstanceState);
-  }
-
   // STEP - STORAGE DIR ///////////////////////////////////////////////////////////////////////////
 
   private File mDir;
@@ -376,30 +383,32 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   public void setStackBarOnListen() {
     RxUtil.unsubscribe(mStackBarSubscription);
     mStackBarSubscription = startSubscribePlayer()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.newThread())
-            .filter(millisec -> {
-              if (!isRecording) {
-                stopSubscribePlayer();
-              }
-              return isRecording;
-            })
-            .map(millisec -> (millisec - mOffset))
-            .filter(millisec -> {
-              if (millisec >= 15000) {
-                stopRecording();
-                return false;
-              }
-              return true;
-            })
-            .subscribe(
-                mStackBar::updateStackBar,
-                Throwable::printStackTrace,
-                () -> {
-                  mStackBar.recordOffset();
-                  RxUtil.unsubscribe(mStackBarSubscription);
-                }
-            );
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(Schedulers.newThread())
+        .filter(millisec -> {
+          if (!isRecording) {
+            stopSubscribePlayer();
+          }
+          return isRecording;
+        })
+        .map(millisec -> (millisec - mOffset))
+        .filter(millisec -> {
+          if (millisec >= 15000) {
+            stopRecording();
+            return false;
+          }
+          return true;
+        })
+        .doOnSubscribe(() -> mUiThreadHandler.post(this::hideTrashbin))
+        .subscribe(
+            mStackBar::updateStackBar,
+            Throwable::printStackTrace,
+            () -> {
+              mStackBar.recordOffset();
+              updateTrashbin();
+              RxUtil.unsubscribe(mStackBarSubscription);
+            }
+        );
   }
 
   private void pushVideoFile() {
@@ -453,29 +462,86 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     mVideoStack.clear();
   }
 
+  ImageButton mStackTrashbin;
+
+  private final static int LEFT   = 0;
+  private final static int CENTER = 1;
+  private final static int RIGHT  = 2;
+
+  Drawable[] mTrashbinDrawable;
+
+  private void createTrashbin() {
+    mStackTrashbin = new ImageButton(getActivity());
+    mStackTrashbin.setBackgroundColor(getResources().getColor(R.color.transparent));
+    mStackTrashbin.setOnClickListener(v -> {
+      if (mVideoStack.isEmpty()) {
+        return;
+      }
+      v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
+        @Override
+        public void onAnimationEnd(Animation animation) {
+          hideTrashbin();
+          popVideoFile();
+          rewindPlayer(mStackBar.deleteRecentRecord() + mOffset);
+          updateTrashbin();
+        }
+      }));
+    });
+  }
+
+  private void updateTrashbin() {
+    if (mVideoStack.isEmpty()) {
+      hideTrashbin();
+      return;
+    }
+    int pos = mStackBar.getPosition();
+    int trashbinWidth = mTrashbinDrawable[CENTER].getIntrinsicWidth();
+    int trashbinHeight = mTrashbinDrawable[CENTER].getIntrinsicHeight();
+    int barWidth = mStackBar.getWidth();
+
+    FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(trashbinWidth, trashbinHeight);
+    params.topMargin = 0;
+
+    if (pos < trashbinWidth / 2 + 1) {
+      mStackTrashbin.setImageDrawable(mTrashbinDrawable[LEFT]);
+      params.leftMargin = pos;
+    } else if (barWidth - pos < trashbinWidth / 2 + 1) {
+      mStackTrashbin.setImageDrawable(mTrashbinDrawable[RIGHT]);
+      params.leftMargin = pos - trashbinWidth;
+    } else {
+      mStackTrashbin.setImageDrawable(mTrashbinDrawable[CENTER]);
+      params.leftMargin = pos - trashbinWidth / 2;
+    }
+    mStackTrashbinContainer.addView(mStackTrashbin, params);
+  }
+
+  private void hideTrashbin() {
+    mStackTrashbinContainer.removeView(mStackTrashbin);
+  }
+
   // STEP - TEXTURE VIEW //////////////////////////////////////////////////////////////////////////
 
   private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
-        @Override
-        public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-          openCamera();
-        }
+    @Override
+    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+      openCamera();
+    }
 
-        @Override
-        public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-          // Size changed
-        }
+    @Override
+    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+      // Size changed
+    }
 
-        @Override
-        public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-          return true;
-        }
+    @Override
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+      return true;
+    }
 
-        @Override
-        public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-          // texture view updated
-        }
-      };
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+      // texture view updated
+    }
+  };
 
   // STEP - BACKGROUND THREAD /////////////////////////////////////////////////////////////////////
 
@@ -1043,7 +1109,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   }
 
   public void stopPlayer() {
-    if(mPlayer != null) {
+    if (mPlayer != null) {
       mPlayer.stop();
       mPlayer.reset();
     }
@@ -1122,7 +1188,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
       final Fragment parent = getParentFragment();
 
-       return new AlertDialog.Builder(getActivity())
+      return new AlertDialog.Builder(getActivity())
           .setMessage(R.string.camera_request_permission)
           .setPositiveButton(android.R.string.ok, (dialog, i) ->
               requestPermissions(VIDEO_PERMISSIONS, REQUEST_VIDEO_PERMISSIONS)
@@ -1203,7 +1269,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   public static final int UI_LOGIC_DURING_SHOOTING = 0x007;
 
   public static final int UI_LOGIC_DOWN_SHOOT_BUTTON = 0x008;
-  public static final int UI_LOGIC_UP_SHOOT_BUTTON   = 0x009;
+  public static final int UI_LOGIC_UP_SHOOT_BUTTON = 0x009;
 
   public static final int UI_LOGIC_DURING_CUT_MUSIC = 0x010;
   public static final int UI_LOGIC_FINISH_CUT_MUSIC = 0x011;
@@ -1216,7 +1282,8 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       UI_LOGIC_BEFORE_SHOOTING, UI_LOGIC_DURING_SHOOTING,
       UI_LOGIC_DOWN_SHOOT_BUTTON, UI_LOGIC_UP_SHOOT_BUTTON,
       UI_LOGIC_DURING_CUT_MUSIC, UI_LOGIC_FINISH_CUT_MUSIC})
-  public @interface UiLogic {}
+  public @interface UiLogic {
+  }
 
   private static final String UI_LOGIC = "UiLogic";
 
@@ -1234,7 +1301,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   Handler mUiThreadHandler = new Handler(Looper.getMainLooper()) {
 
     private boolean duringShootingVideo = false;
-    private boolean duringCuttingMusic  = false;
+    private boolean duringCuttingMusic = false;
 
     @Override
     public void handleMessage(Message msg) {
@@ -1244,7 +1311,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
         case UI_LOGIC_RESTORE_UI_CONFIGURATION:
           if (duringCuttingMusic) {
             Timber.e("is during cutting music? true");
-            ((HomeActivity)getActivity()).disableScroll();
+            ((HomeActivity) getActivity()).disableScroll();
             mShootButton.setVisibility(View.INVISIBLE);
             mBaseLineView.setVisibility(View.INVISIBLE);
             mCutButton.setVisibility(View.INVISIBLE);
@@ -1260,7 +1327,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
               mCutButton.setImageResource(R.drawable.camera_cut_button_inactive_30dp);
               mSelfieButton.setImageResource(R.drawable.camera_selfie_button_inactive_30dp);
               mOkButton.setImageResource(R.drawable.camera_ok_button_active_30dp);
-              ((HomeActivity)getActivity()).disableScroll();
+              ((HomeActivity) getActivity()).disableScroll();
               break;
             } else {
               if (mMusic != null) {
@@ -1270,7 +1337,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
               }
               mSelfieButton.setImageResource(R.drawable.camera_selfie_button_active_30dp);
               mOkButton.setImageResource(R.drawable.camera_ok_button_inactive_30dp);
-              ((HomeActivity)getActivity()).enableScroll();
+              ((HomeActivity) getActivity()).enableScroll();
               break;
             }
           }
@@ -1283,21 +1350,21 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           }
           mSelfieButton.setImageResource(R.drawable.camera_selfie_button_active_30dp);
           mOkButton.setImageResource(R.drawable.camera_ok_button_inactive_30dp);
-          ((HomeActivity)getActivity()).enableScroll();
+          ((HomeActivity) getActivity()).enableScroll();
           break;
         case UI_LOGIC_DURING_SHOOTING:
           duringShootingVideo = true;
           mCutButton.setImageResource(R.drawable.camera_cut_button_inactive_30dp);
           mSelfieButton.setImageResource(R.drawable.camera_selfie_button_inactive_30dp);
           mOkButton.setImageResource(R.drawable.camera_ok_button_active_30dp);
-          ((HomeActivity)getActivity()).disableScroll();
+          ((HomeActivity) getActivity()).disableScroll();
           break;
         case UI_LOGIC_FINISH_CUT_MUSIC:
           duringCuttingMusic = false;
           if (duringShootingVideo) {
-            ((HomeActivity)getActivity()).disableScroll();
+            ((HomeActivity) getActivity()).disableScroll();
           } else {
-            ((HomeActivity)getActivity()).enableScroll();
+            ((HomeActivity) getActivity()).enableScroll();
           }
           /*  */
         case UI_LOGIC_SHOW_ALL_BUTTONS:
@@ -1313,7 +1380,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           break;
         case UI_LOGIC_DURING_CUT_MUSIC:
           duringCuttingMusic = true;
-          ((HomeActivity)getActivity()).disableScroll();
+          ((HomeActivity) getActivity()).disableScroll();
           /*  */
         case UI_LOGIC_HIDE_ALL_BUTTONS:
           mShootButton.setVisibility(View.INVISIBLE);
