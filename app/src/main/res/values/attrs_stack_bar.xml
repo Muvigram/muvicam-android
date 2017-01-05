@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="StackBar">
-        <attr name="maximumTime" format="integer"/>
-        <attr name="minimumTime" format="integer"/>
-
         <attr name="backgroundColor" format="color"/>
         <attr name="stackColor" format="color"/>
         <attr name="dividerColor" format="color"/>

@@ -11,15 +11,12 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"/>
 
-
     <com.estsoft.muvicam.ui.home.camera.StackBar
         android:id="@+id/camera_stack_bar"
         android:layout_width="match_parent"
         android:layout_height="15dp"
         android:layout_alignParentTop="true"
 
-        custom:maximumTime="15000"
-        custom:minimumTime="5000"
         custom:backgroundColor="#7fd7dadb"
         custom:stackColor="#FFFFFF"
         custom:dividerColor="#E8474E"/>

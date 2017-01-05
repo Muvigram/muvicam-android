@@ -51,8 +51,8 @@ public class StackBar extends View {
    */
   private static final int DEFAULT_DIVIDER_COLOR = 0xffe8474e;
 
-  private int mMaximumTime;
-  private int mMinimumTime;
+  private int mMaximumTime = DEFAULT_MAXIMUM_TIME;
+  private int mMinimumTime = DEFAULT_MINIMUM_TIME;
 
   private int mBackgroundColor;
   private int mStackColor;
@@ -73,9 +73,6 @@ public class StackBar extends View {
         attrs, R.styleable.StackBar, defStyleAttr, 0);
 
     try {
-      mMaximumTime = attrArray.getInt(R.styleable.StackBar_maximumTime, DEFAULT_MAXIMUM_TIME);
-      mMinimumTime = attrArray.getInt(R.styleable.StackBar_minimumTime, DEFAULT_MINIMUM_TIME);
-
       mBackgroundColor = attrArray.getColor(R.styleable.StackBar_backgroundColor, DEFAULT_BACKGROUND_COLOR);
       mStackColor = attrArray.getColor(R.styleable.StackBar_stackColor, DEFAULT_STACK_COLOR);
       mDividerColor = attrArray.getColor(R.styleable.StackBar_dividerColor, DEFAULT_DIVIDER_COLOR);
@@ -107,7 +104,12 @@ public class StackBar extends View {
     mDividerPaint.setColor(mDividerColor);
     mDividerPaint.setStrokeWidth(5.0f);
 
-    mOffsetStack = new Stack<>();
+    mRecordStack = new Stack<>();
+  }
+
+  public void setTimeBound(int maximumTime, int minimumTime) {
+    mMaximumTime = maximumTime;
+    mMinimumTime = minimumTime;
   }
 
   private int mWidth;
@@ -120,7 +122,7 @@ public class StackBar extends View {
     mHeight = MeasureSpec.getSize(heightMeasureSpec);
   }
 
-  private Stack<Integer> mOffsetStack;
+  private Stack<Integer> mRecordStack;
 
   private int mOffset;
 
@@ -130,14 +132,14 @@ public class StackBar extends View {
   }
 
   public void recordOffset() {
-    mOffsetStack.push(mOffset);
+    mRecordStack.push(mOffset);
   }
 
   public int deleteRecentRecord() {
-    if (!mOffsetStack.isEmpty()) {
-      mOffsetStack.pop();
+    if (!mRecordStack.isEmpty()) {
+      mRecordStack.pop();
     }
-    mOffset = mOffsetStack.isEmpty() ? 0 : mOffsetStack.peek();
+    mOffset = mRecordStack.isEmpty() ? 0 : mRecordStack.peek();
     invalidate();
     return mOffset;
   }
@@ -162,8 +164,8 @@ public class StackBar extends View {
     Timber.i("draw divider : {%f, %f, %f}", 0.0f, (float) mHeight, curOffset);
     canvas.drawLine(curOffset, 0.0f, curOffset, mHeight, mDividerPaint);
 
-    for (int i = 0; i < mOffsetStack.size(); i++) {
-      Integer splitLine = mOffsetStack.get(i);
+    for (int i = 0; i < mRecordStack.size(); i++) {
+      Integer splitLine = mRecordStack.get(i);
       float splitX = (float) mWidth * splitLine / mMaximumTime;
       canvas.drawLine(splitX, 0.0f, splitX, mHeight, mDividerPaint);
     }
@@ -176,7 +178,5 @@ public class StackBar extends View {
   public int getBarWidth() {
     return mWidth;
   }
-
-
 
 }
