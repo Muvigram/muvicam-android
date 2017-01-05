@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
@@ -49,6 +50,7 @@ import android.widget.Toast;
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.ui.home.HomeActivity;
+import com.estsoft.muvicam.ui.share.ShareActivity;
 import com.estsoft.muvicam.util.FileUtil;
 import com.estsoft.muvicam.util.RxUtil;
 import com.jakewharton.rxbinding.view.RxView;
@@ -95,6 +97,45 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     return (CameraFragment) fragment.getParentFragment();
   }
 
+  public void sendAllInformation() {
+
+    String[] videoPaths = new String[mVideoStack.size()];
+    int i = 0;
+    int j = 0;
+    for (File file : mVideoStack.toArray(new File[mVideoStack.size()])) {
+      String fileName = String.format(Locale.US, "%d_%d.mp4",
+          System.currentTimeMillis(), j++);
+      File newFile = new File(mDir, fileName);
+      new Thread() {
+        @Override
+        public void run() {
+          super.run();
+          try {
+            FileUtil.copyFile(file, newFile);
+          } catch (IOException e) {
+            e.printStackTrace();
+          } finally {
+            Toast.makeText(getActivity(), "SAVE : " + mDir.toString() + fileName, Toast.LENGTH_SHORT).show();
+            Timber.e("Save the file $$ dir : %s, file : %s\n", mDir.toString(), fileName);
+          }
+        }
+      }.run();
+      videoPaths[i++] = newFile.toString();
+    }
+
+    int[] videoOffsets = new int[mOffsetStack.size()];
+    i = 0;
+    for (Integer videoOffset : mOffsetStack.toArray(new Integer[mOffsetStack.size()])) {
+      videoOffsets[i++] = videoOffset;
+    }
+
+    String mMusicPath = mMusic == null ? "" : mMusic.uri().toString();
+
+    Intent intent = ShareActivity.newIntent(getContext(), videoPaths, videoOffsets,
+        mMusicPath, mMusicOffset, mPlayer.getCurrentPosition() - mMusicOffset);
+
+    getActivity().startActivity(intent);
+  }
 
   private Unbinder mUnbinder;
 
@@ -154,13 +195,14 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_ok_button)
   public void _completeVideo(View v) {
-    if (mVideoStack.isEmpty()) {
+    if (mVideoStack.isEmpty() || mPlayer.getCurrentPosition() - mMusicOffset < 5000) {
       return;
     }
     v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
       @Override
       public void onAnimationEnd(Animation animation) {
-        saveAllFilesInStack();
+        // saveAllFilesInStack();
+        sendAllInformation();
         if (mVideoStack.isEmpty()) {
           requestUiChange(UI_LOGIC_BEFORE_SHOOTING);
         }
@@ -210,6 +252,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     final Observable<MotionEvent> sharedObservable = RxView.touches(mShootButton).share();
     // Start shooting
     sharedObservable
+        .filter(e -> isSessionPreviewReady)
         .filter(e -> e.getAction() == MotionEvent.ACTION_DOWN)
         .filter(this::holdButton)
         .filter(this::shootButtonDown)
@@ -283,6 +326,8 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @Override
   public void onDestroyView() {
+    mVideoStack.clear();
+    mOffsetStack.clear();
     mUnbinder.unbind();
     if (mUnbinder != null) {
       mUnbinder = null;
@@ -458,13 +503,14 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       File file = (File) obj;
       String fileName = String.format(Locale.US, "%d_%d.mp4",
           System.currentTimeMillis(), i++);
+      File newFile = new File(mDir, fileName);
 
       new Thread() {
         @Override
         public void run() {
           super.run();
           try {
-            FileUtil.copyFile(file, new File(mDir, fileName));
+            FileUtil.copyFile(file, newFile);
           } catch (IOException e) {
             e.printStackTrace();
           } finally {
@@ -842,12 +888,14 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   // STEP - CONTROL PREVIEW ///////////////////////////////////////////////////////////////////////
 
   private CaptureRequest.Builder mCaptureRequestBuilder;
+  private boolean isSessionPreviewReady = false;
 
   private void startPreviewing() {
     createPreviewSession();
   }
 
   private void startRecording() {
+    isSessionPreviewReady = false;
     requestUiChange(UI_LOGIC_HIDE_PERIPHERAL_BUTTONS);
     createRecordSession();
   }
@@ -962,8 +1010,8 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
     @Override
     public void onConfigured(@NonNull CameraCaptureSession previewSession) {
+      isSessionPreviewReady = true;
       mSession = previewSession;
-
       // start capture request
       mCaptureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
       try {
@@ -1405,7 +1453,10 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           duringShootingVideo = true;
           mCutButton.setImageResource(R.drawable.camera_cut_button_inactive_30dp);
           mSelfieButton.setImageResource(R.drawable.camera_selfie_button_inactive_30dp);
-          mOkButton.setImageResource(R.drawable.camera_ok_button_active_30dp);
+          if (mPlayer.getCurrentPosition() - mMusicOffset < 5000)
+            mOkButton.setImageResource(R.drawable.camera_ok_button_inactive_30dp);
+          else
+            mOkButton.setImageResource(R.drawable.camera_ok_button_active_30dp);
           ((HomeActivity) getActivity()).disableScroll();
           break;
         case UI_LOGIC_FINISH_CUT_MUSIC:
