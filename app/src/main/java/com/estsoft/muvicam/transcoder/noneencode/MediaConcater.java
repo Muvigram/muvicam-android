@@ -61,7 +61,8 @@ public class MediaConcater {
                 endTimeUs, audioVolume, mode );
         mSegments.add( segment );
         mTotalEstimatedDuration += segment.getEndTimeUs() - segment.getStartTimeUs();
-
+        Log.e(TAG, "addSegment: segment max duration ... " + segment.getmShorestDurationUs() );
+        Log.e(TAG, "addSegment: total EstimatedDuration ... " + mTotalEstimatedDuration );
         setVideoTrackToMuxer( inputFilePath );
         if ( currentMode == NORMAL ) setAudioTrackToMuxer( inputFilePath );
     }

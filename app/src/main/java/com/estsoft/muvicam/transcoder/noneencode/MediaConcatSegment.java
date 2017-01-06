@@ -31,10 +31,13 @@ public class MediaConcatSegment {
     private long mStartTimeUs;
     private long mActualFirstExtractedTimeUs;
     private long mEndTimeUs;
+    private long mShorestDurationUs;
     private int mAudioVolume;
     private int mVideoTrackIndex;
     private int mAudioTrackIndex;
     private boolean isFinished;
+
+    public long getmShorestDurationUs() { return mShorestDurationUs; }
 
     public MediaConcatSegment(BufferListener bufferListener, String inputFilePath,
                               long startTimeUs, long endTimeUs, int audioVolume, int mode) {
@@ -46,9 +49,9 @@ public class MediaConcatSegment {
         } catch (IOException e ) {
             throw new RuntimeException( e );
         }
-        long shortestDuration = getShortestDuration();
-        this.mStartTimeUs = startTimeUs < 0 ? 0 : startTimeUs > shortestDuration ? shortestDuration : startTimeUs;
-        this.mEndTimeUs = endTimeUs < 0 ? shortestDuration : endTimeUs > shortestDuration ? shortestDuration : endTimeUs;
+        mShorestDurationUs = getShortestDuration();
+        this.mStartTimeUs = startTimeUs < 0 ? 0 : startTimeUs > mShorestDurationUs ? mShorestDurationUs : startTimeUs;
+        this.mEndTimeUs = endTimeUs < 0 ? mShorestDurationUs : endTimeUs > mShorestDurationUs ? mShorestDurationUs : endTimeUs;
         this.mAudioVolume = audioVolume;
         this.currentMode = mode;
     }

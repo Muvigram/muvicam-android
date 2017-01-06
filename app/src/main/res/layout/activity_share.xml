@@ -4,8 +4,12 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/share_test_text_view"
+    <FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        tools:context="com.estsoft.muvigram.transcoder.ShareActivity"
+        android:id="@+id/fragment_activity_share"/>
+
 </LinearLayout>
