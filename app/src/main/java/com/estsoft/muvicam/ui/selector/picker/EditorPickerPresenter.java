@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.editor.picker;
+package com.estsoft.muvicam.ui.selector.picker;
 
 import android.app.Activity;
 import android.content.Context;
@@ -14,7 +14,6 @@ import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.model.EditorVideoData;
 import com.estsoft.muvicam.transcoder.utils.ThumbnailUtil;
 import com.estsoft.muvicam.ui.base.BasePresenter;
-import com.estsoft.muvicam.ui.base.MvpView;
 
 import java.util.ArrayList;
 

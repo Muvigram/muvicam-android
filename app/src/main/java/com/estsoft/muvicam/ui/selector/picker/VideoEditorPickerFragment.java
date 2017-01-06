@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.editor.picker;
+package com.estsoft.muvicam.ui.selector.picker;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -18,7 +18,7 @@ import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.model.EditorVideoData;
 import com.estsoft.muvicam.transcoder.utils.ThumbnailUtil;
 import com.estsoft.muvicam.ui.base.BasePresenter;
-import com.estsoft.muvicam.ui.editor.EditorActivity;
+import com.estsoft.muvicam.ui.selector.SelectActivity;
 
 import java.util.ArrayList;
 
@@ -74,7 +74,7 @@ public class VideoEditorPickerFragment extends Fragment implements PickerView {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        presenter = ((EditorActivity) getActivity()).getPresenter();
+        presenter = ((SelectActivity) getActivity()).getPresenter();
         ((EditorPickerPresenter) presenter).setEditorVideoData(EditorVideoData.getInstance());
         presenter.attachView(this);
 

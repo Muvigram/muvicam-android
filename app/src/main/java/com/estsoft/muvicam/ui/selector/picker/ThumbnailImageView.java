@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.editor.picker;
+package com.estsoft.muvicam.ui.selector.picker;
 
 import android.content.Context;
 import android.util.AttributeSet;
