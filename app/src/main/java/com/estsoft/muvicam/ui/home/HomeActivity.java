@@ -65,6 +65,7 @@ public class HomeActivity extends BaseActivity {
     return (HomeActivity) fragment.getActivity();
   }
 
+
   @Inject
   HomePagerAdapter mPagerAdapter;
 
