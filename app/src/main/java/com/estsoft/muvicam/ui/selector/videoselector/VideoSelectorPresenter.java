@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.editor.picker;
+package com.estsoft.muvicam.ui.selector.videoselector;
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,10 +11,9 @@ import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
-import com.estsoft.muvicam.model.EditorVideoData;
+import com.estsoft.muvicam.model.SelectorVideoData;
 import com.estsoft.muvicam.transcoder.utils.ThumbnailUtil;
 import com.estsoft.muvicam.ui.base.BasePresenter;
-import com.estsoft.muvicam.ui.base.MvpView;
 
 import java.util.ArrayList;
 
@@ -23,12 +22,12 @@ import java.util.ArrayList;
  * Created by Administrator on 2017-01-05.
  */
 
-public class EditorPickerPresenter extends BasePresenter<PickerView> implements VideoEditorPickerAdapter.OnItemClickListener {
-    private EditorVideoData editorVideoData;
-    private EditorPickerAdapterContract.Model adapterModel;
-    private EditorPickerAdapterContract.View adapterView;
+public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> implements VideoSelectorAdapter.OnItemClickListener {
+    private SelectorVideoData selectorVideoData;
+    private VideoSelectorAdapterContract.Model adapterModel;
+    private VideoSelectorAdapterContract.View adapterView;
     private int countSelected = 0;
-    private String TAG = "EditorPickerPresenter";
+    private String TAG = "VideoSelectorPresenter";
 
     @Override
     public boolean isViewAttached() {
@@ -36,7 +35,7 @@ public class EditorPickerPresenter extends BasePresenter<PickerView> implements 
     }
 
     @Override
-    public PickerView getMvpView() {
+    public VideoSelectorView getMvpView() {
         return super.getMvpView();
     }
 
@@ -46,7 +45,7 @@ public class EditorPickerPresenter extends BasePresenter<PickerView> implements 
     }
 
     @Override
-    public void attachView(PickerView mvpView) {
+    public void attachView(VideoSelectorView mvpView) {
         super.attachView(mvpView);
     }
 
@@ -55,12 +54,12 @@ public class EditorPickerPresenter extends BasePresenter<PickerView> implements 
         super.detachView();
     }
 
-    public void setEditorVideoData(EditorVideoData editorVideoData) {
-        this.editorVideoData = editorVideoData;
+    public void setSelectorVideoData(SelectorVideoData selectorVideoData) {
+        this.selectorVideoData = selectorVideoData;
     }
 
     public void loadVideos(final Context context, final ThumbnailUtil.VideoMetaDataListener listener) {
-        Pair<ArrayList<EditorVideo>, ArrayList<String>> pair = editorVideoData.getVideos(context);
+        Pair<ArrayList<EditorVideo>, ArrayList<String>> pair = selectorVideoData.getVideos(context);
         final ArrayList videos = pair.first;
         ((Activity) context).runOnUiThread(new Runnable() {
             @Override
@@ -71,12 +70,12 @@ public class EditorPickerPresenter extends BasePresenter<PickerView> implements 
         ThumbnailUtil.getThumbnails(pair.second, context, listener);
     }
 
-    public void setPickerAdapterModel(EditorPickerAdapterContract.Model adapterModel) {
+    public void setPickerAdapterModel(VideoSelectorAdapterContract.Model adapterModel) {
         this.adapterModel = adapterModel;
 
     }
 
-    public void setPickerAdapterView(EditorPickerAdapterContract.View adapterView) {
+    public void setPickerAdapterView(VideoSelectorAdapterContract.View adapterView) {
         this.adapterView = adapterView;
         this.adapterView.setOnClickListener(this);
     }
@@ -89,7 +88,7 @@ public class EditorPickerPresenter extends BasePresenter<PickerView> implements 
         TextView selectedNum = (TextView) view.findViewById(R.id.video_num);
         if (position > 2 && hide.getVisibility() == View.GONE) {
             if (adapterModel.getItem(position - 3).isSelected()) {
-                editorVideoData.removeSelectedVideo(adapterModel.getItem(position - 3));
+                selectorVideoData.removeSelectedVideo(adapterModel.getItem(position - 3));
                 layoutSelected.setVisibility(View.GONE);
                 for (EditorVideo mvt : adapterModel.getItems()) {
                     if (mvt.getNumSelected() > adapterModel.getItem(position - 3).getNumSelected()) {
@@ -111,7 +110,7 @@ public class EditorPickerPresenter extends BasePresenter<PickerView> implements 
                     String selectedNumS = "" + adapterModel.getItem(position - 3).getNumSelected();
                     selectedNum.setText(selectedNumS);
                     layoutSelected.setVisibility(View.VISIBLE);
-                    editorVideoData.addSelectedVideo(adapterModel.getItem(position - 3));
+                    selectorVideoData.addSelectedVideo(adapterModel.getItem(position - 3));
                     ++countSelected;
                 }
 
@@ -122,7 +121,7 @@ public class EditorPickerPresenter extends BasePresenter<PickerView> implements 
 
     // position : list of position
     public void progress(ThumbnailUtil.VideoMetaData data) {
-        editorVideoData.progressGetThumbnail(data);
+        selectorVideoData.progressGetThumbnail(data);
     }
 
 
@@ -130,15 +129,15 @@ public class EditorPickerPresenter extends BasePresenter<PickerView> implements 
         adapterModel.addItems(videos);
     }
 
-    public void setmCallBack(VideoEditorPickerFragment.DataPassListener context) {
-        editorVideoData.setmCallBack(context);
+    public void setmCallBack(VideoSelectorFragment.DataPassListener context) {
+        selectorVideoData.setmCallBack(context);
     }
 
     public void nextButtonClick(View view) {
-        if (editorVideoData.getSelectedVideos().size() == 0) {
+        if (selectorVideoData.getSelectedVideos().size() == 0) {
             Toast.makeText(view.getContext(), "Select at least 1 video", Toast.LENGTH_SHORT).show();
         } else {
-            editorVideoData.getmCallBack().passData((ArrayList<EditorVideo>) editorVideoData.getSelectedVideos(),new ArrayList<EditorVideo>());
+            selectorVideoData.getmCallBack().passData((EditorVideo[]) selectorVideoData.getSelectedVideos().toArray() );
         }
     }
 }

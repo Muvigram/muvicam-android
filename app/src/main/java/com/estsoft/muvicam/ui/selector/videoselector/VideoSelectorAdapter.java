@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.editor.picker;
+package com.estsoft.muvicam.ui.selector.videoselector;
 
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
@@ -18,18 +18,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class VideoEditorPickerAdapter extends RecyclerView.Adapter<VideoEditorPickerAdapter.ViewHolder> implements EditorPickerAdapterContract.View, EditorPickerAdapterContract.Model {
-    String TAG = "VideoEditorPickerAdapter";
+public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdapter.ViewHolder> implements VideoSelectorAdapterContract.View, VideoSelectorAdapterContract.Model {
+    String TAG = "VideoSelectorAdapter";
     private final FragmentActivity mActivity;
     OnItemClickListener itemClickListener;
     List<EditorVideo> thumbnailImageViews;
 
-    public VideoEditorPickerAdapter(FragmentActivity fragmentActivity) {
+    public VideoSelectorAdapter(FragmentActivity fragmentActivity) {
         mActivity = fragmentActivity;
     }
 
     @Override
-    public VideoEditorPickerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public VideoSelectorAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater mInflater = LayoutInflater.from(parent.getContext());
         View view = mInflater.inflate(R.layout.layout_recyclerview_video_picker, parent, false);
         return new ViewHolder(view);

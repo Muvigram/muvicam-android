@@ -20,6 +20,7 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -49,6 +50,7 @@ import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Music;
+import com.estsoft.muvicam.ui.selector.SelectorActivity;
 import com.estsoft.muvicam.ui.home.HomeActivity;
 import com.estsoft.muvicam.ui.share.ShareActivity;
 import com.estsoft.muvicam.util.FileUtil;
@@ -206,6 +208,16 @@ public class CameraFragment extends Fragment implements CameraMvpView {
         if (mVideoStack.isEmpty()) {
           requestUiChange(UI_LOGIC_BEFORE_SHOOTING);
         }
+      }
+    }));
+  }
+
+  @OnClick(R.id.camera_library_button)
+  public void _goToLibrary(View v) {
+    v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
+      @Override
+      public void onAnimationEnd(Animation animation) {
+        getActivity().startActivity(new Intent(getActivity(), SelectorActivity.class));
       }
     }));
   }
@@ -544,7 +556,11 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   private void createTrashbin() {
     mStackTrashbin = new ImageButton(getActivity());
-    mStackTrashbin.setBackgroundColor(getResources().getColor(R.color.transparent));
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      mStackTrashbin.setBackgroundColor(getResources().getColor(R.color.transparent, null));
+    } else {
+      mStackTrashbin.setBackgroundColor(getResources().getColor(R.color.transparent));
+    }
     mStackTrashbin.setOnClickListener(this::_deleteRecentVideo);
   }
 
@@ -745,11 +761,14 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
       // get display size
       Point displaySize = new Point();
-      activity.getWindowManager().getDefaultDisplay().getSize(displaySize);
+      activity.getWindowManager().getDefaultDisplay().getRealSize(displaySize);
+
       int w = displaySize.x;
       int h = displaySize.y;
 
+      Timber.e("[w : %d, h : %d]", w, h);
       Size aspectRatio = !isOrthogonal ? new Size(w, h) : new Size(h, w);
+
       int baseDimension = !isOrthogonal ? BASE_DIMENSION_WIDTH : BASE_DIMENSION_HEIGHT;
 
       int baseLength = displaySize.x;

@@ -5,9 +5,12 @@ import android.content.Intent;
 import android.graphics.Camera;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -29,6 +32,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 /**
  *
@@ -36,8 +40,6 @@ import butterknife.ButterKnife;
  * Created by jaylim on 12/12/2016.
  */
 public class HomeActivity extends BaseActivity {
-
-  private final static String TAG = HomeActivity.class.getSimpleName();
 
   private final static String EXTRA_MUSIC_URI = "HomeActivity.musicUri";
 
@@ -72,6 +74,7 @@ public class HomeActivity extends BaseActivity {
 
     // set fullscreen mode
     setFullscreen();
+    setDecorView();
 
     // bind view
     setContentView(R.layout.activity_home);
@@ -98,6 +101,19 @@ public class HomeActivity extends BaseActivity {
   }
 
   @Override
+  protected void onResume() {
+    super.onResume();
+    startBackgroundThread();
+    hideDecorView();
+  }
+
+  @Override
+  protected void onStop() {
+    stopBackgroundThread();
+    super.onStop();
+  }
+
+  @Override
   protected void onDestroy() {
     if (mHomeComponent != null) {
       mHomeComponent = null;
@@ -111,6 +127,56 @@ public class HomeActivity extends BaseActivity {
         WindowManager.LayoutParams.FLAG_FULLSCREEN,
         WindowManager.LayoutParams.FLAG_FULLSCREEN
     );
+  }
+
+  View mDecorView;
+  private final static int DEFAULT_UI_SETTING = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+          | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+          | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+          | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+          | View.SYSTEM_UI_FLAG_FULLSCREEN      // hide status bar
+          | View.SYSTEM_UI_FLAG_IMMERSIVE;
+
+  private final static String BACKGROUND_HANDLER_THREAD = "BACKGROUND_HANDLER";
+
+  HandlerThread mBackgroundThread;
+  Handler mBackgroundHandler;
+
+  private void startBackgroundThread() {
+    mBackgroundThread = new HandlerThread(BACKGROUND_HANDLER_THREAD);
+    mBackgroundThread.start();
+    mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
+  }
+
+  private void stopBackgroundThread() {
+    mBackgroundHandler.removeCallbacks(hideDecorView);
+    mBackgroundThread.quitSafely();
+    try {
+      // Waits forever for this thread to die.
+      mBackgroundThread.join();
+      mBackgroundThread = null;
+      mBackgroundHandler = null;
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void setDecorView() {
+    mDecorView = getWindow().getDecorView();
+
+    mDecorView.setOnSystemUiVisibilityChangeListener(visibility -> {
+      Timber.e("onSystemUiVisibilityChange");
+      int xor = DEFAULT_UI_SETTING ^ visibility;
+      if (xor != 0) {
+        mBackgroundHandler.postDelayed(hideDecorView, 1500);
+      }
+    });
+  }
+
+  Runnable hideDecorView = this::hideDecorView;
+
+  public void hideDecorView() {
+    new Handler(getMainLooper()).post(() -> mDecorView.setSystemUiVisibility(DEFAULT_UI_SETTING));
   }
 
   public void setUpViewPager() {

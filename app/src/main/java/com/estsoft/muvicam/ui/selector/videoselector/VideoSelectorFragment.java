@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.editor.picker;
+package com.estsoft.muvicam.ui.selector.videoselector;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -15,31 +15,31 @@ import android.widget.TextView;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
-import com.estsoft.muvicam.model.EditorVideoData;
+import com.estsoft.muvicam.model.SelectorVideoData;
 import com.estsoft.muvicam.transcoder.utils.ThumbnailUtil;
 import com.estsoft.muvicam.ui.base.BasePresenter;
-import com.estsoft.muvicam.ui.editor.EditorActivity;
+import com.estsoft.muvicam.ui.selector.SelectorActivity;
 
 import java.util.ArrayList;
 
 
-public class VideoEditorPickerFragment extends Fragment implements PickerView {
-    private String TAG = "VideoEditorPickerFragment";
+public class VideoSelectorFragment extends Fragment implements VideoSelectorView {
+    private String TAG = "VideoSelectorFragment";
     private String TAG_Lib = "Lib:";
-    private VideoEditorPickerAdapter videoEditorPickerAdapter;
+    private VideoSelectorAdapter videoSelectorAdapter;
     private TextView nextButton;
     private RecyclerView videoPickerRecyclerView;
     BasePresenter presenter;
 
     public interface DataPassListener {
-        void passData(ArrayList<EditorVideo> data, ArrayList<EditorVideo> resultData);
+        void passData(EditorVideo[] data);
     }
 
     private ThumbnailUtil.VideoMetaDataListener videoMetaDataListener = new ThumbnailUtil.VideoMetaDataListener() {
 
         @Override
         public void onProgress(final ThumbnailUtil.VideoMetaData data) {
-            ((EditorPickerPresenter) presenter).progress(data);
+            ((VideoSelectorPresenter) presenter).progress(data);
         }
 
         @Override
@@ -47,13 +47,13 @@ public class VideoEditorPickerFragment extends Fragment implements PickerView {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    VideoEditorPickerAdapter tempA = videoEditorPickerAdapter;
-                    videoEditorPickerAdapter = new VideoEditorPickerAdapter(getActivity());
-                    ((EditorPickerPresenter) presenter).setPickerAdapterModel(videoEditorPickerAdapter);
-                    ((EditorPickerPresenter) presenter).setPickerAdapterView(videoEditorPickerAdapter);
-                    ((EditorPickerPresenter) presenter).addItems(tempA.getItems());
-                    videoPickerRecyclerView.setAdapter(videoEditorPickerAdapter);
-                    // ?    videoEditorPickerAdapter.notifyDataSetChanged();
+                    VideoSelectorAdapter tempA = videoSelectorAdapter;
+                    videoSelectorAdapter = new VideoSelectorAdapter(getActivity());
+                    ((VideoSelectorPresenter) presenter).setPickerAdapterModel(videoSelectorAdapter);
+                    ((VideoSelectorPresenter) presenter).setPickerAdapterView(videoSelectorAdapter);
+                    ((VideoSelectorPresenter) presenter).addItems(tempA.getItems());
+                    videoPickerRecyclerView.setAdapter(videoSelectorAdapter);
+                    // ?    videoSelectorAdapter.notifyDataSetChanged();
                 }
             });
 
@@ -67,25 +67,25 @@ public class VideoEditorPickerFragment extends Fragment implements PickerView {
     Thread getThumbnailObjectThread = new Thread(new Runnable() {
         @Override
         public void run() {
-            ((EditorPickerPresenter) presenter).loadVideos(getActivity(), videoMetaDataListener);
+            ((VideoSelectorPresenter) presenter).loadVideos(getActivity(), videoMetaDataListener);
         }
     });
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        presenter = ((EditorActivity) getActivity()).getPresenter();
-        ((EditorPickerPresenter) presenter).setEditorVideoData(EditorVideoData.getInstance());
+        presenter = ((SelectorActivity) getActivity()).getPresenter();
+        ((VideoSelectorPresenter) presenter).setSelectorVideoData(SelectorVideoData.getInstance());
         presenter.attachView(this);
 
-        ((EditorPickerPresenter) presenter).setmCallBack(((DataPassListener) context));
+        ((VideoSelectorPresenter) presenter).setmCallBack(((DataPassListener) context));
     }
 
-    public VideoEditorPickerFragment() {
+    public VideoSelectorFragment() {
     }
 
-    public static VideoEditorPickerFragment newInstance() {
-        VideoEditorPickerFragment fragment = new VideoEditorPickerFragment();
+    public static VideoSelectorFragment newInstance() {
+        VideoSelectorFragment fragment = new VideoSelectorFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -104,12 +104,12 @@ public class VideoEditorPickerFragment extends Fragment implements PickerView {
         videoPickerRecyclerView = (RecyclerView) v.findViewById(R.id.recycler_view_video_picker);
         nextButton = (TextView) v.findViewById(R.id.next_button);
         videoPickerRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
-        videoEditorPickerAdapter = new VideoEditorPickerAdapter(getActivity());
-        ((EditorPickerPresenter) presenter).setPickerAdapterModel(videoEditorPickerAdapter);
-        ((EditorPickerPresenter) presenter).setPickerAdapterView(videoEditorPickerAdapter);
-        ((EditorPickerPresenter) presenter).addItems(new ArrayList<EditorVideo>());
+        videoSelectorAdapter = new VideoSelectorAdapter(getActivity());
+        ((VideoSelectorPresenter) presenter).setPickerAdapterModel(videoSelectorAdapter);
+        ((VideoSelectorPresenter) presenter).setPickerAdapterView(videoSelectorAdapter);
+        ((VideoSelectorPresenter) presenter).addItems(new ArrayList<EditorVideo>());
 
-        videoPickerRecyclerView.setAdapter(videoEditorPickerAdapter);
+        videoPickerRecyclerView.setAdapter(videoSelectorAdapter);
         getThumbnailObjectThread.setPriority(Thread.MAX_PRIORITY);
         getThumbnailObjectThread.start();
 
@@ -128,7 +128,7 @@ public class VideoEditorPickerFragment extends Fragment implements PickerView {
             @Override
             public void onClick(View view) {
                 // Intent intent = new Intent();
-                ((EditorPickerPresenter) presenter).nextButtonClick(view);
+                ((VideoSelectorPresenter) presenter).nextButtonClick(view);
 
             }
         });
@@ -139,7 +139,7 @@ public class VideoEditorPickerFragment extends Fragment implements PickerView {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        presenter.detachView();;
+        presenter.detachView();
     }
 
     @Override
