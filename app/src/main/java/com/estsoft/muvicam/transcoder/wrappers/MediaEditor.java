@@ -5,7 +5,7 @@ import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.util.Log;
 
-import com.estsoft.muvigram.transcoder.transcoders.BufferListener;
+import com.estsoft.muvicam.transcoder.transcoders.BufferListener;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -150,7 +150,7 @@ public class MediaEditor {
         @Override
         public void onOutputFormat(BufferType type, MediaFormat format) {
             mMuxer.setOutputFormat(
-                    type == BufferType.VIDEO ? MuxerWrapper.SampleType.VIDEO : MuxerWrapper.SampleType.AUDIO,
+                    type == BufferListener.BufferType.VIDEO ? MuxerWrapper.SampleType.VIDEO : MuxerWrapper.SampleType.AUDIO,
                     format);
         }
     };

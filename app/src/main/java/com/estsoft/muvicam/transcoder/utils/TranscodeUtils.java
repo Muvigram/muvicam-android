@@ -7,7 +7,8 @@ import android.media.MediaScannerConnection;
 import android.os.Environment;
 import android.util.Log;
 
-import com.estsoft.muvigram.transcoder.wrappers.ProgressListener;
+
+import com.estsoft.muvicam.transcoder.wrappers.ProgressListener;
 
 import java.io.File;
 import java.io.FileInputStream;

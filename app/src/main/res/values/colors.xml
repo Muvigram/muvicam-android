@@ -20,4 +20,18 @@
     <color name="backgroundWhite">@color/grey_white_1000</color>
     <color name="backgroundLightGrey">@color/grey_300</color>
     <color name="backgroundOpaqueGrey">#98989898</color>
+
+
+
+
+    <!-- Editor PickerColor-->
+    <color name="hide">#99000000</color>
+    <color name="hide_text">#99FFFFFF</color>
+    <color name="colorVideoPicker">#F2F2F2F2</color>
+    <color name="colorVideoPickerButton">#0077CC</color>
+    <color name="colorVideoGridLayout">#FFFFFF</color>
+    <color name="Black">#000000</color>
+    <color name="White">#FFFFFF</color>
+    <color name="colorVideoSelected">#59FFFFFF</color>
+
 </resources>

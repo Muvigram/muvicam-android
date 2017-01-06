@@ -8,7 +8,7 @@ import android.media.MediaFormat;
 import android.opengl.GLES20;
 import android.util.Log;
 
-import com.estsoft.muvigram.transcoder.eglsurface.OutputSurface;
+import com.estsoft.muvicam.transcoder.eglsurface.OutputSurface;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

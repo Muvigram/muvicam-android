@@ -4,7 +4,7 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.util.Log;
 
-import com.estsoft.muvigram.transcoder.audioresampler.Resampler;
+import com.estsoft.muvicam.transcoder.audioresampler.Resampler;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

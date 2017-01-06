@@ -6,8 +6,8 @@ import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.util.Log;
 
-import com.estsoft.muvigram.transcoder.utils.TranscodeUtils;
-import com.estsoft.muvigram.transcoder.wrappers.ProgressListener;
+import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
+import com.estsoft.muvicam.transcoder.wrappers.ProgressListener;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
