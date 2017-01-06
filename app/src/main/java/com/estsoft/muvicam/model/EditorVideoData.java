@@ -6,7 +6,7 @@ import android.util.Pair;
 
 
 import com.estsoft.muvicam.transcoder.utils.ThumbnailUtil;
-import com.estsoft.muvicam.ui.editor.picker.VideoEditorPickerFragment;
+import com.estsoft.muvicam.ui.selector.picker.VideoEditorPickerFragment;
 
 import java.io.File;
 import java.util.ArrayList;

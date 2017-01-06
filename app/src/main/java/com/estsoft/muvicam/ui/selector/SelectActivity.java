@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.editor;
+package com.estsoft.muvicam.ui.selector;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,14 +10,14 @@ import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.ui.base.BaseActivity;
 import com.estsoft.muvicam.ui.base.BasePresenter;
 import com.estsoft.muvicam.ui.editor.edit.VideoEditorEditFragment;
-import com.estsoft.muvicam.ui.editor.picker.EditorPickerPresenter;
-import com.estsoft.muvicam.ui.editor.picker.VideoEditorPickerFragment;
+import com.estsoft.muvicam.ui.selector.picker.EditorPickerPresenter;
+import com.estsoft.muvicam.ui.selector.picker.VideoEditorPickerFragment;
 import com.estsoft.muvicam.ui.editor.result.VideoEditorResultFragment;
 
 import java.util.ArrayList;
 
 // VideoEditorFragment.DataPassListener
-public class EditorActivity extends BaseActivity implements VideoEditorPickerFragment. DataPassListener,VideoEditorResultFragment.DataPassListener{
+public class SelectActivity extends BaseActivity implements VideoEditorPickerFragment. DataPassListener,VideoEditorResultFragment.DataPassListener{
     Fragment fragment;
     private BasePresenter presenter;
 

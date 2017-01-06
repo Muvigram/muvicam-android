@@ -28,7 +28,7 @@
         <activity android:name=".ui.share.ShareActivity">
 
         </activity>
-        <activity android:name=".ui.editor.EditorActivity"
+        <activity android:name=".ui.selector.SelectActivity"
             android:screenOrientation="portrait">
 
         </activity>
