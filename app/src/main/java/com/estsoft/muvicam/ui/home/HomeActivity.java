@@ -41,8 +41,6 @@ import timber.log.Timber;
  */
 public class HomeActivity extends BaseActivity {
 
-  private final static String TAG = HomeActivity.class.getSimpleName();
-
   private final static String EXTRA_MUSIC_URI = "HomeActivity.musicUri";
 
   private final static int PAGE_MUSIC = 0;
@@ -77,7 +75,6 @@ public class HomeActivity extends BaseActivity {
     // set fullscreen mode
     setFullscreen();
     setDecorView();
-
 
     // bind view
     setContentView(R.layout.activity_home);
@@ -152,6 +149,7 @@ public class HomeActivity extends BaseActivity {
   }
 
   private void stopBackgroundThread() {
+    mBackgroundHandler.removeCallbacks(hideDecorView);
     mBackgroundThread.quitSafely();
     try {
       // Waits forever for this thread to die.
@@ -170,11 +168,12 @@ public class HomeActivity extends BaseActivity {
       Timber.e("onSystemUiVisibilityChange");
       int xor = DEFAULT_UI_SETTING ^ visibility;
       if (xor != 0) {
-        mBackgroundHandler.postDelayed(this::hideDecorView, 3000);
+        mBackgroundHandler.postDelayed(hideDecorView, 1500);
       }
     });
   }
 
+  Runnable hideDecorView = this::hideDecorView;
 
   public void hideDecorView() {
     new Handler(getMainLooper()).post(() -> mDecorView.setSystemUiVisibility(DEFAULT_UI_SETTING));
