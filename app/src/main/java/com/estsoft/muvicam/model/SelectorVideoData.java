@@ -6,7 +6,7 @@ import android.util.Pair;
 
 
 import com.estsoft.muvicam.transcoder.utils.ThumbnailUtil;
-import com.estsoft.muvicam.ui.selector.picker.VideoEditorPickerFragment;
+import com.estsoft.muvicam.ui.selector.videoselector.VideoSelectorFragment;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -16,19 +16,19 @@ import java.util.List;
  * Created by Administrator on 2017-01-05.
  */
 
-public class EditorVideoData {
-    private static EditorVideoData editorVideoData;
+public class SelectorVideoData {
+    private static SelectorVideoData selectorVideoData;
     private List<EditorVideo> selectedVideos = new ArrayList<>();
     private ArrayList<EditorVideo> allVideos = new ArrayList<>();
 
-    private VideoEditorPickerFragment.DataPassListener mCallBack;
+    private VideoSelectorFragment.DataPassListener mCallBack;
 
-    private EditorVideoData() {
+    private SelectorVideoData() {
     }
 
-    public static EditorVideoData getInstance() {
-        if (editorVideoData == null) editorVideoData = new EditorVideoData();
-        return editorVideoData;
+    public static SelectorVideoData getInstance() {
+        if (selectorVideoData == null) selectorVideoData = new SelectorVideoData();
+        return selectorVideoData;
     }
 
     public Pair<ArrayList<EditorVideo>, ArrayList<String>> getVideos(Context context) {
@@ -97,7 +97,7 @@ public class EditorVideoData {
         selectedVideos.add(selectedVideo);
     }
 
-    public void setmCallBack(VideoEditorPickerFragment.DataPassListener mCallBack) {
+    public void setmCallBack(VideoSelectorFragment.DataPassListener mCallBack) {
         try {
             this.mCallBack = mCallBack;
         } catch (ClassCastException e) {
@@ -106,7 +106,7 @@ public class EditorVideoData {
         }
     }
 
-    public VideoEditorPickerFragment.DataPassListener getmCallBack() {
+    public VideoSelectorFragment.DataPassListener getmCallBack() {
         return mCallBack;
     }
 }

@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.editor.edit;
+package com.estsoft.muvicam.ui.selector.musicselector;
 
 import android.content.Context;
 import android.net.Uri;
@@ -10,19 +10,29 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.estsoft.muvicam.R;
+import com.estsoft.muvicam.model.EditorVideo;
 
-public class VideoEditorEditFragment extends Fragment {
-    public static final String DATA_RECEIVE = "Selected_Videos";
-    public static final String SELECTED_NUM_RECEIVE = "Selected_Number";
-    public static final String RESULT_VIDEO_RECEIVE = "Result_Videos";
+import java.util.ArrayList;
 
+public class MusicSelectorFragment extends Fragment {
+    public static final String DATA_RECEIVE = "SELECTED_VIDEOS";
 
-    public VideoEditorEditFragment() {
+    //선택된 video list (수정필요!)
+    private static ArrayList<EditorVideo> list = new ArrayList<>();
+
+    public MusicSelectorFragment() {
+        // Required empty public constructor
     }
 
-    public static VideoEditorEditFragment newInstance() {
-        VideoEditorEditFragment fragment = new VideoEditorEditFragment();
+
+    public static MusicSelectorFragment newInstance() {
+        MusicSelectorFragment fragment = new MusicSelectorFragment();
         Bundle args = new Bundle();
+
+        //선택된 video list 받는 곳 (수정필요!)
+        if (args != null) {
+            list = (ArrayList<EditorVideo>) args.get(DATA_RECEIVE);
+        }
         fragment.setArguments(args);
         return fragment;
     }
@@ -30,20 +40,16 @@ public class VideoEditorEditFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-        }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        return inflater.inflate(R.layout.fragment_video_editor_edit, container, false);
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_music_selector, container, false);
     }
 
-    public void onButtonPressed(Uri uri) {
-
-    }
 
     @Override
     public void onAttach(Context context) {
@@ -54,7 +60,6 @@ public class VideoEditorEditFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-
     }
 
 

@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.selector.picker;
+package com.estsoft.muvicam.ui.selector.videoselector;
 
 import com.estsoft.muvicam.ui.base.BasePresenter;
 import com.estsoft.muvicam.ui.base.MvpView;
@@ -7,7 +7,7 @@ import com.estsoft.muvicam.ui.base.MvpView;
  * Created by Administrator on 2017-01-06.
  */
 
-public interface PickerView extends MvpView {
+public interface VideoSelectorView extends MvpView {
 
     void setPresent(BasePresenter basePresenter);
 }

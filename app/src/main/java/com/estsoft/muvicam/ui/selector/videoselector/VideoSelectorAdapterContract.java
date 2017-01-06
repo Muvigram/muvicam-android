@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.selector.picker;
+package com.estsoft.muvicam.ui.selector.videoselector;
 
 
 import com.estsoft.muvicam.model.EditorVideo;
@@ -9,10 +9,10 @@ import java.util.ArrayList;
  * Created by Administrator on 2017-01-05.
  */
 
-public interface EditorPickerAdapterContract{
+public interface VideoSelectorAdapterContract {
     interface  View{
         void notifyAdapter();
-        void setOnClickListener(VideoEditorPickerAdapter.OnItemClickListener clickListener);
+        void setOnClickListener(VideoSelectorAdapter.OnItemClickListener clickListener);
 
     }
     interface  Model{
