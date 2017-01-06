@@ -745,11 +745,14 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
       // get display size
       Point displaySize = new Point();
-      activity.getWindowManager().getDefaultDisplay().getSize(displaySize);
+      activity.getWindowManager().getDefaultDisplay().getRealSize(displaySize);
+
       int w = displaySize.x;
       int h = displaySize.y;
 
+      Timber.e("[w : %d, h : %d]", w, h);
       Size aspectRatio = !isOrthogonal ? new Size(w, h) : new Size(h, w);
+
       int baseDimension = !isOrthogonal ? BASE_DIMENSION_WIDTH : BASE_DIMENSION_HEIGHT;
 
       int baseLength = displaySize.x;
@@ -783,6 +786,22 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       return cameraId;
     }
     return null;
+  }
+
+  private static Size normalizeSize(Size aspectRatio) {
+    int w = aspectRatio.getWidth();
+    int h = aspectRatio.getHeight();
+
+    if (w > h * 3000 / 4000) {
+      // Not yet
+      return new Size (3000, 4000);
+    } else if (w < h * 3000 / 4000 && w > h * 9000 / 16000) {
+      return new Size(9000, 16000);
+    } else if (w < h * 9000 / 16000) {
+      return new Size(9000, 16000);
+    } else {
+      return aspectRatio;
+    }
   }
 
   private static boolean checkOrthogonality(int displayRotation, int cameraSensorOrientation) {
