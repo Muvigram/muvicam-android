@@ -48,8 +48,10 @@ public class HomeActivity extends BaseActivity {
   private final static int PAGE_MUSIC = 0;
   private final static int PAGE_CAMERA = 1;
 
+
   private HomeComponent mHomeComponent;
 
+  
   public static Intent newIntent(Context packageContext) {
     return new Intent(packageContext, HomeActivity.class);
   }
