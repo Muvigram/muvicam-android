@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
-import com.estsoft.muvicam.ui.editor.CustomView.ThumbnailImageView;
 
 import java.util.ArrayList;
 import java.util.List;

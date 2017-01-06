@@ -5,6 +5,7 @@ import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.util.Log;
 
+import com.estsoft.muvicam.transcoder.transcoders.BufferListener;
 import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
 
 import java.io.IOException;
