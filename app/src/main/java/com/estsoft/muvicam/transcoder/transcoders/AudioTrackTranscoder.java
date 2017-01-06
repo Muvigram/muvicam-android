@@ -5,8 +5,8 @@ import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.util.Log;
 
-import com.estsoft.muvigram.transcoder.audiosurface.AudioChannel;
-import com.estsoft.muvigram.transcoder.utils.TranscodeUtils;
+import com.estsoft.muvicam.transcoder.audiosurface.AudioChannel;
+import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

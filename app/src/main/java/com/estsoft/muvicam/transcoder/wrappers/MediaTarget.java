@@ -3,8 +3,8 @@ package com.estsoft.muvicam.transcoder.wrappers;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 
-import com.estsoft.muvigram.transcoder.utils.MediaFormatExtraInfo;
-import com.estsoft.muvigram.transcoder.utils.TranscodeUtils;
+import com.estsoft.muvicam.transcoder.utils.MediaFormatExtraInfo;
+import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
 
 import java.nio.ByteBuffer;
 

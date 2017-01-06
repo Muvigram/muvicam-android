@@ -5,10 +5,11 @@ import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.util.Log;
 
-import com.estsoft.muvigram.transcoder.eglsurface.InputSurface;
-import com.estsoft.muvigram.transcoder.eglsurface.OutputSurface;
-import com.estsoft.muvigram.transcoder.utils.MediaFormatExtraInfo;
-import com.estsoft.muvigram.transcoder.utils.TranscodeUtils;
+
+import com.estsoft.muvicam.transcoder.eglsurface.InputSurface;
+import com.estsoft.muvicam.transcoder.eglsurface.OutputSurface;
+import com.estsoft.muvicam.transcoder.utils.MediaFormatExtraInfo;
+import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

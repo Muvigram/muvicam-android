@@ -5,10 +5,11 @@ import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
 import android.util.Log;
 
-import com.estsoft.muvigram.transcoder.transcoders.AudioTrackTranscoder;
-import com.estsoft.muvigram.transcoder.transcoders.BufferListener;
-import com.estsoft.muvigram.transcoder.transcoders.VideoTrackTranscoder;
-import com.estsoft.muvigram.transcoder.utils.TranscodeUtils;
+
+import com.estsoft.muvicam.transcoder.transcoders.AudioTrackTranscoder;
+import com.estsoft.muvicam.transcoder.transcoders.BufferListener;
+import com.estsoft.muvicam.transcoder.transcoders.VideoTrackTranscoder;
+import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
 
 import java.io.IOException;
 
