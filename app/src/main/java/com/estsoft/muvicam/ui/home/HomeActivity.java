@@ -50,6 +50,7 @@ public class HomeActivity extends BaseActivity {
 
   private HomeComponent mHomeComponent;
 
+
   public static Intent newIntent(Context packageContext) {
     return new Intent(packageContext, HomeActivity.class);
   }
