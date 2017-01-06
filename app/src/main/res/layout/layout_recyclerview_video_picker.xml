@@ -20,14 +20,14 @@
         android:layout_height="match_parent"
         android:visibility="gone">
 
-        <com.example.administrator.muvigrameditor.CustomView.ThumbnailImageView
+        <com.estsoft.muvicam.ui.editor.picker.ThumbnailImageView
             android:id="@+id/video_thumbnail"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
             android:scaleType="centerCrop" />
 
-        <com.example.administrator.muvigrameditor.CustomView.ThumbnailImageView
+        <com.estsoft.muvicam.ui.editor.picker.ThumbnailImageView
             android:id="@+id/to_show_time"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
