@@ -16,6 +16,7 @@ import com.estsoft.muvicam.transcoder.utils.ThumbnailUtil;
 import com.estsoft.muvicam.ui.base.BasePresenter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -137,7 +138,10 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
         if (selectorVideoData.getSelectedVideos().size() == 0) {
             Toast.makeText(view.getContext(), "Select at least 1 video", Toast.LENGTH_SHORT).show();
         } else {
-            selectorVideoData.getmCallBack().passData((EditorVideo[]) selectorVideoData.getSelectedVideos().toArray() );
+            List<EditorVideo> selectedVideos = selectorVideoData.getSelectedVideos();
+            EditorVideo[] selectedVideosArray = new EditorVideo[selectedVideos.size()];
+            selectedVideos.toArray(selectedVideosArray);
+            selectorVideoData.getmCallBack().passData(selectedVideosArray);
         }
     }
 }

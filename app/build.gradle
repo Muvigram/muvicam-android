@@ -55,6 +55,7 @@ dependencies {
     })
 
     // Add unit test framework
+    testCompile 'junit:junit:4.12'
     // Android Support Library
     compile "com.android.support:support-v4:$SUPPORT_LIBRARY_VERSION"
     compile "com.android.support:support-v13:$SUPPORT_LIBRARY_VERSION"
@@ -70,14 +71,18 @@ dependencies {
     // Dagger
     compile "com.google.dagger:dagger:$DAGGER_VERSION"
     apt "com.google.dagger:dagger-compiler:$DAGGER_VERSION"
+    provided 'javax.annotation:jsr250-api:1.0'
 
     // Timber
-    
+    compile 'com.jakewharton.timber:timber:4.3.1'
 
     // SqlBrite
-    
+    compile 'com.squareup.sqlbrite:sqlbrite:0.5.0'
+
     // RxJava/RxAndroid
-    
+    compile 'io.reactivex:rxandroid:1.2.1'
+    compile 'io.reactivex:rxjava:1.1.6'
+
     // RxBinding
     compile "com.jakewharton.rxbinding:rxbinding:$RX_BINDING_VERSION"
     compile "com.jakewharton.rxbinding:rxbinding-support-v4:$RX_BINDING_VERSION"
@@ -86,34 +91,27 @@ dependencies {
     compile "com.jakewharton.rxbinding:rxbinding-recyclerview-v7:$RX_BINDING_VERSION"
 
     // OkHttp
-    
+    compile 'com.squareup.okhttp3:okhttp:3.2.0'
+    compile 'com.squareup.okio:okio:1.7.0'
+
     // Auto Value
     provided "com.jakewharton.auto.value:auto-value-annotations:$AUTO_VALUE_VERSION"
     provided "com.ryanharter.auto.value:auto-value-gson:$AUTO_VALUE_GSON_VERSION"
     annotationProcessor "com.google.auto.value:auto-value:$AUTO_VALUE_VERSION"
     annotationProcessor "com.ryanharter.auto.value:auto-value-gson:$AUTO_VALUE_GSON_VERSION"
-    
+    annotationProcessor 'com.ryanharter.auto.value:auto-value-parcel:0.2.4-rc2'
+    annotationProcessor 'com.squareup:javapoet:1.7.0'
+    apt 'com.ryanharter.auto.value:auto-value-parcel:0.2.5'
+    compile 'com.ryanharter.auto.value:auto-value-parcel-adapter:0.2.5'
+
     // Retrofit - itself, for Gson, for RxJava
     compile "com.squareup.retrofit2:retrofit:$RETROFIT_VERSION"
     compile "com.squareup.retrofit2:converter-gson:$RETROFIT_VERSION"
     compile "com.squareup.retrofit2:adapter-rxjava:$RETROFIT_VERSION"
 
     // picasso
-    
-    compile 'com.jakewharton.timber:timber:4.3.1'
-    compile 'com.squareup.sqlbrite:sqlbrite:0.5.0'
-    compile 'io.reactivex:rxandroid:1.2.1'
-    compile 'io.reactivex:rxjava:1.1.6'
-    compile 'com.squareup.okhttp3:okhttp:3.2.0'
-    compile 'com.squareup.okio:okio:1.7.0'
-    compile 'com.ryanharter.auto.value:auto-value-parcel-adapter:0.2.5'
     compile 'com.squareup.picasso:picasso:2.3.3'
+
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'jp.wasabeef:blurry:2.0.3'
-    compile 'com.android.support:support-v4:24.2.1'
-    testCompile 'junit:junit:4.12'
-    annotationProcessor 'com.ryanharter.auto.value:auto-value-parcel:0.2.4-rc2'
-    annotationProcessor 'com.squareup:javapoet:1.7.0'
-    apt 'com.ryanharter.auto.value:auto-value-parcel:0.2.5'
-    provided 'javax.annotation:jsr250-api:1.0'
 }
