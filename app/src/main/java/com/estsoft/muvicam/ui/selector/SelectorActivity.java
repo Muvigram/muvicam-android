@@ -44,7 +44,7 @@ public class SelectorActivity extends BaseActivity implements VideoSelectorFragm
     // or we can use another passData
 
     @Override
-    public void passData(EditorVideo[] data) {
+    public void passData(ArrayList<EditorVideo> data) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragment = fragmentManager.findFragmentById(R.id.fragment_container);
         if (fragment != null) {
@@ -53,7 +53,7 @@ public class SelectorActivity extends BaseActivity implements VideoSelectorFragm
         }
         fragment = new MusicSelectorFragment();
         Bundle args = new Bundle();
-        args.putParcelableArray(MusicSelectorFragment.DATA_RECEIVE, data);
+        args.putParcelableArrayList(MusicSelectorFragment.DATA_RECEIVE, data);
         fragment.setArguments(args);
         fragmentManager.beginTransaction().replace(R.id.selector_fragment_container, fragment).commit();
     }

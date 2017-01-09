@@ -32,7 +32,7 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorView
     BasePresenter presenter;
 
     public interface DataPassListener {
-        void passData(EditorVideo[] data);
+        void passData(ArrayList<EditorVideo> data);
     }
 
     private ThumbnailUtil.VideoMetaDataListener videoMetaDataListener = new ThumbnailUtil.VideoMetaDataListener() {

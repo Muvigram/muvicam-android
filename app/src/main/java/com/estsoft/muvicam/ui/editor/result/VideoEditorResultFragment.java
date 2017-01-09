@@ -3,24 +3,48 @@ package com.estsoft.muvicam.ui.editor.result;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /*
  * will show edit view
   * */
 public class VideoEditorResultFragment extends Fragment {
-    public static final String DATA_RECEIVE = "Selected_Videos";
-    public static final String RESULT_VIDEO_RECEIVE = "Result_Videos";
+    public final static String EXTRA_FRAGMENT_NUM = "VideoEditorResultFragment.fragmentNum";
+    public final static String EXTRA_VIDEOS = "VideoEditorResultFragment.videoList";
+    public final static String EXTRA_RESULT_VIDEOS = "VideoEditorResultFragment.resultVideoList";
+    public final static String EXTRA_MUSIC_PATH = "VideoEditorResultFragment.musicPath";
+    public final static String EXTRA_MUSIC_OFFSET = "VideoEditorResultFragment.musicOffset";
+    public final static String EXTRA_MUSIC_LENGTH = "VideoEditorResultFragment.musicLength";
+    RecyclerView selectedVideoButtons;
+    ImageView deleteButton;
+    List<EditorVideo> resultVideos, selectedVideos;
+    String musicPath;
+    int musicOffset, musicLength;
+    DataPassListener mCallBack;
+    VideoEditSelectedNumberAdapter.OnItemClickListener itemClickListener = new VideoEditSelectedNumberAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(View view, int position) {
+
+            mCallBack.passDataFToF(position+1, (ArrayList<EditorVideo>) selectedVideos, (ArrayList<EditorVideo>) resultVideos, musicPath, musicOffset, musicLength);
+        }
+    };
+
+
     public interface DataPassListener {
-        void passDataFToF(ArrayList<EditorVideo> data, int selectedNum, ArrayList<EditorVideo> resultEditorVideos);
+        void passDataFToF(int selectedNum, ArrayList<EditorVideo> data, ArrayList<EditorVideo> resultEditorVideos, String musicPath, int musicOffset, int musicLength);
     }
     public VideoEditorResultFragment() {
         // Required empty public constructor
@@ -37,22 +61,58 @@ public class VideoEditorResultFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Bundle args = getArguments();
+        if (args != null) {
+            selectedVideos = args.getParcelableArrayList(VideoEditorResultFragment.EXTRA_VIDEOS);
+            resultVideos = args.getParcelableArrayList(VideoEditorResultFragment.EXTRA_RESULT_VIDEOS);
+            musicPath = args.getString(VideoEditorResultFragment.EXTRA_MUSIC_PATH);
+            musicOffset = args.getInt(VideoEditorResultFragment.EXTRA_MUSIC_OFFSET);
+            musicLength = args.getInt(VideoEditorResultFragment.EXTRA_MUSIC_LENGTH);
+        }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_video_editor_result, container, false);
+        // Inflate the layout for this fragment
+        View v = inflater.inflate(R.layout.fragment_video_editor_result, container, false);
+        selectedVideoButtons = (RecyclerView) v.findViewById(R.id.editor_result_buttons);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        selectedVideoButtons.setLayoutManager(linearLayoutManager);
+        deleteButton = (ImageView) v.findViewById(R.id.editor_result_delete);
+
+        return v;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        VideoEditSelectedNumberAdapter videoEditSelectedNumberAdapter = new VideoEditSelectedNumberAdapter(getActivity(), selectedVideos, itemClickListener);
+
+        selectedVideoButtons.setAdapter(videoEditSelectedNumberAdapter);
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //    int num = videoResult.getLastVideo().getNumSelected();
+                //      will be changed to num
+                mCallBack.passDataFToF(0, (ArrayList<EditorVideo>) selectedVideos, (ArrayList<EditorVideo>) resultVideos, musicPath, musicOffset, musicLength);
+            }
+        });
     }
+
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
+        try {
+            mCallBack = (DataPassListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement DataPassListener");
+        }
     }
 
     @Override

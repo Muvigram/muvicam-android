@@ -7,6 +7,10 @@ import android.os.Parcelable;
 public class EditorVideo implements Parcelable {
 
     private String videoPath;
+    private long durationMiliSec;
+    private int start;
+    private int end;
+
     // will be changed real videothumbnail from sdcard;
     private Bitmap thumbnailBitmap;
     private long presentationTimeUs;
@@ -14,10 +18,6 @@ public class EditorVideo implements Parcelable {
     private boolean isSelected;
     private boolean isLast;
     private int numSelected;
-    private long durationMiliSec;
-    private String audioPath;
-    private int start;
-    private int end;
 
 
 
@@ -25,6 +25,8 @@ public class EditorVideo implements Parcelable {
         isSelected = false;
         numSelected = -1;
         resolutionacceptable = false;
+        start = 0;
+        end = 0;
     }
 
     public EditorVideo(Parcel in) {
@@ -80,16 +82,6 @@ public class EditorVideo implements Parcelable {
         this.durationMiliSec = durationMiliSec;
     }
 
-
-
-    public String getAudioPath() {
-        return audioPath;
-    }
-
-    public void setAudioPath(String audioPath) {
-        this.audioPath = audioPath;
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -99,7 +91,6 @@ public class EditorVideo implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(videoPath);
         parcel.writeLong(durationMiliSec);
-        parcel.writeString(audioPath);
         parcel.writeInt(start);
         parcel.writeInt(end);
     }
@@ -107,7 +98,6 @@ public class EditorVideo implements Parcelable {
     public void readFromParcel(Parcel in) {
         videoPath = in.readString();
         durationMiliSec = in.readLong();
-        audioPath = in.readString();
         start = in.readInt();
         end = in.readInt();
     }
