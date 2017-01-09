@@ -22,6 +22,7 @@ import android.widget.VideoView;
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.transcoder.noneencode.MediaConcater;
 import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
+import com.estsoft.muvicam.transcoder.wrappers.MediaEditorNew;
 import com.estsoft.muvicam.transcoder.wrappers.ProgressListener;
 
 import javax.inject.Inject;
@@ -150,7 +151,8 @@ public class ShareFragment extends Fragment implements ShareMvpView, View.OnClic
     private void workTranscode() {
         currentWork = TRANSCODE;
         new Thread(() -> {
-                concatTranslater();
+            transcodeTranslator();
+//            concatTranslator();
 
 //                MediaEditorNew editorNew = new MediaEditorNew( TranscodeUtils.getAppCashingFile(getContext()), MediaEditorNew.MUTE_AND_ADD_MUSIC, mProgressListener);
 //                editorNew.initVideoTarget( 1, 30, 5000000, 90, 1280, 720 );
@@ -162,16 +164,32 @@ public class ShareFragment extends Fragment implements ShareMvpView, View.OnClic
         }).start();
     }
 
-    private void concatTranslater() {
+    private void transcodeTranslator() {
+        int transcodeMode = mMusicPath.equals("") ? MediaEditorNew.NORMAL : MediaEditorNew.MUTE_AND_ADD_MUSIC;
+        MediaEditorNew editor = new MediaEditorNew( mOutputPath, transcodeMode, mProgressListener );
+        editor.initVideoTarget( 1, 30, 5000000, 90, 1280, 720 );
+        editor.initAudioTarget( 44100, 2, 128 * 1000 );
+        for ( int i = 0; i < mVideoPaths.length; i ++ ) {
+            long startTimeUs = 0;
+            long endTimeUs = i == mVideoOffsets.length - 1 ? mMusicLength - mVideoOffsets[i] : mVideoOffsets[i + 1] - mVideoOffsets[i];
+            endTimeUs += MILLI_TO_MICRO;
+            Log.e(TAG, "transcodeTranslator: [" + i + "] ... "  + startTimeUs + " / " + endTimeUs );
+            editor.addSegment( mVideoPaths[i], startTimeUs, endTimeUs, 100);
+        }
+        if (transcodeMode == MediaEditorNew.MUTE_AND_ADD_MUSIC) {
+            Log.e(TAG, "transcodeTranslator: [music] ... "  + mMusicOffset + " / " + mMusicLength + " / " + (mMusicLength - mMusicOffset) );
+            editor.addMusicSegment( mMusicPath, (long)(mMusicOffset * MILLI_TO_MICRO), 100 );
+        }
+        editor.start();
+    }
+
+    private void concatTranslator() {
         int concatMode = mMusicPath.equals("") ? MediaConcater.NORMAL : MediaConcater.MUTE_AND_ADD_MUSIC;
         MediaConcater concater = new MediaConcater( mOutputPath, concatMode, mProgressListener );
         for ( int i = 0; i < mVideoPaths.length; i ++ ) {
             long startTImeUs = 0;
             long endTimeUs = i == mVideoOffsets.length - 1 ? mMusicLength - mVideoOffsets[i] : mVideoOffsets[i + 1] - mVideoOffsets[i];
-//            long endTimeUs = i == 0 ? mVideoOffsets[i + 1] : i == mVideoOffsets.length -1 ? mMusicLength - mVideoOffsets[i] : mVideoOffsets[i + 1] - mVideoOffsets[i];
             endTimeUs *= MILLI_TO_MICRO;
-            Log.d(TAG, "concatTranslater1: " + endTimeUs);
-            Log.e(TAG, "addSegment: requested ... " + mVideoOffsets[i] );
             Log.e(TAG, "concatTranslater: [" + i + "] ... "  + startTImeUs + " / " + endTimeUs );
             concater.addSegment( mVideoPaths[i], startTImeUs, endTimeUs, 100);
         }
