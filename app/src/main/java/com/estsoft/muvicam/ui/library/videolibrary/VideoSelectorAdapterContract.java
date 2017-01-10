@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.selector.videoselector;
+package com.estsoft.muvicam.ui.library.videolibrary;
 
 
 import com.estsoft.muvicam.model.EditorVideo;

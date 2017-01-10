@@ -6,7 +6,7 @@ import android.util.Pair;
 
 
 import com.estsoft.muvicam.transcoder.utils.ThumbnailUtil;
-import com.estsoft.muvicam.ui.selector.videoselector.VideoSelectorFragment;
+import com.estsoft.muvicam.ui.library.videolibrary.VideoLibraryFragment;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class SelectorVideoData {
     private List<EditorVideo> selectedVideos = new ArrayList<>();
     private ArrayList<EditorVideo> allVideos = new ArrayList<>();
 
-    private VideoSelectorFragment.DataPassListener mCallBack;
+    private VideoLibraryFragment.DataPassListener mCallBack;
 
     private SelectorVideoData() {
     }
@@ -92,7 +92,7 @@ public class SelectorVideoData {
         selectedVideos.add(selectedVideo);
     }
 
-    public void setmCallBack(VideoSelectorFragment.DataPassListener mCallBack) {
+    public void setmCallBack(VideoLibraryFragment.DataPassListener mCallBack) {
         try {
             this.mCallBack = mCallBack;
         } catch (ClassCastException e) {
@@ -101,7 +101,7 @@ public class SelectorVideoData {
         }
     }
 
-    public VideoSelectorFragment.DataPassListener getmCallBack() {
+    public VideoLibraryFragment.DataPassListener getmCallBack() {
         return mCallBack;
     }
 }

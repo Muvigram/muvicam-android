@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.selector.videoselector;
+package com.estsoft.muvicam.ui.library.videolibrary;
 
 import android.app.Activity;
 import android.content.Context;
@@ -23,12 +23,12 @@ import java.util.List;
  * Created by Administrator on 2017-01-05.
  */
 
-public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> implements VideoSelectorAdapter.OnItemClickListener {
+public class VideoLibraryPresenter extends BasePresenter<VideoLibraryView> implements VideoSelectorAdapter.OnItemClickListener {
     private SelectorVideoData selectorVideoData;
     private VideoSelectorAdapterContract.Model adapterModel;
     private VideoSelectorAdapterContract.View adapterView;
     private int countSelected = 0;
-    private String TAG = "VideoSelectorPresenter";
+    private String TAG = "VideoLibraryPresenter";
 
     @Override
     public boolean isViewAttached() {
@@ -36,7 +36,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
     }
 
     @Override
-    public VideoSelectorView getMvpView() {
+    public VideoLibraryView getMvpView() {
         return super.getMvpView();
     }
 
@@ -46,7 +46,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
     }
 
     @Override
-    public void attachView(VideoSelectorView mvpView) {
+    public void attachView(VideoLibraryView mvpView) {
         super.attachView(mvpView);
     }
 
@@ -130,7 +130,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
         adapterModel.addItems(videos);
     }
 
-    public void setmCallBack(VideoSelectorFragment.DataPassListener context) {
+    public void setmCallBack(VideoLibraryFragment.DataPassListener context) {
         selectorVideoData.setmCallBack(context);
     }
 
@@ -138,7 +138,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
         if (selectorVideoData.getSelectedVideos().size() == 0) {
             Toast.makeText(view.getContext(), "Select at least 1 video", Toast.LENGTH_SHORT).show();
         } else {
-            selectorVideoData.getmCallBack().passData((ArrayList<EditorVideo>) selectorVideoData.getSelectedVideos());
+            selectorVideoData.getmCallBack().passData((List<EditorVideo>) selectorVideoData.getSelectedVideos());
         }
     }
 }

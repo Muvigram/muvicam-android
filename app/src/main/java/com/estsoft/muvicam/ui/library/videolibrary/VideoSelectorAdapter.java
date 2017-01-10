@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.selector.videoselector;
+package com.estsoft.muvicam.ui.library.videolibrary;
 
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;

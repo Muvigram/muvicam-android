@@ -102,24 +102,17 @@ public class EditorVideo implements Parcelable {
         end = in.readInt();
     }
 
-    public boolean getIsLast() {
-        return isLast;
-    }
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator<EditorVideo>(){
+        @Override
+        public EditorVideo[] newArray(int i) {
+            return new EditorVideo[i];
+        }
 
-    public void setIsLast(boolean isLast) {
-        this.isLast = isLast;
-    }
-
-    public long getPresentationTimeUs() {
-        return presentationTimeUs;
-    }
-
-    public void setPresentationTimeUs(long presentationTimeUs) {
-        this.presentationTimeUs = presentationTimeUs;
-    }
-
-    public static final Parcelable.Creator CREATOR = new EditorVideoCreator();
-
+        @Override
+        public EditorVideo createFromParcel(Parcel parcel) {
+            return new EditorVideo(parcel);
+        }
+    };
 
     public boolean isLast() {
         return isLast;

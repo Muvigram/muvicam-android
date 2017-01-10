@@ -20,14 +20,14 @@
         android:layout_height="match_parent"
         android:visibility="gone">
 
-        <com.estsoft.muvicam.ui.selector.videoselector.ThumbnailImageView
+        <com.estsoft.muvicam.ui.library.videolibrary.ThumbnailImageView
             android:id="@+id/video_thumbnail"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
             android:scaleType="centerCrop" />
 
-        <com.estsoft.muvicam.ui.selector.videoselector.ThumbnailImageView
+        <com.estsoft.muvicam.ui.library.videolibrary.ThumbnailImageView
             android:id="@+id/to_show_time"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

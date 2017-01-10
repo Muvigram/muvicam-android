@@ -15,6 +15,11 @@
     <string name="music_search_hint">search music</string>
     <string name="music_album_desc">Album cover.</string>
 
+    <string name="music_search_ok">OK</string>
+    <string name="music_search_skip">Skip</string>
+    <string name="music_search_cancel">Cancel</string>
+    <string name="music_search_back">Back</string>
+
     <string name="music_search_empty_musics">There arn\'t any musics</string>
     <string name="music_search_error_loading">There was a problem loading the musics.</string>
 
@@ -26,4 +31,17 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- library music package -->
+    <string name="library_music_search_title">Select music</string>
+    <string name="library_music_search_hint">search music</string>
+    <string name="library_music_album_desc">Album cover.</string>
+
+    <string name="library_music_search_ok">OK</string>
+    <string name="library_music_search_skip">Skip &gt;</string>
+    <string name="library_music_search_cancel">Cancel</string>
+    <string name="library_music_search_back">&lt; Back</string>
+
+    <string name="library_music_search_empty_musics">There arn\'t any musics</string>
+    <string name="library_music_search_error_loading">There was a problem loading the musics.</string>
 </resources>
