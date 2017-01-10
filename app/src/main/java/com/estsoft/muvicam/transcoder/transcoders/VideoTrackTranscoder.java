@@ -210,7 +210,6 @@ public class VideoTrackTranscoder implements TrackTranscoder {
                 if (mActualOutputFormat != null)
                     throw new RuntimeException("Video output format changed twice.");
                 mActualOutputFormat = mEncoder.getOutputFormat();
-                // TODO
                 mBufferListener.onOutputFormat( BufferListener.BufferType.VIDEO, mActualOutputFormat );
 //                mMuxerWrapper.setOutputFormat(MuxerWrapper.SampleType.VIDEO, mActualOutputFormat);
                 TranscodeUtils.printInformationOf( mActualOutputFormat );

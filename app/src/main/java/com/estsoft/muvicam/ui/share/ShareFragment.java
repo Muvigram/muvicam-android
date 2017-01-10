@@ -320,7 +320,7 @@ public class ShareFragment extends Fragment implements ShareMvpView, View.OnClic
      */
     private OnFragmentInteractionListener mListener;
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
+//         TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
     public ShareFragment() {

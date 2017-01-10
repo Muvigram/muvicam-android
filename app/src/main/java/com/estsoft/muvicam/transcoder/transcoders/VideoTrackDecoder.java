@@ -19,7 +19,7 @@ import java.nio.ByteBuffer;
 
 public class VideoTrackDecoder implements TrackTranscoder {
     private static final String TAG = "VideoTrackDecoder";
-    private static final boolean VERBOSE = true;
+    private static final boolean VERBOSE = false;
     private static final int DRAIN_STATE_NONE = 0;
     private static final int DRAIN_STATE_SHOULD_RETRY_IMMEDIATELY = 1;
     private static final int DRAIN_STATE_CONSUMED = 2;
@@ -142,7 +142,7 @@ public class VideoTrackDecoder implements TrackTranscoder {
         // need to confirm
         if ( mExtractor.getSampleTime() < 0 || lastOneFlag > 1 || forceStop ) {
             sawExtractorEOS = true;
-            Log.d(TAG, "drainExtractor: Extractor ended " + extractedCount);
+            if (VERBOSE) Log.d(TAG, "drainExtractor: Extractor ended " + extractedCount);
             mDecoder.queueInputBuffer( index, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM );
             return DRAIN_STATE_NONE;
         }
@@ -207,7 +207,6 @@ public class VideoTrackDecoder implements TrackTranscoder {
         }
         if ( sawDecoderEOS || extractedCount <= decodedCount) {
             sawDecoderEOS = true;
-            Log.d(TAG, "drainDecoder: completed");
             mBitmapListener.onComplete();
         }
         return DRAIN_STATE_CONSUMED;
