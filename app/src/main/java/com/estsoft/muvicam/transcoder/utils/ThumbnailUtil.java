@@ -1,5 +1,6 @@
 package com.estsoft.muvicam.transcoder.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -26,11 +27,12 @@ import rx.subjects.PublishSubject;
 
 public class ThumbnailUtil {
     private static final String TAG = "ThumbnailUser";
-    private static final boolean VERBOSE = false;
+    private static final boolean VERBOSE = true;
     private static final long US_WEIGHT = 1000000;
 
     private VideoTrackDecoder mDecoder;
     private MediaExtractor mExtractor;
+    private Activity mAct;
     private long mIntervalUs;
     private int mWidth;
     private int mHeight;
@@ -42,9 +44,11 @@ public class ThumbnailUtil {
     private Subscription mSubscription;
     private UserBitmapListener userBitmapListener;
 
-    public ThumbnailUtil(UserBitmapListener userBitmapListener, boolean iFrameExtractingMode) {
+    public ThumbnailUtil(UserBitmapListener userBitmapListener, Activity act, boolean iFrameExtractingMode) {
         this.userBitmapListener = userBitmapListener;
         this.isIFrameMode = iFrameExtractingMode;
+        this.mAct = act;
+        Log.d(TAG, "ThumbnailUtil: " + mAct.toString());
     }
 
 
@@ -84,11 +88,13 @@ public class ThumbnailUtil {
                 .subscribe(new Observer<BitmapSignal>() {
                     @Override
                     public void onCompleted() {
+                        Log.d("VideoTrackDecoder", "onCompleted: ");
                         userBitmapListener.onComplete();
                     }
 
                     @Override
                     public void onNext(BitmapSignal signal) {
+                        Log.d("VideoTrackDecoder", "onNext: ");
                         userBitmapListener.onBitmapNext( signal.bitmap, signal.presentationTimeUs, signal.lastOne );
                     }
 
@@ -143,15 +149,20 @@ public class ThumbnailUtil {
 
         @Override
         public void onBitmapSupply(Bitmap bitmap, long presentationTime, boolean isEnd ) {
-            subject.onNext( new BitmapSignal(bitmap, presentationTime, isEnd ) );
+            mAct.runOnUiThread(() -> {
+                    userBitmapListener.onBitmapNext( bitmap, presentationTime, isEnd );
+            });
+//            subject.onNext( new BitmapSignal(bitmap, presentationTime, isEnd ) );
         }
 
         @Override
         public void onComplete() {
             if (VERBOSE) Log.d(TAG, "onComplete: End of Task");
+            userBitmapListener.onComplete();
             mDecoder.release();
-            subject.onCompleted();
-            mSubscription.unsubscribe();
+
+//            subject.onCompleted();
+//            mSubscription.unsubscribe();
         }
     }
 

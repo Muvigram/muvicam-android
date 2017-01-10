@@ -82,7 +82,8 @@ public class VideoEditorEditFragment extends Fragment {
         Log.d(TAG, "onClick: starttimeView" + Math.round((((float) videoEdit.getWidth()) / 40 + videoEdit.computeHorizontalScrollOffset()) * 1000 / (maxX / 15)));
         }
     };
-    ThumbnailUtil thumbnailUtil = new ThumbnailUtil(thumbnailUtilListener, true);
+//    ThumbnailUtil thumbnailUtil = new ThumbnailUtil(thumbnailUtilListener, getActivity(), true);
+    ThumbnailUtil thumbnailUtil;
 
     public VideoEditorEditFragment() {
     }
@@ -123,6 +124,8 @@ public class VideoEditorEditFragment extends Fragment {
         seekBarRight = (ImageView) v.findViewById(R.id.editor_seekbar_right);
         videoEditAdapter = new VideoEditorEditAdapter(getActivity(), selectedNum, selectedVideos.get(selectedNum - 1), videoThumbnails);
         videoEdit.setAdapter(videoEditAdapter);
+
+        thumbnailUtil = new ThumbnailUtil(thumbnailUtilListener, getActivity(), true);
 
         thumbnailUtil.extractFromNewThread(selectedVideos.get(selectedNum - 1).getVideoPath(), 3.0, 300, 300);
         return v;
