@@ -100,7 +100,7 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorView
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_video_editor_picker, container, false);
+        View v = inflater.inflate(R.layout.fragment_selector_video, container, false);
         videoPickerRecyclerView = (RecyclerView) v.findViewById(R.id.recycler_view_video_picker);
         nextButton = (TextView) v.findViewById(R.id.next_button);
         videoPickerRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));

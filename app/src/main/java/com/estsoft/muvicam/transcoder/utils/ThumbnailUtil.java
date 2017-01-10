@@ -84,6 +84,7 @@ public class ThumbnailUtil {
                 .subscribe(new Observer<BitmapSignal>() {
                     @Override
                     public void onCompleted() {
+                        userBitmapListener.onComplete();
                     }
 
                     @Override
@@ -128,6 +129,7 @@ public class ThumbnailUtil {
 
     public interface UserBitmapListener {
         void onBitmapNext(Bitmap bitmap, long presentationTimeUs, boolean isLast);
+        void onComplete();
         void onError(Exception e);
     }
 

@@ -1,11 +1,83 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
->
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    android:layout_height="match_parent">
+
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="edit fragment" />
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/editor_edit_result_space_linear"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:layout_alignParentTop="true"
+            android:orientation="horizontal" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/editor_edit_frame_thumbnails"
+            android:layout_alignParentRight="true"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/editor_edit_cancel"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="3dp"
+                android:src="@drawable/editor_edit_cancel" />
+
+            <ImageView
+                android:id="@+id/editor_edit_insert"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="3dp"
+                android:src="@drawable/editor_edit_insert" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/editor_edit_frame_thumbnails"
+            android:layout_width="wrap_content"
+            android:layout_height="77dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="1dp"
+            android:layout_marginTop="1dp"
+            android:background="@color/editorTrimmer">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/editor_edit_recycler_thumbnails"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/editor_seekbar_left"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:foregroundGravity="center_vertical"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/editor_edit_seekbar_left" />
+
+
+                <ImageView
+                    android:id="@+id/editor_seekbar_right"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:foregroundGravity="center_vertical"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/editor_edit_seekbar_right" />
+
+            </RelativeLayout>
+
+        </FrameLayout>
+    </RelativeLayout>
 </FrameLayout>
