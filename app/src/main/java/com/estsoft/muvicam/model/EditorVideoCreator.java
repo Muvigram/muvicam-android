@@ -15,6 +15,6 @@ public class EditorVideoCreator implements Parcelable.Creator<EditorVideo> {
 
     @Override
     public EditorVideo createFromParcel(Parcel parcel) {
-        return new EditorVideo();
+        return new EditorVideo(parcel);
     }
 }

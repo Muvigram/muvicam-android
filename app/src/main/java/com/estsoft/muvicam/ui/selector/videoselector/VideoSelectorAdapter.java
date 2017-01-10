@@ -31,7 +31,7 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
     @Override
     public VideoSelectorAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater mInflater = LayoutInflater.from(parent.getContext());
-        View view = mInflater.inflate(R.layout.layout_recyclerview_video_picker, parent, false);
+        View view = mInflater.inflate(R.layout.layout_recyclerview_selector_video, parent, false);
         return new ViewHolder(view);
     }
 

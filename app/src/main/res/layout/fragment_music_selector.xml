@@ -4,9 +4,10 @@
     android:layout_height="match_parent"
     tools:context="com.estsoft.muvicam.ui.selector.musicselector.MusicSelectorFragment">
 
-<TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="MusicSelectorFragment"/>
+    <Button
+        android:id="@+id/music_to_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="music to result" />
 
 </FrameLayout>

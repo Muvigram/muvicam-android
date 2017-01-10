@@ -33,8 +33,6 @@ public class SelectorVideoData {
 
     public Pair<ArrayList<EditorVideo>, ArrayList<String>> getVideos(Context context) {
         ArrayList<String> videoPaths = new ArrayList<>();
-        String audioDirectoryPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + "/sample_song_15s.mp3";
-        File audioTest = new File(audioDirectoryPath);
         String externalStorageDirectoryPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath() + "/Camera";
         File cameraDir = new File(externalStorageDirectoryPath);
         if (cameraDir.listFiles() != null) {
@@ -42,9 +40,6 @@ public class SelectorVideoData {
                 if (f.getName().endsWith(".mp4")) {
                     EditorVideo editorVideo = new EditorVideo();
                     editorVideo.setVideoPath(f.getAbsolutePath());
-                    if (audioTest != null)
-                        editorVideo.setAudioPath(audioTest.getAbsolutePath());
-
                     allVideos.add(editorVideo);
                     videoPaths.add(editorVideo.getVideoPath());
 

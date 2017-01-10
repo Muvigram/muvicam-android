@@ -138,10 +138,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
         if (selectorVideoData.getSelectedVideos().size() == 0) {
             Toast.makeText(view.getContext(), "Select at least 1 video", Toast.LENGTH_SHORT).show();
         } else {
-            List<EditorVideo> selectedVideos = selectorVideoData.getSelectedVideos();
-            EditorVideo[] selectedVideosArray = new EditorVideo[selectedVideos.size()];
-            selectedVideos.toArray(selectedVideosArray);
-            selectorVideoData.getmCallBack().passData(selectedVideosArray);
+            selectorVideoData.getmCallBack().passData((ArrayList<EditorVideo>) selectorVideoData.getSelectedVideos());
         }
     }
 }
