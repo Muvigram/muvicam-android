@@ -35,7 +35,7 @@ public class VideoEditorResultFragment extends Fragment {
     List<EditorVideo> resultVideos, selectedVideos;
     String musicPath;
     int musicOffset, musicLength;
-    float resultVideosTotalTime;
+    int resultVideosTotalTime;
     DataPassListener mCallBack;
     VideoEditSelectedNumberAdapter.OnItemClickListener itemClickListener = new VideoEditSelectedNumberAdapter.OnItemClickListener() {
         @Override
@@ -47,7 +47,7 @@ public class VideoEditorResultFragment extends Fragment {
 
 
     public interface DataPassListener {
-        void passDataFToF(int selectedNum, ArrayList<EditorVideo> selectedVideos, ArrayList<EditorVideo> resultEditorVideos,float resultTotalTime, String musicPath, int musicOffset, int musicLength);
+        void passDataFToF(int selectedNum, ArrayList<EditorVideo> selectedVideos, ArrayList<EditorVideo> resultEditorVideos,int resultTotalTime, String musicPath, int musicOffset, int musicLength);
     }
     public VideoEditorResultFragment() {
         // Required empty public constructor
@@ -68,7 +68,7 @@ public class VideoEditorResultFragment extends Fragment {
         if (args != null) {
             selectedVideos = args.getParcelableArrayList(VideoEditorResultFragment.EXTRA_VIDEOS);
             resultVideos = args.getParcelableArrayList(VideoEditorResultFragment.EXTRA_RESULT_VIDEOS);
-            resultVideosTotalTime = args.getFloat(VideoEditorResultFragment.EXTRA_RESULT_VIDEO_TOTAL_TIME);
+            resultVideosTotalTime = args.getInt(VideoEditorResultFragment.EXTRA_RESULT_VIDEO_TOTAL_TIME);
             musicPath = args.getString(VideoEditorResultFragment.EXTRA_MUSIC_PATH);
             musicOffset = args.getInt(VideoEditorResultFragment.EXTRA_MUSIC_OFFSET);
             musicLength = args.getInt(VideoEditorResultFragment.EXTRA_MUSIC_LENGTH);

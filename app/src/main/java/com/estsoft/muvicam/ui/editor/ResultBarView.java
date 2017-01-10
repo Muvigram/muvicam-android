@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 
 import com.estsoft.muvicam.R;
@@ -18,7 +19,8 @@ import com.estsoft.muvicam.R;
 
 public class ResultBarView extends View {
     private Paint paint;
-    private float totalTime;
+    // ms
+    private int totalTime;
 
     public ResultBarView(Context context) {
         super(context);
@@ -36,7 +38,7 @@ public class ResultBarView extends View {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    public ResultBarView(Context context, float totalTime) {
+    public ResultBarView(Context context, int totalTime) {
         super(context);
         paint = new Paint();
         this.totalTime = totalTime;
@@ -50,10 +52,12 @@ public class ResultBarView extends View {
         paint.setAntiAlias(true);
         DisplayMetrics outMetrics = new DisplayMetrics();
         ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
-        float width = ((float) outMetrics.widthPixels) / 15;
-        float dpi = (float) outMetrics.densityDpi;
-
-        canvas.drawRect(0, 0, totalTime * width, 20 / (160 / dpi), paint);
+        int widthPSec =  outMetrics.widthPixels/15;
+        int dpi =  outMetrics.densityDpi/160;
+        Log.d("onDraw", "onDraw: "+totalTime);
+        Log.d("onDraw", "onDraw: width"+widthPSec);
+        Log.d("onDraw", "onDraw: dpi"+dpi);
+        canvas.drawRect(0, 0, ((float)totalTime/1000) * widthPSec, 20*dpi, paint);
     }
 
 }

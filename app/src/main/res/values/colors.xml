@@ -31,7 +31,7 @@
     <color name="selectorTop">#F2F2F2F2</color>
     <color name="selectorButton">#0077CC</color>
     <color name="selectorGridLayout">#FFFFFF</color>
-    <color name="colorVideoSelected">#59FFFFFF</color>
+    <color name="selectorVideoSelected">#59FFFFFF</color>
     <color name="selectorHide">#99000000</color>
     <color name="selectorHideText">#99FFFFFF</color>
 

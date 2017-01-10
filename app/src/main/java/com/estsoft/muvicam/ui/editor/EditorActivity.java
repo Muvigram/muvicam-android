@@ -62,7 +62,7 @@ public class EditorActivity extends AppCompatActivity implements VideoEditorResu
 
 
     @Override
-    public void passDataFToF(int selectedNum, ArrayList<EditorVideo> selectedVideos, ArrayList<EditorVideo> resultEditorVideos,float resultVideosTotalTime, String musicPath, int musicOffset, int musicLength) {
+    public void passDataFToF(int selectedNum, ArrayList<EditorVideo> selectedVideos, ArrayList<EditorVideo> resultEditorVideos,int resultVideosTotalTime, String musicPath, int musicOffset, int musicLength) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragment = fragmentManager.findFragmentById(R.id.fragment_container);
         if (fragment != null) {
@@ -79,7 +79,7 @@ public class EditorActivity extends AppCompatActivity implements VideoEditorResu
         }
         args.putParcelableArrayList(VideoEditorResultFragment.EXTRA_VIDEOS, selectedVideos);
         args.putParcelableArrayList(VideoEditorResultFragment.EXTRA_RESULT_VIDEOS, resultEditorVideos);
-        args.putFloat(VideoEditorResultFragment.EXTRA_RESULT_VIDEO_TOTAL_TIME,resultVideosTotalTime);
+        args.putInt(VideoEditorResultFragment.EXTRA_RESULT_VIDEO_TOTAL_TIME,resultVideosTotalTime);
         args.putString(VideoEditorResultFragment.EXTRA_MUSIC_PATH, musicPath);
         args.putInt(VideoEditorResultFragment.EXTRA_MUSIC_OFFSET, musicOffset);
         args.putInt(VideoEditorResultFragment.EXTRA_MUSIC_LENGTH, musicLength);
