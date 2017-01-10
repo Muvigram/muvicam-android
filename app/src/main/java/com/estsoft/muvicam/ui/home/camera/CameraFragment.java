@@ -1376,6 +1376,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   public static final int UI_LOGIC_SHOW_PERIPHERAL_BUTTONS = 0x001;
   public static final int UI_LOGIC_HIDE_PERIPHERAL_BUTTONS = 0x002;
+
   public static final int UI_LOGIC_SHOW_ALL_BUTTONS = 0x003;
   public static final int UI_LOGIC_HIDE_ALL_BUTTONS = 0x004;
 

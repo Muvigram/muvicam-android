@@ -50,8 +50,8 @@ public class MusicFragment extends Fragment implements MusicMvpView {
     return (MusicFragment) fragment.getParentFragment();
   }
 
-  @BindView(R.id.music_search_recyclerview)
-  RecyclerView mRecyclerView;
+  @BindView(R.id.music_search_bar_edit_text) EditText mSearchTextBar;
+  @BindView(R.id.music_search_recyclerview) RecyclerView mRecyclerView;
 
   @OnFocusChange(R.id.music_search_bar_edit_text)
   public void searchBarOnFocus(View v, boolean hasFocus) {
