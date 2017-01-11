@@ -107,7 +107,7 @@ public class ThumbnailUtil {
 
     public interface UserBitmapListener {
         void onBitmapNext(Bitmap bitmap, long presentationTimeUs, boolean isLast);
-        void onComplete();
+        void onComplete( long totalUs );
         void onError(Exception e);
     }
 
@@ -121,9 +121,9 @@ public class ThumbnailUtil {
         }
 
         @Override
-        public void onComplete() {
+        public void onComplete( long totalUs ) {
             if (VERBOSE) Log.d(TAG, "onComplete: End of Task");
-            userBitmapListener.onComplete();
+            userBitmapListener.onComplete( totalUs );
             mDecoder.release();
         }
     }
