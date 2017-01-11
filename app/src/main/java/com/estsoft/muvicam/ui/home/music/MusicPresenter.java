@@ -24,7 +24,7 @@ import timber.log.Timber;
 @MusicScope
 public class MusicPresenter extends BasePresenter<MusicMvpView> {
 
-  DataManager mDataManager;
+  private DataManager mDataManager;
   private Subscription mSubscription;
 
   @Inject

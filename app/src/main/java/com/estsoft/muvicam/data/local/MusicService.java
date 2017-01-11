@@ -54,7 +54,7 @@ public class MusicService {
     }
 
     return CursorObservable.create(musicCursor, false)
-        .onBackpressureBuffer(128) // for "MissingBackPressureException"
+        .onBackpressureBuffer(128) // TODO - for "MissingBackPressureException"
         .filter(this::isEnoughDuration)
         .map(cursor -> Music.builder()
             .setUri(getUri(cursor))
@@ -66,7 +66,7 @@ public class MusicService {
   }
 
   public boolean isEnoughDuration(Cursor cursor) {
-    return Long.parseLong(cursor.getString(mDurationColumn)) > 15000L;
+    return Integer.parseInt(cursor.getString(mDurationColumn)) > 15000;
   }
 
   public Uri getUri(Cursor cursor) {

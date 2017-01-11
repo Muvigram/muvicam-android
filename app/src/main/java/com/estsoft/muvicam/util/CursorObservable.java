@@ -14,20 +14,22 @@ import rx.Observable;
 public class CursorObservable {
 
   public static Observable<Cursor> create(Cursor cursor, boolean autoClose) {
-    cursor.moveToFirst();
+
     return Observable.create(sub -> {
       if (sub.isUnsubscribed()) return;
-
+      if(cursor != null && cursor.moveToFirst()){
+        sub.onCompleted();
+        return;
+      }
       try {
-        while (cursor.moveToNext()) {
-          if (sub.isUnsubscribed()) return;
+        while (cursor != null && cursor.moveToNext()) {
           sub.onNext(cursor);
         }
         sub.onCompleted();
       } catch (Exception e) {
         sub.onError(e);
       } finally {
-        if (autoClose && !cursor.isClosed()) {
+        if (autoClose && cursor != null && !cursor.isClosed()) {
           cursor.close();
         }
       }

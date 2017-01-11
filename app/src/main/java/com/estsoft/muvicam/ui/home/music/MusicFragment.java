@@ -107,7 +107,7 @@ public class MusicFragment extends Fragment implements MusicMvpView {
       } else {
         requestPermissions(new String[] {permission}, REQUEST_VIDEO_PERMISSIONS);
       }
-      return;
+      // return; TODO - ???
     }
 
     mPresenter.loadMusics();
