@@ -26,7 +26,7 @@ import java.util.List;
  * will show edit view
   * */
 public class VideoEditorResultFragment extends Fragment {
-    String TAG = "VideoEditorResultFragment";
+    String TAG = "VideoEditorResultF";
     public final static String EXTRA_FRAGMENT_NUM = "VideoEditorResultFragment.fragmentNum";
     public final static String EXTRA_VIDEOS = "VideoEditorResultFragment.videoList";
     public final static String EXTRA_RESULT_VIDEOS = "VideoEditorResultFragment.resultVideoList";
@@ -47,8 +47,6 @@ public class VideoEditorResultFragment extends Fragment {
     VideoEditSelectedNumberAdapter.OnItemClickListener itemClickListener = new VideoEditSelectedNumberAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(View view, int position) {
-            linearResultSpace.removeView(resultBarView);
-            deleteButton.setVisibility(View.GONE);
             mCallBack.passDataFToF(position + 1, (ArrayList<EditorVideo>) selectedVideos, (ArrayList<EditorVideo>) resultVideos, resultVideosTotalTime, musicPath, musicOffset, musicLength);
         }
     };
@@ -78,6 +76,10 @@ public class VideoEditorResultFragment extends Fragment {
             selectedVideos = args.getParcelableArrayList(VideoEditorResultFragment.EXTRA_VIDEOS);
             resultVideos = args.getParcelableArrayList(VideoEditorResultFragment.EXTRA_RESULT_VIDEOS);
             resultVideosTotalTime = args.getInt(VideoEditorResultFragment.EXTRA_RESULT_VIDEO_TOTAL_TIME, 0);
+            Log.d(TAG, "onCreate: r rvt"+resultVideosTotalTime);
+            for(EditorVideo re:resultVideos){
+                Log.d(TAG, "onCreate: r rvt get" +re.getStart());
+            }
             musicPath = args.getString(VideoEditorResultFragment.EXTRA_MUSIC_PATH);
             musicOffset = args.getInt(VideoEditorResultFragment.EXTRA_MUSIC_OFFSET, 0);
             musicLength = args.getInt(VideoEditorResultFragment.EXTRA_MUSIC_LENGTH, 0);
@@ -96,6 +98,7 @@ public class VideoEditorResultFragment extends Fragment {
         selectedVideoButtons.setLayoutManager(linearLayoutManager);
         deleteButton = (ImageView) v.findViewById(R.id.editor_result_delete);
         linearResultSpace = (LinearLayout) v.findViewById(R.id.editor_result_space_linear);
+
         resultBarView = new ResultBarView(getContext(), resultVideosTotalTime);
         linearResultSpace.addView(resultBarView);
 
@@ -117,14 +120,13 @@ public class VideoEditorResultFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 EditorVideo removedVideo = resultVideos.get(resultVideos.size() - 1);
+                resultVideosTotalTime -= (removedVideo.getEnd() - removedVideo.getStart());
                 resultVideos.remove(resultVideos.get(resultVideos.size() - 1));
-                resultVideosTotalTime -= removedVideo.getEnd() - removedVideo.getStart();
                 linearResultSpace.removeView(resultBarView);
                 resultBarView = new ResultBarView(getContext(), resultVideosTotalTime);
                 linearResultSpace.addView(resultBarView);
                 if (resultVideos.size() > 0) {
                     deleteButton.setTranslationX(deleteButtonLocation(resultVideosTotalTime));
-                    deleteButton.setVisibility(View.VISIBLE);
                 } else {
                     deleteButton.setVisibility(View.GONE);
                 }
@@ -151,11 +153,11 @@ public class VideoEditorResultFragment extends Fragment {
         super.onDetach();
     }
 
-    private float deleteButtonLocation(int resultVideosTotalTime) {
+    private float deleteButtonLocation(float resultVideosTotalTime) {
         DisplayMetrics outMetrics = new DisplayMetrics();
         ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
-        int widthPSec = outMetrics.widthPixels;
+        float widthPSec = (float)outMetrics.widthPixels/15;
         int dpi = outMetrics.densityDpi / 160;
-        return ((float) resultVideosTotalTime / 15000) * widthPSec - 18 * dpi;
+        return (resultVideosTotalTime/1000) * widthPSec - 20*dpi;
     }
 }

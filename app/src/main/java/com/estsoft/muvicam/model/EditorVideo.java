@@ -7,13 +7,13 @@ import android.os.Parcelable;
 public class EditorVideo implements Parcelable {
 
     private String videoPath;
-    private long durationMiliSec;
+    private int durationMiliSec;
     private int start;
     private int end;
 
     // will be changed real videothumbnail from sdcard;
     private Bitmap thumbnailBitmap;
-    private long presentationTimeUs;
+    private int presentationTimeUs;
     private boolean resolutionacceptable;
     private boolean isSelected;
     private boolean isLast;
@@ -34,7 +34,7 @@ public class EditorVideo implements Parcelable {
 
     }
 
-    public EditorVideo(Bitmap thumbnailBitmap, long presentationTimeUs, boolean isLast, int numSelected) {
+    public EditorVideo(Bitmap thumbnailBitmap, int presentationTimeUs, boolean isLast, int numSelected) {
         this.thumbnailBitmap = thumbnailBitmap;
         this.presentationTimeUs = presentationTimeUs;
         this.isLast = isLast;
@@ -74,11 +74,11 @@ public class EditorVideo implements Parcelable {
         this.videoPath = videoPath;
     }
 
-    public long getDurationMiliSec() {
+    public int getDurationMiliSec() {
         return durationMiliSec;
     }
 
-    public void setDurationMiliSec(long durationMiliSec) {
+    public void setDurationMiliSec(int durationMiliSec) {
         this.durationMiliSec = durationMiliSec;
     }
 
@@ -90,14 +90,14 @@ public class EditorVideo implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(videoPath);
-        parcel.writeLong(durationMiliSec);
+        parcel.writeInt(durationMiliSec);
         parcel.writeInt(start);
         parcel.writeInt(end);
     }
 
     public void readFromParcel(Parcel in) {
         videoPath = in.readString();
-        durationMiliSec = in.readLong();
+        durationMiliSec = in.readInt();
         start = in.readInt();
         end = in.readInt();
     }
@@ -110,11 +110,11 @@ public class EditorVideo implements Parcelable {
         this.isLast = isLast;
     }
 
-    public long getPresentationTimeUs() {
+    public int getPresentationTimeUs() {
         return presentationTimeUs;
     }
 
-    public void setPresentationTimeUs(long presentationTimeUs) {
+    public void setPresentationTimeUs(int presentationTimeUs) {
         this.presentationTimeUs = presentationTimeUs;
     }
 

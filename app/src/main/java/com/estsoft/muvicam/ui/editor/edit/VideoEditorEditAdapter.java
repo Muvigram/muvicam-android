@@ -73,7 +73,6 @@ public class VideoEditorEditAdapter extends RecyclerView.Adapter<VideoEditorEdit
 
         @Override
         public void onClick(View view) {
-            mActivity.findViewById(R.id.editor_edit_frame_thumbnails).setBackgroundColor(ContextCompat.getColor(mActivity, R.color.editorTrimmer));
             //        videoEditorFragment.setResultClicked(false);
             //       videoEditorFragment.setEditClicked(true);
             //       mActivity.findViewById(R.id.video_result).setBackgroundColor(ContextCompat.getColor(mActivity, R.color.colorEditBackground));

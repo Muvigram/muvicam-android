@@ -21,7 +21,7 @@ public class ResultBarView extends View {
     private Paint paint;
     // ms
     private int totalTime;
-
+String TAG = "ResultBarView";
     public ResultBarView(Context context) {
         super(context);
     }
@@ -40,6 +40,8 @@ public class ResultBarView extends View {
 
     public ResultBarView(Context context, int totalTime) {
         super(context);
+        Log.d(TAG, "onCreate: rbv rvt"+totalTime);
+
         paint = new Paint();
         this.totalTime = totalTime;
     }
@@ -52,13 +54,13 @@ public class ResultBarView extends View {
         paint.setAntiAlias(true);
         DisplayMetrics outMetrics = new DisplayMetrics();
         ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
-        int widthPSec =  outMetrics.widthPixels;
+        int widthPSec =  outMetrics.widthPixels/15;
         int dpi =  outMetrics.densityDpi/160;
-        Log.d("onDraw", "onDraw: "+totalTime);
+        Log.d("onDraw", "onDraw: "+((float)totalTime)/1000);
         Log.d("onDraw", "onDraw: width"+widthPSec);
         Log.d("onDraw", "onDraw: dpi"+dpi);
 
-        canvas.drawRect(0, 0, ((float)totalTime/15000) * widthPSec, 20*dpi, paint);
+        canvas.drawRect(0, 0, ((float)totalTime)/1000 * widthPSec, 20*dpi, paint);
     }
 
 }
