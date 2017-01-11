@@ -52,12 +52,13 @@ public class ResultBarView extends View {
         paint.setAntiAlias(true);
         DisplayMetrics outMetrics = new DisplayMetrics();
         ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
-        int widthPSec =  outMetrics.widthPixels/15;
+        int widthPSec =  outMetrics.widthPixels;
         int dpi =  outMetrics.densityDpi/160;
         Log.d("onDraw", "onDraw: "+totalTime);
         Log.d("onDraw", "onDraw: width"+widthPSec);
         Log.d("onDraw", "onDraw: dpi"+dpi);
-        canvas.drawRect(0, 0, ((float)totalTime/1000) * widthPSec, 20*dpi, paint);
+
+        canvas.drawRect(0, 0, ((float)totalTime/15000) * widthPSec, 20*dpi, paint);
     }
 
 }

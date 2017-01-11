@@ -41,39 +41,36 @@
 
         <FrameLayout
             android:id="@+id/editor_edit_frame_thumbnails"
-            android:layout_width="wrap_content"
-            android:layout_height="77dp"
+            android:layout_width="match_parent"
+            android:layout_height="75dp"
             android:layout_alignParentBottom="true">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/editor_edit_recycler_thumbnails"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_gravity="center_horizontal"/>
+                android:layout_marginRight="5dp"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="77dp"
-                android:layout_gravity="center_vertical"
-                android:gravity="center_vertical">
+                android:layout_height="match_parent"
+                >
 
                 <ImageView
                     android:id="@+id/editor_seekbar_left"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:foregroundGravity="center_vertical"
-                    android:scaleType="centerCrop"
+                    android:scaleType="fitXY"
                     android:src="@drawable/editor_edit_seekbar_left" />
 
 
                 <ImageView
                     android:id="@+id/editor_seekbar_right"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:foregroundGravity="center_vertical"
-                    android:scaleType="centerCrop"
+                    android:layout_height="wrap_content"
+                    android:scaleType="fitXY"
                     android:src="@drawable/editor_edit_seekbar_right" />
 
             </RelativeLayout>

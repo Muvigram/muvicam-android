@@ -64,7 +64,7 @@ public class EditorActivity extends AppCompatActivity implements VideoEditorResu
     @Override
     public void passDataFToF(int selectedNum, ArrayList<EditorVideo> selectedVideos, ArrayList<EditorVideo> resultEditorVideos,int resultVideosTotalTime, String musicPath, int musicOffset, int musicLength) {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        fragment = fragmentManager.findFragmentById(R.id.editor_fragment_container);
         if (fragment != null) {
             //remove previous fragments to reduce memory :  picker Fragment or other edit Fragments
             fragmentManager.beginTransaction().remove(fragment).commit();
@@ -85,7 +85,7 @@ public class EditorActivity extends AppCompatActivity implements VideoEditorResu
         args.putInt(VideoEditorResultFragment.EXTRA_MUSIC_LENGTH, musicLength);
 
         fragment.setArguments(args);
-        fragmentManager.beginTransaction().replace(R.id.editor_fragment_container, fragment).commit();
+        fragmentManager.beginTransaction().add(R.id.editor_fragment_container, fragment).commit();
     }
 
 }
