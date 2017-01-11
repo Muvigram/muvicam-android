@@ -113,20 +113,5 @@ public class MediaTarget {
         TranscodeUtils.printInformationOf( audioOutputFormat );
     }
 
-//    public void prepare() {
-//        // TODO CSD configuration
-//        muxerWrapper.setOutputFormat( MuxerWrapper.SampleType.VIDEO, videoOutputFormat );
-//        muxerWrapper.setOutputFormat( MuxerWrapper.SampleType.AUDIO, audioOutputFormat );
-//    }
-//
-//    public void stop() {
-//        if ( !muxerWrapper.isStopped() ) muxerWrapper.stop();
-//    }
-//
-//    public void release () {
-//        if ( !muxerWrapper.isStopped() ) muxerWrapper.stop();
-//        muxerWrapper.release();
-//    }
-
 
 }

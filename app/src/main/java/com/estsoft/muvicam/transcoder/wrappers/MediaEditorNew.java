@@ -63,16 +63,13 @@ public class MediaEditorNew {
     }
 
     public void initAudioTarget( int sampleRate, int channelCount, int bitrate ) {
-//        mTarget.initAudioTarget( sampleRate, channelCount, bitrate );
-//        mMuxer.setAudioParams( sampleRate );
+        mTarget.initAudioTarget( sampleRate, channelCount, bitrate );
+        mMuxer.setAudioParams( sampleRate );
     }
 
     public void addSegment(String inputFilePath, long startTimeUs, long endTimeUs, int audioVolume  ){
         if ( musicSegmentAdded ) throw new IllegalStateException( "music segment can be added after all segments added " );
         if ( !(endTimeUs < 0) && startTimeUs >= endTimeUs) throw new IllegalStateException( "start can't be later than end " );
-
-        //TODO Initialize Audio will be in initAudioTarget();
-        if ( CURRENT_MODE != MUTE_AND_ADD_MUSIC ) tmpInitAudioTarget( inputFilePath );
 
         int mode = MediaSegmentNew.NORMAL;
         if ( CURRENT_MODE == MUTE_AND_ADD_MUSIC ) mode = MediaSegmentNew.VIDEO_ONLY;
@@ -90,9 +87,6 @@ public class MediaEditorNew {
 
     public void addMusicSegment(String inputFilePath, long offset, int audioVolume ) {
         if ( CURRENT_MODE == NORMAL ) throw new IllegalStateException( "to add MusicSegment, mode should be ADD_MUSIC or MUTE_AND_ADD_MUSIC " );
-
-        //TODO Initialize Audio will be in initAudioTarget();
-        tmpInitAudioTarget( inputFilePath );
 
         musicSegmentAdded = true;
 //        mMusicSegment = new MediaSegmentNew( mTarget, inputFilePath, mBufferListener,

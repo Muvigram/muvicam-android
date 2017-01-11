@@ -41,16 +41,16 @@ public class AudioChannel {
     private float mVolume;
 
     private int mInputSampleRate;
+    private boolean mResampleRequired;
     private int mInputChannelCount;
     private int mOutputChannelCount;
 
-    private Resampler resampler;
+    private Resampler mResampler;
 
 
     public AudioChannel(MediaFormat mEncodeFormat, float volume) {
         this.mEncodeFormat = mEncodeFormat;
         this.mVolume = volume;
-//        this.resampler = new Resampler(false, 44100, 44100);
         mFilledSamples = new ArrayDeque<>();
         mBufferedSamples = new ArrayDeque<>();
     }
@@ -59,7 +59,9 @@ public class AudioChannel {
         mActualDecodeFormat = decodeFormat;
         mInputSampleRate = mActualDecodeFormat.getInteger( MediaFormat.KEY_SAMPLE_RATE );
         if (mInputSampleRate != mEncodeFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE)) {
-            throw new UnsupportedOperationException("Audio sample rate conversion not supported yet." + " ||| source : " + mInputSampleRate + " / target : " + mEncodeFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE));
+            mResampleRequired = true;
+            Log.e(TAG, "setActualDecodeFormat: Audio Resampling required" + "\tsource : " + mInputSampleRate + "\t target : " + mEncodeFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE) );
+//            throw new UnsupportedOperationException("Audio sample rate conversion not supported yet." + " ||| source : " + mInputSampleRate + " / target : " + mEncodeFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE));
         }
         mInputChannelCount = mActualDecodeFormat.getInteger( MediaFormat.KEY_CHANNEL_COUNT );
         mOutputChannelCount = mEncodeFormat.getInteger( MediaFormat.KEY_CHANNEL_COUNT );
@@ -139,14 +141,11 @@ public class AudioChannel {
             return false;
         }
 
-//        final FloatBuffer floatBuffer = encoder.getInputBuffer(index).asFloatBuffer();
-//        final FloatBuffer tmpBuffer = ByteBuffer.allocate( floatBuffer.capacity() ).asFloatBuffer();
-//        resampler.process(44100, floatBuffer, false, tmpBuffer);
-//        ByteBuffer tmpReceiver = ByteBuffer.allocate( floatBuffer.capacity() * 4 );
-//        tmpReceiver.asFloatBuffer().put( tmpBuffer );
-//        byte[] array = tmpReceiver.array();
-//        final ShortBuffer outBuffer = ByteBuffer.wrap(array).asShortBuffer();
-//        final ShortBuffer outBuffer = encoder.getInputBuffer(index).asShortBuffer();
+        if (mResampleRequired) {
+            short[] samples = new short[ inSample.data.remaining() ];
+            inSample.data.get( samples );
+            inSample.data = ShortBuffer.wrap(mResampler.reSample( samples, 48000, 44100));
+        }
 
         final long presentationTimeUs = remix(inSample, outBuffer);
         encoder.queueInputBuffer(index, 0, outBuffer.position() * BYTES_PER_SHORT, presentationTimeUs, 0);
@@ -181,7 +180,6 @@ public class AudioChannel {
 
         outBuffer.clear();
         if ( overFlowSize > outBuffer.capacity() ) overFlowBuffer.limit( outBuffer.capacity() );
-        // TODO remix
         outBuffer.put( overFlowBuffer );
         if (overFlowSize >= outBuffer.capacity()) overFlowBuffer.clear().limit(0);
         else overFlowBuffer.limit( overFlowLimit );

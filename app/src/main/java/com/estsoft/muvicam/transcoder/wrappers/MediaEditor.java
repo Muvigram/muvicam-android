@@ -26,7 +26,6 @@ public class MediaEditor {
     public static final int NORMAL = -12;
     public static int CURRENT_MODE = NORMAL;
 
-    // TODO confirm Frame seeking mode!
     public static final boolean pFrameSeek = true;
 
     private final MuxerWrapper mMuxer;

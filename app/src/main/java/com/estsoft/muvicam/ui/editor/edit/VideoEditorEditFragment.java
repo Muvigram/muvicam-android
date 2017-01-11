@@ -68,7 +68,7 @@ public class VideoEditorEditFragment extends Fragment {
         }
 
         @Override
-        public void onComplete() {
+        public void onComplete( long endTimeUs ) {
             Log.d(TAG, "onComplete: ");
             DisplayMetrics outMetrics = new DisplayMetrics();
             ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
