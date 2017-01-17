@@ -14,10 +14,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
+import com.estsoft.muvicam.model.ParcelableVideos;
 import com.estsoft.muvicam.ui.editor.ResultBarView;
+import com.estsoft.muvicam.ui.editor.edit.VideoEditorEditFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +42,7 @@ public class VideoEditorResultFragment extends Fragment {
     LinearLayout linearResultSpace;
     ResultBarView resultBarView;
 
-    List<EditorVideo> resultVideos, selectedVideos;
+    private  ArrayList<EditorVideo> resultVideos = new ArrayList<>(), selectedVideos = new ArrayList<>();
     String musicPath;
     int musicOffset, musicLength;
     int resultVideosTotalTime;
@@ -47,13 +50,19 @@ public class VideoEditorResultFragment extends Fragment {
     VideoEditSelectedNumberAdapter.OnItemClickListener itemClickListener = new VideoEditSelectedNumberAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(View view, int position) {
-            mCallBack.passDataFToF(position + 1, (ArrayList<EditorVideo>) selectedVideos, (ArrayList<EditorVideo>) resultVideos, resultVideosTotalTime, musicPath, musicOffset, musicLength);
-        }
+
+            Log.d(TAG, "onCreateView: resultVideosTotalTime6" + resultVideosTotalTime);
+            int remainTime = 15000-resultVideosTotalTime;
+            if(remainTime<1000){
+                Toast.makeText(getContext(),"can not add video less than 1 second",Toast.LENGTH_SHORT).show();
+            }else{
+            mCallBack.passDataFToF(position + 1, selectedVideos, resultVideos, resultVideosTotalTime, musicPath, musicOffset, musicLength);
+        }}
     };
 
 
     public interface DataPassListener {
-        void passDataFToF(int selectedNum, ArrayList<EditorVideo> selectedVideos, ArrayList<EditorVideo> resultEditorVideos, int resultTotalTime, String musicPath, int musicOffset, int musicLength);
+        void passDataFToF(int selectedNum, ArrayList<EditorVideo> selectedVideos,ArrayList<EditorVideo>  resultEditorVideos, int resultTotalTime, String musicPath, int musicOffset, int musicLength);
     }
 
     public VideoEditorResultFragment() {
@@ -61,9 +70,15 @@ public class VideoEditorResultFragment extends Fragment {
     }
 
     // TODO: Rename and change types and number of parameters
-    public static VideoEditorResultFragment newInstance(String param1, String param2) {
+    public static VideoEditorResultFragment newInstance() {
         VideoEditorResultFragment fragment = new VideoEditorResultFragment();
         Bundle args = new Bundle();
+//        args.putParcelableArrayList(VideoEditorResultFragment.EXTRA_VIDEOS, selectedVideos);
+//        args.putParcelableArrayList(VideoEditorResultFragment.EXTRA_RESULT_VIDEOS, resultEditorVideos);
+//        args.putInt(VideoEditorResultFragment.EXTRA_RESULT_VIDEO_TOTAL_TIME,resultVideosTotalTime);
+//        args.putString(VideoEditorResultFragment.EXTRA_MUSIC_PATH, musicPath);
+//        args.putInt(VideoEditorResultFragment.EXTRA_MUSIC_OFFSET, musicOffset);
+//        args.putInt(VideoEditorResultFragment.EXTRA_MUSIC_LENGTH, musicLength);
         fragment.setArguments(args);
         return fragment;
     }
@@ -76,13 +91,14 @@ public class VideoEditorResultFragment extends Fragment {
             selectedVideos = args.getParcelableArrayList(VideoEditorResultFragment.EXTRA_VIDEOS);
             resultVideos = args.getParcelableArrayList(VideoEditorResultFragment.EXTRA_RESULT_VIDEOS);
             resultVideosTotalTime = args.getInt(VideoEditorResultFragment.EXTRA_RESULT_VIDEO_TOTAL_TIME, 0);
-            Log.d(TAG, "onCreate: r rvt"+resultVideosTotalTime);
-            for(EditorVideo re:resultVideos){
-                Log.d(TAG, "onCreate: r rvt get" +re.getStart());
-            }
             musicPath = args.getString(VideoEditorResultFragment.EXTRA_MUSIC_PATH);
             musicOffset = args.getInt(VideoEditorResultFragment.EXTRA_MUSIC_OFFSET, 0);
             musicLength = args.getInt(VideoEditorResultFragment.EXTRA_MUSIC_LENGTH, 0);
+
+
+            for(EditorVideo e:resultVideos){
+                Log.d(TAG, "onCreate: R editFR"+e.toString());
+            }
         }
 
     }
@@ -99,10 +115,12 @@ public class VideoEditorResultFragment extends Fragment {
         deleteButton = (ImageView) v.findViewById(R.id.editor_result_delete);
         linearResultSpace = (LinearLayout) v.findViewById(R.id.editor_result_space_linear);
 
+        Log.d(TAG, "onCreateView: resultVideosTotalTime1" + resultVideosTotalTime);
         resultBarView = new ResultBarView(getContext(), resultVideosTotalTime);
         linearResultSpace.addView(resultBarView);
 
         if (resultVideosTotalTime > 0) {
+            Log.d(TAG, "onCreateView: resultVideosTotalTime2" + resultVideosTotalTime);
             deleteButton.setTranslationX(deleteButtonLocation(resultVideosTotalTime));
             deleteButton.setVisibility(View.VISIBLE);
         }
@@ -120,13 +138,16 @@ public class VideoEditorResultFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 EditorVideo removedVideo = resultVideos.get(resultVideos.size() - 1);
-                resultVideosTotalTime -= (removedVideo.getEnd() - removedVideo.getStart());
+                resultVideosTotalTime = resultVideosTotalTime - (removedVideo.getEnd() - removedVideo.getStart());
+                Log.d(TAG, "onCreateView: resultVideosTotalTime3" + resultVideosTotalTime);
                 resultVideos.remove(resultVideos.get(resultVideos.size() - 1));
                 linearResultSpace.removeView(resultBarView);
                 resultBarView = new ResultBarView(getContext(), resultVideosTotalTime);
+                Log.d(TAG, "onCreateView: resultVideosTotalTime4" + resultVideosTotalTime);
                 linearResultSpace.addView(resultBarView);
                 if (resultVideos.size() > 0) {
                     deleteButton.setTranslationX(deleteButtonLocation(resultVideosTotalTime));
+                    Log.d(TAG, "onCreateView: resultVideosTotalTime5" + resultVideosTotalTime);
                 } else {
                     deleteButton.setVisibility(View.GONE);
                 }
@@ -156,8 +177,8 @@ public class VideoEditorResultFragment extends Fragment {
     private float deleteButtonLocation(float resultVideosTotalTime) {
         DisplayMetrics outMetrics = new DisplayMetrics();
         ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
-        float widthPSec = (float)outMetrics.widthPixels/15;
+        float widthPSec = (float) outMetrics.widthPixels / 15;
         int dpi = outMetrics.densityDpi / 160;
-        return (resultVideosTotalTime/1000) * widthPSec - 20*dpi;
+        return (resultVideosTotalTime / 1000) * widthPSec - 20 * dpi;
     }
 }

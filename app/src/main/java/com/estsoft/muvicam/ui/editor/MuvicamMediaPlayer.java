@@ -5,6 +5,7 @@ import android.media.MediaFormat;
 import android.media.MediaPlayer;
 import android.util.Log;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,10 @@ public class MuvicamMediaPlayer extends MediaPlayer {
     private ExecutorService mThreadExecutor;
 
     private String mDataSource;
+    private FileDescriptor mDataSourceD;
     private List<Long> IFrameMarkers;
+
+    private boolean IFrameInfoPrepared;
 
     @Override
     public void setDataSource(String path) throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
@@ -36,21 +40,31 @@ public class MuvicamMediaPlayer extends MediaPlayer {
         super.setDataSource(path);
     }
 
+
+    @Override
+    public void setDataSource(FileDescriptor fd) throws IOException, IllegalArgumentException, IllegalStateException {
+        this.mDataSourceD = fd;
+        super.setDataSource(fd);
+    }
+
     @Override
     public void prepare() throws IOException, IllegalStateException {
-        if (asyncFrameInfoExtracting) {
-            mThreadExecutor = Executors.newSingleThreadExecutor();
-            mThreadExecutor.submit(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    setupIFrameInformation();
-                    return null;
-                }
-            });
-        } else {
-            setupIFrameInformation();
+        if (!IFrameInfoPrepared) {
+            if (asyncFrameInfoExtracting) {
+                IFrameInfoPrepared = true;
+                mThreadExecutor = Executors.newSingleThreadExecutor();
+                mThreadExecutor.submit(new Callable<Void>() {
+                    @Override
+                    public Void call() throws Exception {
+                        setupIFrameInformation();
+                        return null;
+                    }
+                });
+            } else {
+                IFrameInfoPrepared = true;
+                setupIFrameInformation();
+            }
         }
-
         super.prepare();
     }
 
@@ -86,8 +100,14 @@ public class MuvicamMediaPlayer extends MediaPlayer {
         long startTime = System.currentTimeMillis();
         IFrameMarkers = new ArrayList<>();
         mExtractor = new MediaExtractor();
-        mExtractor.setDataSource(mDataSource);
+        if (mDataSource == null) {
+            mExtractor.setDataSource(mDataSourceD);
+        } else {
+
+            mExtractor.setDataSource(mDataSource);
+        }
         mExtractor.selectTrack( getVideoTrack() );
+
         while ( mExtractor.getSampleTime() >= 0 ) {
             if ( mExtractor.getSampleFlags() == MediaExtractor.SAMPLE_FLAG_SYNC) {
                 IFrameMarkers.add( (mExtractor.getSampleTime()) );
@@ -110,5 +130,6 @@ public class MuvicamMediaPlayer extends MediaPlayer {
         }
         throw new IllegalStateException( "No Video Track in " + mDataSource );
     }
+
 }
 

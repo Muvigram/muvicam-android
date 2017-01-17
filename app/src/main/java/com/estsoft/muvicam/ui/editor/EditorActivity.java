@@ -6,12 +6,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
+import com.estsoft.muvicam.model.ParcelableVideos;
 import com.estsoft.muvicam.ui.base.BasePresenter;
 import com.estsoft.muvicam.ui.editor.edit.VideoEditorEditFragment;
 import com.estsoft.muvicam.ui.editor.result.VideoEditorResultFragment;
@@ -24,7 +26,7 @@ import java.util.List;
 public class EditorActivity extends AppCompatActivity implements VideoEditorResultFragment.DataPassListener {
     Fragment fragment;
     private BasePresenter presenter;
-
+    String TAG = "EditorActicity";
     private final static String EXTRA_VIDEOS = "EditorActivity.videoList";
     private final static String EXTRA_MUSIC_PATH = "EditorActivity.musicPath";
     private final static String EXTRA_MUSIC_OFFSET = "EditorActivity.musicOffset";
@@ -48,21 +50,20 @@ public class EditorActivity extends AppCompatActivity implements VideoEditorResu
         super.onCreate(savedInstanceState);
         setTheme(android.R.style.Theme_NoTitleBar_Fullscreen);
         setContentView(R.layout.activity_editor);
-     //   getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+        //   getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
 
         Bundle args = getIntent().getExtras();
         ArrayList<EditorVideo> selectedVideos = args.getParcelableArrayList(EXTRA_VIDEOS);
         String musicPath = args.getString(EXTRA_MUSIC_PATH);
         int musicOffset = args.getInt(EXTRA_MUSIC_OFFSET, 0);
         int musicLength = args.getInt(EXTRA_MUSIC_LENGTH, 0);
-
-        passDataFToF(0, selectedVideos, new ArrayList<>(),0, musicPath, musicOffset, musicLength);
+        passDataFToF(0, selectedVideos, new ArrayList<>(), 0, musicPath, musicOffset, musicLength);
 
     }
 
 
     @Override
-    public void passDataFToF(int selectedNum, ArrayList<EditorVideo> selectedVideos, ArrayList<EditorVideo> resultEditorVideos,int resultVideosTotalTime, String musicPath, int musicOffset, int musicLength) {
+    public void passDataFToF(int selectedNum, ArrayList<EditorVideo> selectedVideos, ArrayList<EditorVideo> resultEditorVideos, int resultVideosTotalTime, String musicPath, int musicOffset, int musicLength) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragment = fragmentManager.findFragmentById(R.id.editor_fragment_container);
         if (fragment != null) {
@@ -75,17 +76,24 @@ public class EditorActivity extends AppCompatActivity implements VideoEditorResu
             fragment = new VideoEditorResultFragment();
         } else {
             fragment = new VideoEditorEditFragment();
-            args.putInt(VideoEditorResultFragment.EXTRA_FRAGMENT_NUM,selectedNum);
+            args.putInt(VideoEditorResultFragment.EXTRA_FRAGMENT_NUM, selectedNum);
         }
+
+        for (EditorVideo e : resultEditorVideos) {
+            Log.d(TAG, "passDataFToF: EV" + e.toString());
+        }
+        Log.d(TAG, "passDataFToF: T" + resultVideosTotalTime);
+
+
         args.putParcelableArrayList(VideoEditorResultFragment.EXTRA_VIDEOS, selectedVideos);
         args.putParcelableArrayList(VideoEditorResultFragment.EXTRA_RESULT_VIDEOS, resultEditorVideos);
-        args.putInt(VideoEditorResultFragment.EXTRA_RESULT_VIDEO_TOTAL_TIME,resultVideosTotalTime);
+        args.putInt(VideoEditorResultFragment.EXTRA_RESULT_VIDEO_TOTAL_TIME, resultVideosTotalTime);
         args.putString(VideoEditorResultFragment.EXTRA_MUSIC_PATH, musicPath);
         args.putInt(VideoEditorResultFragment.EXTRA_MUSIC_OFFSET, musicOffset);
         args.putInt(VideoEditorResultFragment.EXTRA_MUSIC_LENGTH, musicLength);
 
         fragment.setArguments(args);
-        fragmentManager.beginTransaction().add(R.id.editor_fragment_container, fragment).commit();
+        fragmentManager.beginTransaction().replace(R.id.editor_fragment_container, fragment).commit();
     }
 
 }

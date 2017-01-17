@@ -57,10 +57,10 @@ String TAG = "ResultBarView";
         int widthPSec =  outMetrics.widthPixels/15;
         int dpi =  outMetrics.densityDpi/160;
         Log.d("onDraw", "onDraw: "+((float)totalTime)/1000);
-        Log.d("onDraw", "onDraw: width"+widthPSec);
+        Log.d("onDraw", "onDraw: editorvideoWidth"+widthPSec);
         Log.d("onDraw", "onDraw: dpi"+dpi);
 
-        canvas.drawRect(0, 0, ((float)totalTime)/1000 * widthPSec, 20*dpi, paint);
+        canvas.drawRect(0, 0, Math.round(((float)totalTime)/1000 * widthPSec), Math.round(20*dpi), paint);
     }
 
 }

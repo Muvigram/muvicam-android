@@ -52,9 +52,9 @@ public class SelectorVideoData {
 
     public void progressGetThumbnail(ThumbnailUtil.VideoMetaData data) {
         allVideos.get(data.position).setDurationMiliSec((int)(data.durationMs));
-        allVideos.get(data.position).setResolutionacceptable(isSixTVFour(data.width, data.height));
+        allVideos.get(data.position).setResolutionAcceptable(isSixTVFour(data.width, data.height));
         if (data.durationMs > 180000) {
-            allVideos.get(data.position).setResolutionacceptable(false);
+            allVideos.get(data.position).setResolutionAcceptable(false);
         }
         allVideos.get(data.position).setThumbnailBitmap(data.thumbnailBitmap);
     }

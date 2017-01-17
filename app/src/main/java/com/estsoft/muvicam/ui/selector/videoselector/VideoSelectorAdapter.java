@@ -67,7 +67,7 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
                 holder.layoutSelected.setVisibility(View.GONE);
 
             }
-            if (!thumbnailImageViews.get(position - 3).isResolutionacceptable()) {
+            if (!thumbnailImageViews.get(position - 3).isResolutionAcceptable()) {
                 holder.hide.setVisibility(View.VISIBLE);
             } else {
                 holder.hide.setVisibility(View.GONE);

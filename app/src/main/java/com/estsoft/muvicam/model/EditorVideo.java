@@ -3,6 +3,7 @@ package com.estsoft.muvicam.model;
 import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 public class EditorVideo implements Parcelable {
 
@@ -14,7 +15,7 @@ public class EditorVideo implements Parcelable {
     // will be changed real videothumbnail from sdcard;
     private Bitmap thumbnailBitmap;
     private int presentationTimeUs;
-    private boolean resolutionacceptable;
+    private boolean resolutionAcceptable;
     private boolean isSelected;
     private boolean isLast;
     private int numSelected;
@@ -24,9 +25,10 @@ public class EditorVideo implements Parcelable {
     public EditorVideo() {
         isSelected = false;
         numSelected = -1;
-        resolutionacceptable = false;
+        resolutionAcceptable = false;
         start = 0;
         end = 0;
+
     }
 
     public EditorVideo(Parcel in) {
@@ -90,17 +92,16 @@ public class EditorVideo implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(videoPath);
-        parcel.writeInt(durationMiliSec);
+
         parcel.writeInt(start);
         parcel.writeInt(end);
     }
 
     public void readFromParcel(Parcel in) {
         videoPath = in.readString();
-        durationMiliSec = in.readInt();
-        start = in.readInt();
-        end = in.readInt();
-    }
+    start = in.readInt();
+    end = in.readInt();
+}
 
     public boolean getIsLast() {
         return isLast;
@@ -145,16 +146,16 @@ public class EditorVideo implements Parcelable {
         this.end = end;
     }
 
-    public boolean isResolutionacceptable() {
-        return resolutionacceptable;
+    public boolean isResolutionAcceptable() {
+        return resolutionAcceptable;
     }
 
-    public void setResolutionacceptable(boolean resolutionacceptable) {
-        this.resolutionacceptable = resolutionacceptable;
+    public void setResolutionAcceptable(boolean resolutionAcceptable) {
+        this.resolutionAcceptable = resolutionAcceptable;
     }
 
-
-
-
-
+    @Override
+    public String toString() {
+        return "start: "+start+", end:"+end+", path: "+videoPath;
+    }
 }
