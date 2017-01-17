@@ -99,7 +99,7 @@ public class HomeActivity extends BaseActivity {
 
   @Override
   protected void onPause() {
-    mBackgroundHandler.removeCallbacks(hideDecorView);
+    mBackgroundHandler.removeCallbacksAndMessages(null);
     stopBackgroundThread();
     super.onPause();
   }
@@ -136,22 +136,26 @@ public class HomeActivity extends BaseActivity {
           | View.SYSTEM_UI_FLAG_FULLSCREEN      // hide status bar
           | View.SYSTEM_UI_FLAG_IMMERSIVE;
 
+  Runnable hideDecorView;
+
   public void setUpDecorView() {
     mDecorView = getWindow().getDecorView();
+    hideDecorView = this::hideDecorView;
 
     mDecorView.setOnSystemUiVisibilityChangeListener(visibility -> {
       Timber.e("onSystemUiVisibilityChange");
       int xor = DEFAULT_UI_SETTING ^ visibility;
       if (xor != 0) {
-        mBackgroundHandler.postDelayed(hideDecorView, 1500);
+        mBackgroundHandler.post(hideDecorView);
       }
     });
   }
 
-  Runnable hideDecorView = this::hideDecorView;
-
   public void hideDecorView() {
-    new Handler(getMainLooper()).post(() -> mDecorView.setSystemUiVisibility(DEFAULT_UI_SETTING));
+    new Handler(getMainLooper()).postDelayed(
+        () -> mDecorView.setSystemUiVisibility(DEFAULT_UI_SETTING),
+        1500
+    );
   }
 
   // VIEW PAGER //////////////////////////////////////////////////////////////

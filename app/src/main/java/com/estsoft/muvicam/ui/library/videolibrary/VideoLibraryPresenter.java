@@ -1,144 +1,127 @@
 package com.estsoft.muvicam.ui.library.videolibrary;
 
-import android.app.Activity;
-import android.content.Context;
-import android.util.Pair;
-import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.estsoft.muvicam.R;
+import com.estsoft.muvicam.data.DataManager;
 import com.estsoft.muvicam.model.EditorVideo;
-import com.estsoft.muvicam.model.SelectorVideoData;
-import com.estsoft.muvicam.transcoder.utils.ThumbnailUtil;
+import com.estsoft.muvicam.model.Video;
 import com.estsoft.muvicam.ui.base.BasePresenter;
+import com.estsoft.muvicam.ui.library.videolibrary.injection.VideoLibraryScope;
+import com.estsoft.muvicam.util.RxUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
+
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 
 /**
  * Created by Administrator on 2017-01-05.
  */
 
-public class VideoLibraryPresenter extends BasePresenter<VideoLibraryView> implements VideoSelectorAdapter.OnItemClickListener {
-    private SelectorVideoData selectorVideoData;
-    private VideoSelectorAdapterContract.Model adapterModel;
-    private VideoSelectorAdapterContract.View adapterView;
-    private int countSelected = 0;
-    private String TAG = "VideoLibraryPresenter";
+@VideoLibraryScope
+public class VideoLibraryPresenter extends BasePresenter<VideoLibraryMvpView> {
 
-    @Override
-    public boolean isViewAttached() {
-        return super.isViewAttached();
+  private DataManager mDataManager;
+  private Subscription mSubscription;
+
+  @Inject
+  public VideoLibraryPresenter(DataManager dataManager) {
+    mDataManager = dataManager;
+  }
+
+  @Override
+  public void attachView(VideoLibraryMvpView mvpView) {
+    super.attachView(mvpView);
+  }
+
+  @Override
+  public void detachView() {
+    RxUtil.unsubscribe(mSubscription);
+    if (mSubscription != null) {
+      mSubscription = null;
     }
+    super.detachView();
+  }
 
-    @Override
-    public VideoLibraryView getMvpView() {
-        return super.getMvpView();
-    }
-
-    @Override
-    public void checkViewAttached() {
-        super.checkViewAttached();
-    }
-
-    @Override
-    public void attachView(VideoLibraryView mvpView) {
-        super.attachView(mvpView);
-    }
-
-    @Override
-    public void detachView() {
-        super.detachView();
-    }
-
-    public void setSelectorVideoData(SelectorVideoData selectorVideoData) {
-        this.selectorVideoData = selectorVideoData;
-    }
-
-    public void loadVideos(final Context context, final ThumbnailUtil.VideoMetaDataListener listener) {
-        Pair<ArrayList<EditorVideo>, ArrayList<String>> pair = selectorVideoData.getVideos(context);
-        final ArrayList videos = pair.first;
-        ((Activity) context).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                adapterModel.addItems(videos);
+  public void loadVideos() {
+    checkViewAttached();
+    RxUtil.unsubscribe(mSubscription);
+    mSubscription = mDataManager.getVideos()
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(Schedulers.io())
+        .subscribe(
+            videos -> {
+              if (videos.isEmpty()) {
+                getMvpView().showVideosEmpty();
+              } else {
+                getMvpView().showVideos(videos);
+              }
+            },
+            e -> {
+              Timber.e(e, "There was an error loading the videos.");
+              getMvpView().showError();
             }
-        });
-        ThumbnailUtil.getThumbnails(pair.second, context, listener);
+        );
+  }
+
+  public void onItemSelected(Video video) {
+    video.selected();
+    pushVideo(video);
+    getMvpView().selectVideo(mSelectedVideos);
+  }
+
+  public void onItemReleased(Video video) {
+    video.released();
+    removeVideo(video);
+    getMvpView().releaseVideo(mSelectedVideos);
+  }
+
+  public List<EditorVideo> getVideos() {
+    List<EditorVideo> editorVideoList = new ArrayList<>();
+
+    for (Video video : mSelectedVideos) {
+      EditorVideo editorVideo = new EditorVideo();
+      editorVideo.setDurationMiliSec(video.duration());
+      editorVideo.setVideoPath(video.uri().toString());
+      editorVideoList.add(editorVideo);
     }
 
-    public void setPickerAdapterModel(VideoSelectorAdapterContract.Model adapterModel) {
-        this.adapterModel = adapterModel;
+    return editorVideoList;
+  }
 
+  private static final int MAX_SELECTION = 5;
+  private Video[] mSelectedVideos = new Video[MAX_SELECTION];
+
+  private void pushVideo(Video item) {
+    if (mSelectedVideos.length == MAX_SELECTION) {
+      Timber.i("Selected video array is empty.");
+      return;
+    }
+    item.setSelectionOrder(mSelectedVideos.length);
+    mSelectedVideos[mSelectedVideos.length] = item;
+  }
+
+  private Video removeVideo(Video item) {
+    if (mSelectedVideos.length == 0) {
+      Timber.i("Selected video array is full.");
+      return null;
     }
 
-    public void setPickerAdapterView(VideoSelectorAdapterContract.View adapterView) {
-        this.adapterView = adapterView;
-        this.adapterView.setOnClickListener(this);
+    int i; // 0, 1, 2, 3, 4
+
+    //noinspection StatementWithEmptyBody
+    for (i = 0; i < MAX_SELECTION && mSelectedVideos[i].compareTo(item) != 0; i++)
+      ;
+    Video temp = mSelectedVideos[i++];
+    for (; i < MAX_SELECTION; i++) {
+      mSelectedVideos[i].setSelectionOrder(i-1);
+      mSelectedVideos[i-1] = mSelectedVideos[i];
     }
 
-    //position : touched position
-    @Override
-    public void onItemClick(View view, int position) {
-        RelativeLayout layoutSelected = (RelativeLayout) view.findViewById(R.id.layout_selected);
-        FrameLayout hide = (FrameLayout) view.findViewById(R.id.video_hided);
-        TextView selectedNum = (TextView) view.findViewById(R.id.video_num);
-        if (position > 2 && hide.getVisibility() == View.GONE) {
-            if (adapterModel.getItem(position - 3).isSelected()) {
-                selectorVideoData.removeSelectedVideo(adapterModel.getItem(position - 3));
-                layoutSelected.setVisibility(View.GONE);
-                for (EditorVideo mvt : adapterModel.getItems()) {
-                    if (mvt.getNumSelected() > adapterModel.getItem(position - 3).getNumSelected()) {
-                        mvt.setNumSelected((mvt.getNumSelected() - 1));
-                        adapterView.notifyAdapter();
-                    }
-                }
-                adapterModel.getItem(position - 3).setNumSelected(-1);
-                adapterModel.getItem(position - 3).setSelected(false);
-                --countSelected;
-            } else {
-                if (countSelected > 4) {
-                    //more than 5 things
-                    Toast.makeText(view.getContext(), "select less than 6 ", Toast.LENGTH_SHORT).show();
-                } else {
-//                    Log.d(TAG, "audio" + adapterModel.getItem(position - 3).getAudioPath());
-                    adapterModel.getItem(position - 3).setSelected(true);
-                    adapterModel.getItem(position - 3).setNumSelected(countSelected + 1);
-                    String selectedNumS = "" + adapterModel.getItem(position - 3).getNumSelected();
-                    selectedNum.setText(selectedNumS);
-                    layoutSelected.setVisibility(View.VISIBLE);
-                    selectorVideoData.addSelectedVideo(adapterModel.getItem(position - 3));
-                    ++countSelected;
-                }
-
-
-            }
-        }
-    }
-
-    // position : list of position
-    public void progress(ThumbnailUtil.VideoMetaData data) {
-        selectorVideoData.progressGetThumbnail(data);
-    }
-
-
-    public void addItems(ArrayList<EditorVideo> videos) {
-        adapterModel.addItems(videos);
-    }
-
-    public void setmCallBack(VideoLibraryFragment.DataPassListener context) {
-        selectorVideoData.setmCallBack(context);
-    }
-
-    public void nextButtonClick(View view) {
-        if (selectorVideoData.getSelectedVideos().size() == 0) {
-            Toast.makeText(view.getContext(), "Select at least 1 video", Toast.LENGTH_SHORT).show();
-        } else {
-            selectorVideoData.getmCallBack().passData((List<EditorVideo>) selectorVideoData.getSelectedVideos());
-        }
-    }
+    return temp;
+  }
 }

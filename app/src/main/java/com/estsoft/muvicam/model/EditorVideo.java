@@ -14,7 +14,7 @@ public class EditorVideo implements Parcelable {
     // will be changed real videothumbnail from sdcard;
     private Bitmap thumbnailBitmap;
     private long presentationTimeUs;
-    private boolean resolutionacceptable;
+    private boolean resolutionAcceptable;
     private boolean isSelected;
     private boolean isLast;
     private int numSelected;
@@ -24,7 +24,7 @@ public class EditorVideo implements Parcelable {
     public EditorVideo() {
         isSelected = false;
         numSelected = -1;
-        resolutionacceptable = false;
+        resolutionAcceptable = false;
         start = 0;
         end = 0;
     }
@@ -82,6 +82,40 @@ public class EditorVideo implements Parcelable {
         this.durationMiliSec = durationMiliSec;
     }
 
+
+
+    public boolean isLast() {
+        return isLast;
+    }
+
+    public void setLast(boolean last) {
+        isLast = last;
+    }
+
+    public int getStart() {
+        return start;
+    }
+
+    public void setStart(int start) {
+        this.start = start;
+    }
+
+    public int getEnd() {
+        return end;
+    }
+
+    public void setEnd(int end) {
+        this.end = end;
+    }
+
+    public boolean isResolutionAcceptable() {
+        return resolutionAcceptable;
+    }
+
+    public void setResolutionAcceptable(boolean resolutionAcceptable) {
+        this.resolutionAcceptable = resolutionAcceptable;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -113,41 +147,4 @@ public class EditorVideo implements Parcelable {
             return new EditorVideo(parcel);
         }
     };
-
-    public boolean isLast() {
-        return isLast;
-    }
-
-    public void setLast(boolean last) {
-        isLast = last;
-    }
-
-    public int getStart() {
-        return start;
-    }
-
-    public void setStart(int start) {
-        this.start = start;
-    }
-
-    public int getEnd() {
-        return end;
-    }
-
-    public void setEnd(int end) {
-        this.end = end;
-    }
-
-    public boolean isResolutionacceptable() {
-        return resolutionacceptable;
-    }
-
-    public void setResolutionacceptable(boolean resolutionacceptable) {
-        this.resolutionacceptable = resolutionacceptable;
-    }
-
-
-
-
-
 }

@@ -16,7 +16,6 @@ import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.injection.component.DaggerLibraryComponent;
 import com.estsoft.muvicam.injection.component.LibraryComponent;
 import com.estsoft.muvicam.model.EditorVideo;
-import com.estsoft.muvicam.ui.base.BasePresenter;
 import com.estsoft.muvicam.ui.base.BaseSingleFragmentActivity;
 import com.estsoft.muvicam.ui.editor.EditorActivity;
 import com.estsoft.muvicam.ui.library.musiclibrary.MusicLibraryFragment;
@@ -26,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class LibraryActivity extends BaseSingleFragmentActivity implements VideoLibraryFragment.DataPassListener {
+public class LibraryActivity extends BaseSingleFragmentActivity {
 
 
   public static Intent getIntent(Context packageContext) {
@@ -67,8 +66,7 @@ public class LibraryActivity extends BaseSingleFragmentActivity implements Video
     mLibraryComponent.inject(this);
   }
 
-  @Override
-  public void passData(@NonNull List<EditorVideo> videos) {
+  public void goToNext(@NonNull List<EditorVideo> videos) {
     FragmentManager fragmentManager = getSupportFragmentManager();
     Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
     if (fragment != null) {

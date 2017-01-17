@@ -11,8 +11,6 @@ import android.provider.MediaStore;
 import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.util.CursorObservable;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 /**
  * Data service that finds musics from local drive and then provides them to presenter.
@@ -44,7 +42,7 @@ public class MusicService {
   public Observable<Music> getMusics() {
 
     Cursor musicCursor = mContext.getContentResolver().query(
-        android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
         null, null, null, null
     );
     initColumnIndex(musicCursor);
@@ -66,7 +64,7 @@ public class MusicService {
   }
 
   public boolean isEnoughDuration(Cursor cursor) {
-    return Integer.parseInt(cursor.getString(mDurationColumn)) > 15000;
+    return Integer.parseInt(cursor.getString(mDurationColumn)) > 15000/* 15 sec */;
   }
 
   public Uri getUri(Cursor cursor) {

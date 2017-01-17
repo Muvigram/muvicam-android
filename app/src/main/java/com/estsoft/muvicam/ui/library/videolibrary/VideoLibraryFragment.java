@@ -1,150 +1,160 @@
 package com.estsoft.muvicam.ui.library.videolibrary;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.estsoft.muvicam.R;
-import com.estsoft.muvicam.model.EditorVideo;
-import com.estsoft.muvicam.model.SelectorVideoData;
-import com.estsoft.muvicam.transcoder.utils.ThumbnailUtil;
-import com.estsoft.muvicam.ui.base.BasePresenter;
+import com.estsoft.muvicam.model.Video;
 import com.estsoft.muvicam.ui.library.LibraryActivity;
+import com.estsoft.muvicam.ui.library.videolibrary.injection.VideoLibraryComponent;
+import com.estsoft.muvicam.ui.library.videolibrary.injection.VideoLibraryModule;
+import com.estsoft.muvicam.util.DialogFactory;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
 
-public class VideoLibraryFragment extends Fragment implements VideoLibraryView {
-    private String TAG = "VideoLibraryFragment";
-    private String TAG_Lib = "Lib:";
-    private VideoSelectorAdapter videoSelectorAdapter;
-    private TextView nextButton;
-    private RecyclerView videoPickerRecyclerView;
-    BasePresenter presenter;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.Unbinder;
 
-    public interface DataPassListener {
-        void passData(List<EditorVideo> videos);
+
+public class VideoLibraryFragment extends Fragment implements VideoLibraryMvpView {
+
+  public static VideoLibraryFragment newInstance() {
+    return new VideoLibraryFragment();
+  }
+
+  VideoLibraryComponent mVideoLibraryComponent;
+
+  @Inject VideoLibraryPresenter mPresenter;
+  @Inject VideoSelectorAdapter mAdapter;
+
+  @Inject
+  public void registerVideoLibraryFragment(VideoSelectorAdapter adapter) {
+    adapter.register(this);
+  }
+
+  Unbinder mUnbinder;
+
+  @BindView(R.id.library_video_recyclerview) RecyclerView mRecyclerView;
+  @BindView(R.id.library_video_home_button)  TextView mHomeButton;
+  @BindView(R.id.library_video_next_button)  TextView mNextButton;
+
+  @OnClick(R.id.library_video_home_button)
+  public void backToHome(View v) {
+    getActivity().onBackPressed();
+  }
+
+  @OnClick(R.id.library_video_next_button)
+  public void goToNext(View v) {
+    LibraryActivity.get(this).goToNext(mPresenter.getVideos());
+  }
+
+  @Override
+  public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                           Bundle savedInstanceState) {
+    // Inflate a layout and bind views on this fragment
+    View view = inflater.inflate(R.layout.fragment_library_video, container, false);
+    mUnbinder = ButterKnife.bind(this, view);
+
+    return view;
+  }
+
+  //
+  @Override
+  public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    // Create a dagger component and inject dependencies
+    mVideoLibraryComponent = LibraryActivity.get(this).getComponent()
+        .plus(new VideoLibraryModule());
+    mVideoLibraryComponent.inject(this);
+
+    // Attach views
+    mPresenter.attachView(this);
+  }
+
+  @Override
+  public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    super.onActivityCreated(savedInstanceState);
+    // Set up recycler view with GridLayoutManager
+    mRecyclerView.setAdapter(mAdapter);
+    mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
+
+    // Load videos from local library
+    mPresenter.loadVideos();
+  }
+
+  @Override
+  public void onDestroyView() {
+    mUnbinder.unbind();
+    if (mUnbinder != null) {
+      mUnbinder = null;
     }
+    super.onDestroyView();
+  }
 
-    private ThumbnailUtil.VideoMetaDataListener videoMetaDataListener = new ThumbnailUtil.VideoMetaDataListener() {
-
-        @Override
-        public void onProgress(final ThumbnailUtil.VideoMetaData data) {
-            ((VideoLibraryPresenter) presenter).progress(data);
-        }
-
-        @Override
-        public void onComplete() {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    VideoSelectorAdapter tempA = videoSelectorAdapter;
-                    videoSelectorAdapter = new VideoSelectorAdapter(getActivity());
-                    ((VideoLibraryPresenter) presenter).setPickerAdapterModel(videoSelectorAdapter);
-                    ((VideoLibraryPresenter) presenter).setPickerAdapterView(videoSelectorAdapter);
-                    ((VideoLibraryPresenter) presenter).addItems(tempA.getItems());
-                    videoPickerRecyclerView.setAdapter(videoSelectorAdapter);
-                    // ?    videoSelectorAdapter.notifyDataSetChanged();
-                }
-            });
-
-        }
-
-        @Override
-        public void onError(Exception e) {
-            Log.d(TAG_Lib, "VMDListener");
-        }
-    };
-    Thread getThumbnailObjectThread = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            ((VideoLibraryPresenter) presenter).loadVideos(getActivity(), videoMetaDataListener);
-        }
-    });
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        presenter = ((LibraryActivity) getActivity()).getPresenter();
-        ((VideoLibraryPresenter) presenter).setSelectorVideoData(SelectorVideoData.getInstance());
-        presenter.attachView(this);
-
-        ((VideoLibraryPresenter) presenter).setmCallBack(((DataPassListener) context));
+  @Override
+  public void onDestroy() {
+    mPresenter.detachView();
+    if (mPresenter != null) {
+      mPresenter = null;
     }
-
-    public VideoLibraryFragment() {
+    if (mVideoLibraryComponent != null) {
+      mVideoLibraryComponent = null;
     }
+    super.onDestroy();
+  }
 
-    public static VideoLibraryFragment newInstance() {
-        VideoLibraryFragment fragment = new VideoLibraryFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
+  // Show videos
+  @Override
+  public void showVideos(List<Video> videos) {
+    mAdapter.setVideos(videos);
+    mAdapter.notifyDataSetChanged();
+  }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
+  @Override
+  public void showVideosEmpty() {
+    mAdapter.setVideos(Collections.emptyList());
+    mAdapter.notifyDataSetChanged();
+    Toast.makeText(
+        getActivity(),
+        R.string.library_video_empty_videos,
+        Toast.LENGTH_LONG
+    ).show();
+  }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_video_editor_picker, container, false);
-        videoPickerRecyclerView = (RecyclerView) v.findViewById(R.id.recycler_view_video_picker);
-        nextButton = (TextView) v.findViewById(R.id.next_button);
-        videoPickerRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
-        videoSelectorAdapter = new VideoSelectorAdapter(getActivity());
-        ((VideoLibraryPresenter) presenter).setPickerAdapterModel(videoSelectorAdapter);
-        ((VideoLibraryPresenter) presenter).setPickerAdapterView(videoSelectorAdapter);
-        ((VideoLibraryPresenter) presenter).addItems(new ArrayList<EditorVideo>());
+  @Override
+  public void showError() {
+    DialogFactory.createGenericErrorDialog(
+        getActivity(),
+        getString(R.string.library_video_error_loading)
+    ).show();
+  }
 
-        videoPickerRecyclerView.setAdapter(videoSelectorAdapter);
-        getThumbnailObjectThread.setPriority(Thread.MAX_PRIORITY);
-        getThumbnailObjectThread.start();
+  @Override
+  public void selectVideo(Video[] videos) {
+    mAdapter.updateView(videos);
+  }
 
+  @Override
+  public void releaseVideo(Video[] videos) {
+    mAdapter.updateView(videos);
+  }
 
-        return v;
-    }
+  public VideoLibraryPresenter getPresenter() {
+    return mPresenter;
+  }
 
-    //
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-//        getThumbnailsThread.start();
-
-        nextButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Intent intent = new Intent();
-                ((VideoLibraryPresenter) presenter).nextButtonClick(view);
-
-            }
-        });
-
-
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        presenter.detachView();
-    }
-
-    @Override
-    public void setPresent(BasePresenter basePresenter) {
-        this.presenter = basePresenter;
-    }
 }

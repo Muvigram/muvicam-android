@@ -39,10 +39,11 @@ public class MusicPresenter extends BasePresenter<MusicMvpView> {
 
   @Override
   public void detachView() {
-    super.detachView();
-    if(mSubscription != null) {
-      mSubscription.unsubscribe();
+    RxUtil.unsubscribe(mSubscription);
+    if (mSubscription != null) {
+      mSubscription = null;
     }
+    super.detachView();
   }
 
   /* Business logic here */
