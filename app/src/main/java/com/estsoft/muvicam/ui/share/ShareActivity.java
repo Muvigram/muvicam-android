@@ -33,6 +33,21 @@ public class ShareActivity extends BaseActivity {
   private final static String EXTRA_MUSIC_PATH = "ShareActivity.musicPath";
   private final static String EXTRA_MUSIC_OFFSET = "ShareActivity.musicOffset";
   private final static String EXTRA_MUSIC_LENGTH = "ShareActivity.musicLength";
+  private final static String EXTRA_FROM_CAMERA = "ShareActivity.fromCamera";
+
+  public static Intent newIntent(Context packageContext, String[] videoPaths, int[] videoOffsets,
+                                 String musicPath, int musicOffset, int musicLength, boolean fromCamera ) {
+
+    Intent intent = new Intent(packageContext, ShareActivity.class);
+    intent.putExtra(EXTRA_VIDEO_PATHS, videoPaths);
+    intent.putExtra(EXTRA_VIDEO_OFFSETS, videoOffsets);
+    intent.putExtra(EXTRA_MUSIC_PATH, musicPath);
+    intent.putExtra(EXTRA_MUSIC_OFFSET, musicOffset);
+    intent.putExtra(EXTRA_MUSIC_LENGTH, musicLength);
+    intent.putExtra(EXTRA_FROM_CAMERA, fromCamera);
+
+    return intent;
+  }
 
   public static Intent newIntent(Context packageContext, String[] videoPaths, int[] videoOffsets,
                                  String musicPath, int musicOffset, int musicLength) {
@@ -42,6 +57,7 @@ public class ShareActivity extends BaseActivity {
     intent.putExtra(EXTRA_MUSIC_PATH, musicPath);
     intent.putExtra(EXTRA_MUSIC_OFFSET, musicOffset);
     intent.putExtra(EXTRA_MUSIC_LENGTH, musicLength);
+    intent.putExtra(EXTRA_FROM_CAMERA, false);
 
     return intent;
   }
@@ -51,6 +67,7 @@ public class ShareActivity extends BaseActivity {
   private String mMusicPath;
   private int mMusicOffset;
   private int mMusicLength;
+  private boolean mFromCamera;
 
   public static ShareActivity get(Fragment fragment) {
     return (ShareActivity)fragment.getActivity();
@@ -93,8 +110,9 @@ public class ShareActivity extends BaseActivity {
     mMusicPath = getIntent().getStringExtra(EXTRA_MUSIC_PATH);
     mMusicOffset = getIntent().getIntExtra(EXTRA_MUSIC_OFFSET, 0);
     mMusicLength = getIntent().getIntExtra(EXTRA_MUSIC_LENGTH, 0);
+    mFromCamera = getIntent().getBooleanExtra(EXTRA_FROM_CAMERA, false);
 
-    return ShareFragment.newInstance( mVideoPaths, mVideoOffsets, mMusicPath, mMusicOffset, mMusicLength );
+    return ShareFragment.newInstance( mVideoPaths, mVideoOffsets, mMusicPath, mMusicOffset, mMusicLength, mFromCamera );
   }
 
 }

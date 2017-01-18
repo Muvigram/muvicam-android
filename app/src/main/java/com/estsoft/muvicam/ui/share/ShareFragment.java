@@ -47,26 +47,27 @@ public class ShareFragment extends Fragment implements View.OnClickListener {
     private final static String EXTRA_MUSIC_PATH = "ShareFragment.musicPath";
     private final static String EXTRA_MUSIC_OFFSET = "ShareFragment.musicOffset";
     private final static String EXTRA_MUSIC_LENGTH = "ShareFragment.musicLength";
+    private final static String EXTRA_FROM_CAMERA = "ShareFragment.fromCamera";
 
-    private static final String TEST_PATH_ORIGIN_CAMERA_01 = "/storage/emulated/0/test_video/20161212_112049.mp4";
-    private static final String TEST_PATH_ORIGIN_CAMERA_02 = "/storage/emulated/0/test_video/20161130_131929.mp4";
-    private static final String TEST_PATH_ORIGIN_CAMERA_03 = "/storage/emulated/0/test_video/20161208_144759.mp4";
-
-    private static final String TEST_PATH_MUVIGRAM_CAMERA_01 = "/storage/emulated/0/test_video/1483402446855_0.mp4";
-    private static final String TEST_PATH_MUVIGRAM_CAMERA_02 = "/storage/emulated/0/test_video/1483402446906_1.mp4";
-    private static final String TEST_PATH_MUVIGRAM_CAMERA_03 = "/storage/emulated/0/test_video/1483402484394_0.mp4";
-    private static final String TEST_PATH_MUVIGRAM_CAMERA_04 = "/storage/emulated/0/test_video/1483402593109_0.mp4";
-    private static final String TEST_PATH_MUVIGRAM_CAMERA_05 = "/storage/emulated/0/test_video/1483402633321_2.mp4";
-
-    private static final String TEST_PATH_MUVIGRAM_CAMERA_5000K = "/storage/emulated/0/test_video/camera_sample_5000k.mp4";
-    private static final String TEST_PATH_OUTSIDE_GIRLSDAY = "/storage/emulated/0/test_video/girlsday_sample.mp4";
-
-    private static final String TEST_PATH_NEXUS_CAMERA_01 = "/storage/emulated/0/test_video/nexus_sample01.mp4";
-    private static final String TEST_PATH_NEXUS_CAMERA_02 = "/storage/emulated/0/test_video/nexus_sample02.mp4";
-
-    private static final String TEST_PATH_MP3_63S = "/storage/emulated/0/test_video/sample_sound_63s.mp3";
-    private static final String TEST_PATH_MP3_221S = "/storage/emulated/0/test_video/sample_song_221s.mp3";
-    private static final String TEST_PATH_MP3_253S = "/storage/emulated/0/test_video/sample_song_253s.mp3";
+//    private static final String TEST_PATH_ORIGIN_CAMERA_01 = "/storage/emulated/0/test_video/20161212_112049.mp4";
+//    private static final String TEST_PATH_ORIGIN_CAMERA_02 = "/storage/emulated/0/test_video/20161130_131929.mp4";
+//    private static final String TEST_PATH_ORIGIN_CAMERA_03 = "/storage/emulated/0/test_video/20161208_144759.mp4";
+//
+//    private static final String TEST_PATH_MUVIGRAM_CAMERA_01 = "/storage/emulated/0/test_video/1483402446855_0.mp4";
+//    private static final String TEST_PATH_MUVIGRAM_CAMERA_02 = "/storage/emulated/0/test_video/1483402446906_1.mp4";
+//    private static final String TEST_PATH_MUVIGRAM_CAMERA_03 = "/storage/emulated/0/test_video/1483402484394_0.mp4";
+//    private static final String TEST_PATH_MUVIGRAM_CAMERA_04 = "/storage/emulated/0/test_video/1483402593109_0.mp4";
+//    private static final String TEST_PATH_MUVIGRAM_CAMERA_05 = "/storage/emulated/0/test_video/1483402633321_2.mp4";
+//
+//    private static final String TEST_PATH_MUVIGRAM_CAMERA_5000K = "/storage/emulated/0/test_video/camera_sample_5000k.mp4";
+//    private static final String TEST_PATH_OUTSIDE_GIRLSDAY = "/storage/emulated/0/test_video/girlsday_sample.mp4";
+//
+//    private static final String TEST_PATH_NEXUS_CAMERA_01 = "/storage/emulated/0/test_video/nexus_sample01.mp4";
+//    private static final String TEST_PATH_NEXUS_CAMERA_02 = "/storage/emulated/0/test_video/nexus_sample02.mp4";
+//
+//    private static final String TEST_PATH_MP3_63S = "/storage/emulated/0/test_video/sample_sound_63s.mp3";
+//    private static final String TEST_PATH_MP3_221S = "/storage/emulated/0/test_video/sample_song_221s.mp3";
+//    private static final String TEST_PATH_MP3_253S = "/storage/emulated/0/test_video/sample_song_253s.mp3";
 
     private static final int MICRO_WEIGHT = 1000000;
     private static final int MILLI_TO_MICRO = 1000;
@@ -81,6 +82,7 @@ public class ShareFragment extends Fragment implements View.OnClickListener {
     private int mMusicOffset;
     private int mMusicLength;
     private String mOutputPath;
+    private boolean mFromCamera;
 
     private boolean localCopied;
 
@@ -104,6 +106,7 @@ public class ShareFragment extends Fragment implements View.OnClickListener {
             mMusicPath = (String)getArguments().getSerializable( EXTRA_MUSIC_PATH );
             mMusicOffset = (int)getArguments().getSerializable( EXTRA_MUSIC_OFFSET );
             mMusicLength = (int)getArguments().getSerializable( EXTRA_MUSIC_LENGTH );
+            mFromCamera = (boolean)getArguments().getSerializable( EXTRA_FROM_CAMERA );
         }
         mOutputPath = TranscodeUtils.getAppCashingFile( getContext() );
     }
@@ -151,16 +154,10 @@ public class ShareFragment extends Fragment implements View.OnClickListener {
     private void workTranscode() {
         currentWork = TRANSCODE;
         new Thread(() -> {
-            transcodeTranslator();
-//            concatTranslator();
 
-//                MediaEditorNew editorNew = new MediaEditorNew( TranscodeUtils.getAppCashingFile(getContext()), MediaEditorNew.MUTE_AND_ADD_MUSIC, mProgressListener);
-//                editorNew.initVideoTarget( 1, 30, 5000000, 90, 1280, 720 );
-//                editorNew.initAudioTarget( 44100, 2, 128 * 1000 );
-//                editorNew.addSegment( TEST_PATH_NEXUS_CAMERA_02, (long)(2.7 * MICRO_WEIGHT), (long)(9.5 * MICRO_WEIGHT), 100 );
-//                editorNew.addSegment( TEST_PATH_NEXUS_CAMERA_01, (long)(0.4 * MICRO_WEIGHT), (long)(20 * MICRO_WEIGHT), 100 );
-//                editorNew.addMusicSegment( TEST_PATH_MP3_253S, (long)(83.5 * MICRO_WEIGHT), 100 );
-//                editorNew.start();
+            if ( mFromCamera ) concatTranslator();
+            else transcodeTranslator();
+
         }).start();
     }
 
@@ -335,7 +332,7 @@ public class ShareFragment extends Fragment implements View.OnClickListener {
         return (ShareFragment) fragment.getParentFragment();
     }
 
-    public static ShareFragment newInstance(String[] videoPaths, int[] videoOffsets, String musicPath, int musicOffset, int musicLength ) {
+    public static ShareFragment newInstance(String[] videoPaths, int[] videoOffsets, String musicPath, int musicOffset, int musicLength, boolean fromCamera ) {
         ShareFragment fragment = new ShareFragment();
         Bundle args = new Bundle();
         args.putSerializable( EXTRA_VIDEO_PATHS, videoPaths );
@@ -343,6 +340,7 @@ public class ShareFragment extends Fragment implements View.OnClickListener {
         args.putSerializable( EXTRA_MUSIC_PATH, musicPath );
         args.putSerializable( EXTRA_MUSIC_OFFSET, musicOffset );
         args.putSerializable( EXTRA_MUSIC_LENGTH, musicLength );
+        args.putSerializable( EXTRA_FROM_CAMERA, fromCamera );
         fragment.setArguments(args);
         return fragment;
     }
