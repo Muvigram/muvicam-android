@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.editor;
+package com.estsoft.muvicam.ui.editor.edit;
 
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
