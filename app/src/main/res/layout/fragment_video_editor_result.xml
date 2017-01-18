@@ -1,8 +1,22 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
->
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:id="@+id/editor_result_frame_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center">
+
+        <LinearLayout
+            android:id="@+id/editor_result_black_screen"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/Black"
+            android:orientation="horizontal" />
+
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/editor_result_progress_space"
@@ -17,17 +31,27 @@
             android:layout_height="20dp"
             android:orientation="horizontal" />
 
+
         <ImageView
             android:id="@+id/editor_result_delete"
-            android:layout_gravity="center_vertical"
             android:layout_width="15dp"
             android:layout_height="15dp"
+            android:layout_gravity="center_vertical"
             android:src="@drawable/editor_result_delete"
             android:visibility="invisible" />
+
+        <ProgressBar
+            android:id="@+id/editor_result_progress"
+            style="?android:progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:progressDrawable="@drawable/editor_result_progress"
+            android:visibility="gone" />
 
     </FrameLayout>
 
     <LinearLayout
+        android:id="@+id/editor_result_home_done"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
@@ -56,6 +80,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="10dp"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp" />
 </RelativeLayout>

@@ -27,7 +27,7 @@
     <!-- Editor PickerColor-->
     <color name="Black">#000000</color>
     <color name="White">#FFFFFF</color>
-
+    <color name="Empty">#00FFFFFF</color>
     <color name="selectorTop">#F2F2F2F2</color>
     <color name="selectorButton">#0077CC</color>
     <color name="selectorGridLayout">#FFFFFF</color>

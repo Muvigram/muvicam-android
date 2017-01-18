@@ -12,25 +12,19 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LayoutAnimationController;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
-import com.estsoft.muvicam.model.ParcelableVideos;
 import com.estsoft.muvicam.transcoder.utils.ThumbnailUtil;
-import com.estsoft.muvicam.ui.editor.MuvicamMediaPlayer;
 import com.estsoft.muvicam.ui.editor.ResultBarView;
 import com.estsoft.muvicam.ui.editor.VideoPlayerTextureView;
 import com.estsoft.muvicam.ui.editor.result.VideoEditorResultFragment;
@@ -255,7 +249,8 @@ public class VideoEditorEditFragment extends Fragment {
         int width = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
         int height = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
         int rotation = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
-        videoPlayerTextureView = new VideoPlayerTextureView(getActivity(), videoPlayer, width, height, rotation);
+        videoPlayerTextureView = new VideoPlayerTextureView(getActivity(), videoPlayer, nowVideo, width, height, rotation);
+
         videoTextureLayout.addView(videoPlayerTextureView);
         return v;
     }
@@ -488,7 +483,7 @@ public class VideoEditorEditFragment extends Fragment {
                                              videoPlayer.seekTo(nowVideo.getStart());
                                              musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
 
-                                            videoPlayer.start();
+                                             videoPlayer.start();
                                              musicPlayer.start();
                                              videoPlayerTextureView.bringToFront();
                                              return false;
@@ -563,11 +558,25 @@ public class VideoEditorEditFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        if (musicPlayer != null) musicPlayer.release();
-        if (videoPlayer != null) videoPlayer.release();
-        flag = false;
+
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (musicPlayer != null && musicPlayer.isPlaying()){
+            musicPlayer.pause();
+            musicPlayer.stop();
+            musicPlayer.release();
+        }
+
+        if (videoPlayer != null && videoPlayer.isPlaying()){
+            videoPlayer.pause();
+            videoPlayer.stop();
+            videoPlayer.release();
+        }
+        flag = false;
+    }
 
     public int getResultEndTime(List<EditorVideo> editedVideos) {
         int editedVideosEnd = 0;
@@ -607,7 +616,6 @@ public class VideoEditorEditFragment extends Fragment {
                                 @Override
                                 public void run() {
                                     blackScreen.bringToFront();
-
                                 }
                             });
                             editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
@@ -617,7 +625,7 @@ public class VideoEditorEditFragment extends Fragment {
                         // progress bar
                         float progressTime = ((float) videoPlayer.getCurrentPosition() - nowVideo.getStart()) / (nowVideo.getEnd() - nowVideo.getStart());
                         float progress = progressTime * (seekBarRight.getX() - (seekBarLeft.getX() + seekBarLeft.getWidth()));
-                        editProgressBar.setX(seekBarLeft.getX()+seekBarLeft.getWidth()+progress);
+                        editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth() + progress);
                         Thread.sleep(50);
                         editProgressBar.setVisibility(View.VISIBLE);
 //                    getActivity().runOnUiThread(new Runnable() {
@@ -628,7 +636,7 @@ public class VideoEditorEditFragment extends Fragment {
 //                    });
 
 
-                    }else{
+                    } else {
 
                         editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
                     }
