@@ -13,7 +13,6 @@ import android.view.WindowManager;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
-import com.estsoft.muvicam.model.ParcelableVideos;
 import com.estsoft.muvicam.ui.base.BasePresenter;
 import com.estsoft.muvicam.ui.editor.edit.VideoEditorEditFragment;
 import com.estsoft.muvicam.ui.editor.result.VideoEditorResultFragment;
