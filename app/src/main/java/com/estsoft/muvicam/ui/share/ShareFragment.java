@@ -155,8 +155,8 @@ public class ShareFragment extends Fragment implements View.OnClickListener {
         currentWork = TRANSCODE;
         new Thread(() -> {
 
-            if ( mFromCamera ) concatTranslator();
-            else transcodeTranslator();
+            if ( mFromCamera ) transcodeTranslator();
+            else concatTranslator();
 
         }).start();
     }
