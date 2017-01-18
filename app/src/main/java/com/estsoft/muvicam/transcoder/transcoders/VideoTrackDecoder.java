@@ -24,6 +24,8 @@ public class VideoTrackDecoder implements TrackTranscoder {
     private static final int DRAIN_STATE_SHOULD_RETRY_IMMEDIATELY = 1;
     private static final int DRAIN_STATE_CONSUMED = 2;
 
+    private boolean I_FRAME_EXTRACTING = true;
+
     private final MediaExtractor mExtractor;
     private final int mTrackIndex;
     private MediaCodec mDecoder;
@@ -41,8 +43,6 @@ public class VideoTrackDecoder implements TrackTranscoder {
     private boolean forceStop;
 
     private BitmapListener mBitmapListener;
-
-    private boolean I_FRAME_EXTRACTING = false;
 
     private int mWidth;
     private int mHeight;

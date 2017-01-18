@@ -39,7 +39,7 @@ import butterknife.Unbinder;
  * Use the {@link ShareFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ShareFragment extends Fragment implements ShareMvpView, View.OnClickListener {
+public class ShareFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "ShareFragment";
 
     private final static String EXTRA_VIDEO_PATHS = "ShareFragment.videoPaths";
@@ -172,7 +172,7 @@ public class ShareFragment extends Fragment implements ShareMvpView, View.OnClic
         for ( int i = 0; i < mVideoPaths.length; i ++ ) {
             long startTimeUs = 0;
             long endTimeUs = i == mVideoOffsets.length - 1 ? mMusicLength - mVideoOffsets[i] : mVideoOffsets[i + 1] - mVideoOffsets[i];
-            endTimeUs += MILLI_TO_MICRO;
+            endTimeUs *= MILLI_TO_MICRO;
             Log.e(TAG, "transcodeTranslator: [" + i + "] ... "  + startTimeUs + " / " + endTimeUs );
             editor.addSegment( mVideoPaths[i], startTimeUs, endTimeUs, 100);
         }
@@ -249,9 +249,13 @@ public class ShareFragment extends Fragment implements ShareMvpView, View.OnClic
      */
     private void viewBind( View view ) {
         mFacebook.setTag(facebookTag);
+        mFacebook.setVisibility(View.INVISIBLE);
         mInstagram.setTag(instagramTag);
+        mInstagram.setVisibility(View.INVISIBLE);
         mYoutube.setTag(youtubeTag);
+        mYoutube.setVisibility(View.INVISIBLE);
         mNaverLine.setTag(naverLineTag);
+        mNaverLine.setVisibility(View.INVISIBLE);
         mLocalStore.setTag(localStoreTag);
         mThumbnailHolder.setImageBitmap( getFirstThumbnail( mVideoPaths[0] ) );
         mProgressContainer.setOnTouchListener(disableTouch);

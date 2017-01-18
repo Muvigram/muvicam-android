@@ -6,6 +6,8 @@ import android.os.Parcelable;
 import android.util.Log;
 
 public class EditorVideo implements Parcelable {
+    private static int index = 0;
+    private static final String TAG = "EditorVideo";
 
     private String videoPath;
     private int durationMiliSec;
@@ -23,6 +25,8 @@ public class EditorVideo implements Parcelable {
 
 
     public EditorVideo() {
+        index ++;
+        Log.d(TAG, "EditorVideo: " + index);
         isSelected = false;
         numSelected = -1;
         resolutionAcceptable = false;

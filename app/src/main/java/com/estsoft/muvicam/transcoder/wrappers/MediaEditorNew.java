@@ -79,6 +79,7 @@ public class MediaEditorNew {
         if ( segment.getStartTimeUs() < segment.getEndTimeUs() ) {
             mSegmentLists.add(segment);
             mTotalEstimatedDuration += segment.getEndTimeUs() - segment.getStartTimeUs();
+            Log.e(TAG, "addSegment: Adding segment ... " + inputFilePath + " / " + segment.getStartTimeUs() + " to " + segment.getEndTimeUs() );
         } else {
             Log.e(TAG, "addSegment: Skipping segment ... " + inputFilePath + " / " + segment.getStartTimeUs() + " to " + segment.getEndTimeUs() );
         }
