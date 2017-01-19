@@ -1,9 +1,5 @@
 package com.estsoft.muvicam.ui.home;
 
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Camera;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -41,32 +37,26 @@ import timber.log.Timber;
  */
 public class HomeActivity extends BaseActivity {
 
-  private final static String EXTRA_MUSIC_URI = "HomeActivity.musicUri";
-
   private final static int PAGE_MUSIC = 0;
   private final static int PAGE_CAMERA = 1;
 
   private HomeComponent mHomeComponent;
 
-  public static Intent newIntent(Context packageContext) {
-    return new Intent(packageContext, HomeActivity.class);
-  }
-
-  public static Intent newIntent(Context packageContext, Uri musicUri) {
-    Intent intent = new Intent(packageContext, HomeActivity.class);
-    intent.putExtra(EXTRA_MUSIC_URI, musicUri);
-    return intent;
+  public HomeComponent getComponent() {
+    return mHomeComponent;
   }
 
   public static HomeActivity get(Fragment fragment) {
     return (HomeActivity) fragment.getActivity();
   }
 
-  @Inject
-  HomePagerAdapter mPagerAdapter;
+  public static HomeActivity get(View view) {
+    return (HomeActivity) view.getContext();
+  }
 
-  @BindView(R.id.home_view_pager)
-  ControllableViewPager mViewPager;
+  @Inject HomePagerAdapter mPagerAdapter;
+
+  @BindView(R.id.home_view_pager) ControllableViewPager mViewPager;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -74,7 +64,7 @@ public class HomeActivity extends BaseActivity {
 
     // set fullscreen mode
     setFullscreen();
-    setDecorView();
+    setUpDecorView();
 
     // bind view
     setContentView(R.layout.activity_home);
@@ -89,7 +79,7 @@ public class HomeActivity extends BaseActivity {
     setUpViewPager();
   }
 
-  /* Restore state from restart activity. */
+  /* Restore state, when restart activity. */
   @Override
   protected void onStart() {
     super.onStart();
@@ -108,8 +98,13 @@ public class HomeActivity extends BaseActivity {
   }
 
   @Override
-  protected void onStop() {
+  protected void onPause() {
     stopBackgroundThread();
+    super.onPause();
+  }
+
+  @Override
+  protected void onStop() {
     super.onStop();
   }
 
@@ -120,6 +115,9 @@ public class HomeActivity extends BaseActivity {
     }
     super.onDestroy();
   }
+
+  // DISPLAY SETTING //////////////////////////////////////////////////////////////
+
 
   public void setFullscreen() {
     requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -137,47 +135,28 @@ public class HomeActivity extends BaseActivity {
           | View.SYSTEM_UI_FLAG_FULLSCREEN      // hide status bar
           | View.SYSTEM_UI_FLAG_IMMERSIVE;
 
-  private final static String BACKGROUND_HANDLER_THREAD = "BACKGROUND_HANDLER";
+  Runnable hideDecorView;
 
-  HandlerThread mBackgroundThread;
-  Handler mBackgroundHandler;
-
-  private void startBackgroundThread() {
-    mBackgroundThread = new HandlerThread(BACKGROUND_HANDLER_THREAD);
-    mBackgroundThread.start();
-    mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
-  }
-
-  private void stopBackgroundThread() {
-    mBackgroundHandler.removeCallbacks(hideDecorView);
-    mBackgroundThread.quitSafely();
-    try {
-      // Waits forever for this thread to die.
-      mBackgroundThread.join();
-      mBackgroundThread = null;
-      mBackgroundHandler = null;
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-  }
-
-  public void setDecorView() {
+  public void setUpDecorView() {
     mDecorView = getWindow().getDecorView();
 
     mDecorView.setOnSystemUiVisibilityChangeListener(visibility -> {
-      Timber.e("onSystemUiVisibilityChange");
+      Timber.e("onSystemUiVisibilityChange %08x / %08x", visibility, DEFAULT_UI_SETTING);
       int xor = DEFAULT_UI_SETTING ^ visibility;
-      if (xor != 0) {
-        mBackgroundHandler.postDelayed(hideDecorView, 1500);
+      if (xor != 0 && mBackgroundHandler != null) {
+        mBackgroundHandler.postDelayed(this::hideDecorView, 1500);
+        // TODO - sync with top scroll bar.
       }
     });
   }
 
-  Runnable hideDecorView = this::hideDecorView;
-
   public void hideDecorView() {
-    new Handler(getMainLooper()).post(() -> mDecorView.setSystemUiVisibility(DEFAULT_UI_SETTING));
+    new Handler(getMainLooper()).post(
+        () -> mDecorView.setSystemUiVisibility(DEFAULT_UI_SETTING)
+    );
   }
+
+  // VIEW PAGER //////////////////////////////////////////////////////////////
 
   public void setUpViewPager() {
     mPagerAdapter.setFragmentList(
@@ -190,22 +169,21 @@ public class HomeActivity extends BaseActivity {
     mViewPager.setCurrentItem(PAGE_CAMERA);
   }
 
-  public void backToCamera(Music music) {
-    if (music != null) {
-      ((CameraFragment) mPagerAdapter.getItem(1)).updateMusic(music);
-      Toast.makeText(this, "Music selected : " + music.uri().toString(), Toast.LENGTH_SHORT).show();
-    }
-    mViewPager.setCurrentItem(PAGE_CAMERA);
-  }
-
-  public HomeComponent getComponent() {
-    return mHomeComponent;
-  }
+  // TRANSITIONS ////////////////////////////////////////////////////////////////////////
 
   private boolean isCuttingVideo;
 
   public void setCuttingVideo(boolean cuttingVideo) {
     isCuttingVideo = cuttingVideo;
+  }
+
+  public void selectMusic(Music music) {
+    if (music != null) {
+      ((CameraFragment) mPagerAdapter.getItem(PAGE_CAMERA)).updateMusic(music);
+      // TODO - might be deleted before deployment
+      Toast.makeText(this, "Music selected : " + music.uri().toString(), Toast.LENGTH_SHORT).show();
+    }
+    mViewPager.setCurrentItem(PAGE_CAMERA);
   }
 
   @Override
@@ -220,12 +198,40 @@ public class HomeActivity extends BaseActivity {
         super.onBackPressed();
       }
     } else {
-      backToCamera(null);
+      mViewPager.setCurrentItem(PAGE_CAMERA);
     }
   }
 
+  // HANDLER ////////////////////////////////////////////////////////////////////////
+
+  private final static String BACKGROUND_HANDLER_THREAD = "BACKGROUND_HANDLER";
+
+  HandlerThread mBackgroundThread;
+  Handler mBackgroundHandler;
+
+  private void startBackgroundThread() {
+    mBackgroundThread = new HandlerThread(BACKGROUND_HANDLER_THREAD);
+    mBackgroundThread.start();
+    mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
+  }
+
+  private void stopBackgroundThread() {
+    mBackgroundThread.quitSafely();
+    try {
+      // Waits forever for this thread to die.
+      mBackgroundThread.join();
+      mBackgroundThread = null;
+      mBackgroundHandler.removeCallbacksAndMessages(null);
+      mBackgroundHandler = null;
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
+  // SCROLLABLE ////////////////////////////////////////////////////////////////////////
+
   public boolean isScrollable() {
-    return mViewPager.getCurrentItem() != PAGE_CAMERA || mViewPager.isScrollable();
+    return !(mViewPager.getCurrentItem() == PAGE_CAMERA) || mViewPager.isScrollable();
   }
 
   public void enableScroll() {
@@ -239,6 +245,7 @@ public class HomeActivity extends BaseActivity {
       mViewPager.disableScroll();
     }
   }
+
 }
 
 

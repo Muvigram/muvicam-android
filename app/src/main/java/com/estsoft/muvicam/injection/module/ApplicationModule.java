@@ -40,4 +40,5 @@ public class ApplicationModule {
   public MusicService provideMusicService() {
     return new MusicService(mApplication);
   }
+
 }
