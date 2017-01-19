@@ -10,6 +10,7 @@ import android.graphics.Matrix;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.estsoft.muvicam.injection.qualifier.ActivityContext;
 import com.estsoft.muvicam.transcoder.noneencode.MediaConcater;
@@ -69,6 +70,8 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
         mContext = context;
         mActivity = activity;
         mTmpStoredPath = TranscodeUtils.getAppCashingFile( mContext );
+        Toast.makeText(mContext, mTmpStoredPath, Toast.LENGTH_LONG).show();
+        Log.e(TAG, "SharePresenter: " + mTmpStoredPath );
     }
 
     @Override
@@ -199,16 +202,13 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
         MediaEditorNew editor = new MediaEditorNew(mTmpStoredPath, transcodeMode, mTranscodeProgressListener);
         editor.initVideoTarget( 1, 30, 5000000, 90, 1280, 720 );
         editor.initAudioTarget( 44100, 2, 128 * 1000 );
+
         for ( int i = 0; i < mVideoPaths.length; i ++ ) {
-            long startTimeUs = 0;
-            long endTimeUs = i == mVideoOffsets.length - 1 ? mMusicLength - mVideoOffsets[i] : mVideoOffsets[i + 1] - mVideoOffsets[i];
-            endTimeUs *= MILLI_TO_MICRO;
-            Log.e(TAG, "transcodeTranslator: [" + i + "] ... "  + startTimeUs + " / " + endTimeUs );
-            editor.addSegment( mVideoPaths[i], startTimeUs, endTimeUs, 100);
+            editor.addSegment( mVideoPaths[i], mVideoStarts[i] * MILLI_TO_MICRO, mVideoEnds[i] * MILLI_TO_MICRO, 100 );
+            Log.d(TAG, "transcodeTranslate: [" + i + "] ... " + mVideoStarts[i] * MILLI_TO_MICRO + " / " + mVideoEnds[i] * MILLI_TO_MICRO );
         }
         if (transcodeMode == MediaEditorNew.MUTE_AND_ADD_MUSIC) {
-            Log.e(TAG, "transcodeTranslator: [music] ... "  + mMusicOffset + " / " + mMusicLength + " / " + (mMusicLength - mMusicOffset) );
-            editor.addMusicSegment( mMusicPath, (long)(mMusicOffset * MILLI_TO_MICRO), 100 );
+            editor.addMusicSegment( mMusicPath, (long)(mMusicOffset * MILLI_TO_MICRO), 100);
         }
         return editor;
     }
