@@ -2,6 +2,7 @@ package com.estsoft.muvicam.ui.editor.result;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -23,9 +24,11 @@ import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
+import com.estsoft.muvicam.ui.editor.EditorActivity;
 import com.estsoft.muvicam.ui.editor.ResultBarView;
 import com.estsoft.muvicam.ui.editor.VideoPlayerTextureView;
 import com.estsoft.muvicam.ui.editor.edit.VideoEditorEditFragment;
+import com.estsoft.muvicam.ui.share.ShareActivity;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -50,8 +53,9 @@ public class VideoEditorResultFragment extends Fragment {
     public final static String EXTRA_MUSIC_LENGTH = "VideoEditorResultFragment.musicLength";
     RecyclerView selectedVideoButtons;
     ImageView deleteButton;
-    LinearLayout linearResultSpace, editorResultBlackScreen;
-    ResultBarView resultBarView;
+    LinearLayout editorResultBlackScreen;
+    FrameLayout linearResultSpace;
+    ArrayList<ResultBarView> resultBarViews = new ArrayList<>();
     EditorResultMediaPlayer videoResultPlayer, videoResultPlayer2, musicResultPlayer;
     VideoPlayerTextureView videoResultTextureView, videoResultTextureView2;
     FrameLayout videoSpaceFrameLayout;
@@ -63,6 +67,7 @@ public class VideoEditorResultFragment extends Fragment {
     int resultVideosTotalTime;
     int nowVideoNum;
     DataPassListener mCallBack;
+    ImageView doneButton;
     VideoEditSelectedNumberAdapter.OnItemClickListener itemClickListener = new VideoEditSelectedNumberAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(View view, int position) {
@@ -162,12 +167,28 @@ public class VideoEditorResultFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         selectedVideoButtons.setLayoutManager(linearLayoutManager);
         deleteButton = (ImageView) v.findViewById(R.id.editor_result_delete);
-        linearResultSpace = (LinearLayout) v.findViewById(R.id.editor_result_space_linear);
+        linearResultSpace = (FrameLayout) v.findViewById(R.id.editor_result_space_linear);
         resultProgressBar = (ProgressBar) v.findViewById(R.id.editor_result_progress);
+        ResultBarView resultBarView;
         Log.d(TAG, "onCreateView: resultVideosTotalTime1" + resultVideosTotalTime);
-        resultBarView = new ResultBarView(getContext(), resultVideosTotalTime);
-        linearResultSpace.addView(resultBarView);
+        int resultTime = 0;
+        for (int i = 0; i < resultVideos.size(); i++) {
+
+            int nowVideoTime = resultVideos.get(i).getEnd() - resultVideos.get(i).getStart();
+            int remainTime = 15000 - resultVideosTotalTime;
+            Log.d(TAG, "onCreateView: resultTime " + resultTime);
+            if (i == resultVideos.size() - 1 && remainTime < 1000) {
+                resultBarView = new ResultBarView(getContext(), resultTime, 15000 - resultTime);
+            } else {
+                resultBarView = new ResultBarView(getContext(), resultTime, nowVideoTime);
+            }
+            resultTime += nowVideoTime;
+            linearResultSpace.addView(resultBarView);
+            resultBarViews.add(resultBarView);
+        }
+
         editorResultBlackScreen = (LinearLayout) v.findViewById(R.id.editor_result_black_screen);
+        doneButton = (ImageView) v.findViewById(R.id.editor_done);
         if (resultVideosTotalTime > 0) {
             Log.d(TAG, "onCreateView: resultVideosTotalTime2" + resultVideosTotalTime);
             deleteButton.setTranslationX(deleteButtonLocation(resultVideosTotalTime));
@@ -183,7 +204,6 @@ public class VideoEditorResultFragment extends Fragment {
         VideoEditSelectedNumberAdapter videoEditSelectedNumberAdapter = new VideoEditSelectedNumberAdapter(getActivity(), selectedVideos, itemClickListener);
 
         selectedVideoButtons.setAdapter(videoEditSelectedNumberAdapter);
-
         if (resultVideos.size() > 0) {
             try {
                 if (resultVideos.size() > 1) {
@@ -230,66 +250,56 @@ public class VideoEditorResultFragment extends Fragment {
                 EditorVideo removedVideo = resultVideos.get(resultVideos.size() - 1);
                 resultVideosTotalTime = resultVideosTotalTime - (removedVideo.getEnd() - removedVideo.getStart());
                 Log.d(TAG, "onCreateView: resultVideosTotalTime3" + resultVideosTotalTime);
-                resultVideos.remove(resultVideos.get(resultVideos.size() - 1));
-                linearResultSpace.removeView(resultBarView);
-                resultBarView = new ResultBarView(getContext(), resultVideosTotalTime);
-                Log.d(TAG, "onCreateView: resultVideosTotalTime4" + resultVideosTotalTime);
-                linearResultSpace.addView(resultBarView);
+
+                videoResultPlayer.stop();
+                videoResultPlayer2.stop();
+                musicResultPlayer.pause();
+
                 if (resultVideos.size() > 0) {
+                    resultVideos.remove(resultVideos.get(resultVideos.size() - 1));
+                    linearResultSpace.removeView(resultBarViews.get(resultBarViews.size() - 1));
+                    linearResultSpace.invalidate();
+                    resultBarViews.remove(resultBarViews.get(resultBarViews.size() - 1));
                     deleteButton.setTranslationX(deleteButtonLocation(resultVideosTotalTime));
                     Log.d(TAG, "onCreateView: resultVideosTotalTime5" + resultVideosTotalTime);
                 } else {
                     deleteButton.setVisibility(View.GONE);
                 }
+                //after removed last video
+                if (resultVideos.size() > 0) {
+                    if (resultVideos.size() > 1) prepareVideoPlayer(videoResultPlayer2, 1, false);
+                    prepareVideoPlayer(videoResultPlayer, 0, true);
+                    videoResultTextureView.bringToFront();
+                    musicResultPlayer.seekTo(musicOffset);
+                    videoResultPlayer.start();
+                } else {
+                    deleteButton.setVisibility(View.GONE);
+                    resultProgressBar.setProgress(0);
+                    resultProgressBar.setVisibility(View.GONE);
+                    editorResultBlackScreen.bringToFront();
+                }
+            }
+        });
+        doneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                getActivity().startActivity(ShareActivity.newIntent();
             }
         });
 
         videoSpaceFrameLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (flag && !musicResultPlayer.isPlaying()) {
+                if (flag && resultVideos.size() > 0 && !musicResultPlayer.isPlaying()) {
                     nowVideoNum = 0;
-                    deleteButton.setVisibility(View.GONE);
                     if (resultVideos.size() > 0) {
-                        try {
-                            if (resultVideos.size() > 1) {
-                                MediaMetadataRetriever retriever2 = new MediaMetadataRetriever();
-                                FileInputStream fis2 = new FileInputStream(resultVideos.get(1).getVideoPath());
-                                FileDescriptor fd2 = fis2.getFD();
-                                videoResultPlayer2.reset();
-                                videoResultPlayer2.setDataSource(fd2);
-                                videoResultPlayer2.setOffset(resultVideos.get(1).getStart());
-                                retriever2.setDataSource(fd2);
-                                int width2 = Integer.valueOf(retriever2.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-                                int height2 = Integer.valueOf(retriever2.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
-                                int rotation2 = Integer.valueOf(retriever2.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
-                                videoResultTextureView2 = new VideoPlayerTextureView(getActivity(), videoResultPlayer2, resultVideos.get(1), width2, height2, rotation2);
-                                videoSpaceFrameLayout.addView(videoResultTextureView2);
-                                fis2.close();
-
-                            }
-                            MediaMetadataRetriever retriever1 = new MediaMetadataRetriever();
-                            FileInputStream fis = new FileInputStream(resultVideos.get(0).getVideoPath());
-                            FileDescriptor fd = fis.getFD();
-                            videoResultPlayer.reset();
-                            videoResultPlayer.setDataSource(fd);
-                            videoResultPlayer.setOffset(resultVideos.get(0).getStart());
-                            videoResultPlayer.setFirst(true);
-                            retriever1.setDataSource(fd);
-                            int width1 = Integer.valueOf(retriever1.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-                            int height1 = Integer.valueOf(retriever1.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
-                            int rotation1 = Integer.valueOf(retriever1.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
-                            videoResultTextureView = new VideoPlayerTextureView(getActivity(), videoResultPlayer, resultVideos.get(0), width1, height1, rotation1);
-                            musicResultPlayer.start();
-                            resultProgressBar.bringToFront();
-                            videoSpaceFrameLayout.addView(videoResultTextureView);
-                            fis.close();
-                        } catch (IOException io) {
-                            StringWriter sw = new StringWriter();
-                            PrintWriter pw = new PrintWriter(sw);
-                            io.printStackTrace(pw);
-                            Log.d(TAG, "editadaptor exception" + sw.toString());
+                        if (resultVideos.size() > 1) {
+                            prepareVideoPlayer(videoResultPlayer2, 1, false);
                         }
+                        prepareVideoPlayer(videoResultPlayer, 0, true);
+                        videoResultTextureView.bringToFront();
+                        musicResultPlayer.seekTo(musicOffset);
+                        videoResultPlayer.start();
 
                     }
                 }
@@ -353,14 +363,15 @@ public class VideoEditorResultFragment extends Fragment {
 
             while (flag) {
                 try {
+
                     if (flag && musicResultPlayer.isPlaying()) {
                         int progress = musicResultPlayer.getCurrentPosition() / 150;
                         resultProgressBar.setProgress(progress);
-                        resultThread.sleep(50);
+                        resultThread.sleep(1);
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                resultProgressBar.setVisibility(View.VISIBLE);
+                                resultProgressBar.invalidate();
                             }
                         });
                         if (nowVideoNum % 2 == 0 && flag && videoResultPlayer.isPlaying()) {
@@ -481,4 +492,6 @@ public class VideoEditorResultFragment extends Fragment {
             e.printStackTrace();
         }
     }
+
+
 }

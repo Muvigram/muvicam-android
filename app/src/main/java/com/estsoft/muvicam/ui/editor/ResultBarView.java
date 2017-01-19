@@ -20,8 +20,10 @@ import com.estsoft.muvicam.R;
 public class ResultBarView extends View {
     private Paint paint;
     // ms
+    private int nowVideoTime;
     private int totalTime;
-String TAG = "ResultBarView";
+    String TAG = "ResultBarView";
+
     public ResultBarView(Context context) {
         super(context);
     }
@@ -38,11 +40,12 @@ String TAG = "ResultBarView";
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    public ResultBarView(Context context, int totalTime) {
+    public ResultBarView(Context context,int totalTime, int nowVideoTime) {
         super(context);
-        Log.d(TAG, "onCreate: rbv rvt"+totalTime);
+        Log.d(TAG, "onCreate: rbv rvt" + totalTime);
 
         paint = new Paint();
+        this.nowVideoTime = nowVideoTime;
         this.totalTime = totalTime;
     }
 
@@ -51,16 +54,20 @@ String TAG = "ResultBarView";
         super.onDraw(canvas);
         paint.setColor(ContextCompat.getColor(getContext(), R.color.resultSpace));
         paint.setStyle(Paint.Style.FILL);
-        paint.setAntiAlias(true);
         DisplayMetrics outMetrics = new DisplayMetrics();
         ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
-        int widthPSec =  outMetrics.widthPixels/15;
-        int dpi =  outMetrics.densityDpi/160;
-        Log.d("onDraw", "onDraw: "+((float)totalTime)/1000);
-        Log.d("onDraw", "onDraw: editorvideoWidth"+widthPSec);
-        Log.d("onDraw", "onDraw: dpi"+dpi);
+        int widthPSec = outMetrics.widthPixels / 15;
+        int dpi = outMetrics.densityDpi / 160;
+        Log.d("onDraw", "onDraw: " + ((float) totalTime) / 1000);
+        Log.d("onDraw", "onDraw: editorvideoWidth" + widthPSec);
+        Log.d("onDraw", "onDraw: dpi" + dpi);
 
-        canvas.drawRect(0, 0, Math.round(((float)totalTime)/1000 * widthPSec), Math.round(20*dpi), paint);
+        canvas.drawRect((float)Math.ceil(((float) totalTime) / 1000 * widthPSec), 0,(float)Math.ceil(((float) totalTime+nowVideoTime) / 1000 * widthPSec), Math.round(20 * dpi), paint);
+        paint.setColor(ContextCompat.getColor(getContext(), R.color.selectorVideoSelected));
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(dpi);
+        canvas.drawRect((float)Math.ceil(((float) totalTime) / 1000 * widthPSec), 0, (float)Math.ceil(((float) totalTime+nowVideoTime) / 1000 * widthPSec), Math.round(20 * dpi), paint);
+
     }
 
 }

@@ -45,8 +45,7 @@ public class VideoEditorEditFragment extends Fragment {
     int selectedNum, musicOffset, musicLength;
     int resultVideosTotalTime;
     VideoEditorResultFragment.DataPassListener mCallBack;
-    LinearLayout resultSpaceLinearLayout, blackScreen;
-    ResultBarView resultBarView;
+    FrameLayout resultSpaceLinearLayout;
     RecyclerView videoEdit;
     ImageView seekBarLeft, seekBarRight;
     VideoEditorEditAdapter videoEditAdapter;
@@ -187,11 +186,22 @@ public class VideoEditorEditFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_video_editor_edit, container, false);
-        resultSpaceLinearLayout = (LinearLayout) v.findViewById(R.id.editor_edit_result_space_linear);
-        blackScreen = (LinearLayout) v.findViewById(R.id.editor_edit_black_screen);
+        resultSpaceLinearLayout = (FrameLayout) v.findViewById(R.id.editor_edit_result_space_linear);
         Log.d(TAG, "onCreateView: edit rvt" + resultVideosTotalTime);
-        resultBarView = new ResultBarView(getContext(), resultVideosTotalTime);
-        resultSpaceLinearLayout.addView(resultBarView);
+        ResultBarView resultBarView;
+        int resultTime = 0;
+        for (int i = 0; i < resultVideos.size(); i++) {
+
+            int nowVideoTime = resultVideos.get(i).getEnd() - resultVideos.get(i).getStart();
+            int remainTime = 15000 - resultVideosTotalTime;
+            if (i == resultVideos.size() - 1 && remainTime < 1000){
+                resultBarView = new ResultBarView(getContext(), resultTime, 15000-resultTime);
+            } else {
+                resultBarView = new ResultBarView(getContext(), resultTime, nowVideoTime);
+            }
+            resultTime += nowVideoTime;
+            resultSpaceLinearLayout.addView(resultBarView);
+        }
         videoEdit = (RecyclerView) v.findViewById(R.id.editor_edit_recycler_thumbnails);
         LinearLayoutManager linearLayoutManagerE = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         videoEdit.setLayoutManager(linearLayoutManagerE);
@@ -564,13 +574,13 @@ public class VideoEditorEditFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        if (musicPlayer != null && musicPlayer.isPlaying()){
+        if (musicPlayer != null && musicPlayer.isPlaying()) {
             musicPlayer.pause();
             musicPlayer.stop();
             musicPlayer.release();
         }
 
-        if (videoPlayer != null && videoPlayer.isPlaying()){
+        if (videoPlayer != null && videoPlayer.isPlaying()) {
             videoPlayer.pause();
             videoPlayer.stop();
             videoPlayer.release();
@@ -612,13 +622,12 @@ public class VideoEditorEditFragment extends Fragment {
                         if (videoPlayer.getCurrentPosition() >= nowVideo.getEnd()) {
                             Log.d(TAG, "run: paused");
                             videoPlayer.pause();
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    blackScreen.bringToFront();
-                                }
-                            });
+                            videoPlayer.seekTo(nowVideo.getStart());
+                            musicPlayer.seekTo(musicOffset);
                             editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
+
+                            videoPlayer.start();
+                            musicPlayer.start();
                         }
 
 
@@ -628,13 +637,6 @@ public class VideoEditorEditFragment extends Fragment {
                         editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth() + progress);
                         Thread.sleep(50);
                         editProgressBar.setVisibility(View.VISIBLE);
-//                    getActivity().runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            blackScreen.bringToFront();
-//                        }
-//                    });
-
 
                     } else {
 

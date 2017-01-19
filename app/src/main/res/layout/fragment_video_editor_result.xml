@@ -25,11 +25,12 @@
         android:layout_alignParentTop="true"
         android:background="@color/selectorVideoSelected">
 
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/editor_result_space_linear"
             android:layout_width="match_parent"
             android:layout_height="20dp"
-            android:orientation="horizontal" />
+            android:orientation="horizontal"
+             />
 
 
         <ImageView
@@ -56,6 +57,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/editor_result_progress_space"
+        android:layout_marginTop="3dp"
+        android:layout_marginRight="3dp"
         android:orientation="vertical">
 
         <ImageView

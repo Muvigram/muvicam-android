@@ -10,13 +10,7 @@
         android:layout_height="match_parent"
         android:background="@color/White"
         >
-        <LinearLayout
-            android:id="@+id/editor_edit_black_screen"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/Black"
-            android:orientation="horizontal"
-            />
+
 
     </FrameLayout>
 
@@ -24,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/editor_edit_result_space_linear"
             android:layout_width="match_parent"
             android:layout_height="20dp"
@@ -95,7 +89,7 @@
             </RelativeLayout>
             <View
                 android:id="@+id/editor_edit_progress"
-                android:layout_width="1dp"
+                android:layout_width="3dp"
                 android:layout_height="wrap_content"
                 android:background="#FF0000"
                 />
