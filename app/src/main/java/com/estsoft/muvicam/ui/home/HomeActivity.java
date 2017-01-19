@@ -99,7 +99,6 @@ public class HomeActivity extends BaseActivity {
 
   @Override
   protected void onPause() {
-    mBackgroundHandler.removeCallbacksAndMessages(null);
     stopBackgroundThread();
     super.onPause();
   }
@@ -140,21 +139,19 @@ public class HomeActivity extends BaseActivity {
 
   public void setUpDecorView() {
     mDecorView = getWindow().getDecorView();
-    hideDecorView = this::hideDecorView;
 
     mDecorView.setOnSystemUiVisibilityChangeListener(visibility -> {
-      Timber.e("onSystemUiVisibilityChange");
+      Timber.e("onSystemUiVisibilityChange %08x / %08x", visibility, DEFAULT_UI_SETTING);
       int xor = DEFAULT_UI_SETTING ^ visibility;
-      if (xor != 0) {
-        mBackgroundHandler.post(hideDecorView);
+      if (xor != 0 && mBackgroundHandler != null) {
+        mBackgroundHandler.postDelayed(this::hideDecorView, 1500);
       }
     });
   }
 
   public void hideDecorView() {
-    new Handler(getMainLooper()).postDelayed(
-        () -> mDecorView.setSystemUiVisibility(DEFAULT_UI_SETTING),
-        1500
+    new Handler(getMainLooper()).post(
+        () -> mDecorView.setSystemUiVisibility(DEFAULT_UI_SETTING)
     );
   }
 
@@ -223,6 +220,7 @@ public class HomeActivity extends BaseActivity {
       // Waits forever for this thread to die.
       mBackgroundThread.join();
       mBackgroundThread = null;
+      mBackgroundHandler.removeCallbacksAndMessages(null);
       mBackgroundHandler = null;
     } catch (InterruptedException e) {
       e.printStackTrace();
