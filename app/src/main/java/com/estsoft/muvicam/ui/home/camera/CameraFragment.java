@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
@@ -988,7 +989,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   private void createRecordSession() {
     try {
-      Timber.e("createRecordSession %b\n", (Looper.myLooper() == Looper.getMainLooper()));
       // Surface texture
       SurfaceTexture texture = mTextureView.getSurfaceTexture();
       assert texture != null;
@@ -1201,15 +1201,15 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     });
     try {
       if (mMusic == null) {
-        mPlayer.setDataSource(getResources().getAssets()
-            .openFd("silence_15_sec.mp3").getFileDescriptor());
+        AssetFileDescriptor afd = getResources().getAssets().openFd("silence_15_sec.mp3");
+        mPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
       } else {
         mPlayer.setDataSource(getContext(), mMusic.uri());
       }
       mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
       mPlayer.prepareAsync();
     } catch (IOException e) {
-      Timber.e("prepare() failed");
+      Timber.e(e, "prepare() failed");
     }
   }
 
