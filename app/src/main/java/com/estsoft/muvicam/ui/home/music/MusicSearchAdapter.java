@@ -1,7 +1,5 @@
 package com.estsoft.muvicam.ui.home.music;
 
-import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +18,6 @@ import butterknife.ButterKnife;
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.ui.home.HomeActivity;
-import com.estsoft.muvicam.ui.home.camera.CameraFragment;
 import com.estsoft.muvicam.ui.home.music.injection.MusicScope;
 
 /**
@@ -80,9 +77,8 @@ public class MusicSearchAdapter extends RecyclerView.Adapter<MusicSearchAdapter.
       }
       mTitle.setText(music.title());
       mArtist.setText(music.artist());
-      mMusicButton.setOnClickListener(v -> {
-        ((HomeActivity) mMusicButton.getContext()).backToCamera(music);
-      });
+      mMusicButton.setOnClickListener(v ->
+          HomeActivity.get(mMusicButton).selectMusic(music));
     }
 
     public MusicViewHolder(View itemView) {

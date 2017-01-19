@@ -17,6 +17,7 @@ import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.ui.home.HomeActivity;
 import com.estsoft.muvicam.util.RxUtil;
+import com.estsoft.muvicam.util.UnitConversionUtil;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -87,7 +88,7 @@ public class MusicCutFragment extends Fragment {
   public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     mParentFragment = ((CameraFragment) getParentFragment());
-    ((HomeActivity) getActivity()).setCuttingVideo(true);
+    HomeActivity.get(mParentFragment).setCuttingVideo(true);
   }
 
   @Nullable
@@ -103,13 +104,8 @@ public class MusicCutFragment extends Fragment {
     super.onViewCreated(view, savedInstanceState);
     Uri uri = getArguments().getParcelable(ARG_MUSIC);
     mOffset = getArguments().getInt(ARG_OFFSET);
-    mWaveformView.setSoundFile(uri, millisecToSec(mOffset));
+    mWaveformView.setSoundFile(uri, UnitConversionUtil.millisecToSec(mOffset));
     mWaveformView.setListener(mWaveformListener);
-  }
-
-  @Override
-  public void onResume() {
-    super.onResume();
   }
 
   @Override
@@ -126,7 +122,7 @@ public class MusicCutFragment extends Fragment {
 
   @Override
   public void onDestroy() {
-    ((HomeActivity) getActivity()).setCuttingVideo(false);
+    HomeActivity.get(mParentFragment).setCuttingVideo(false);
     super.onDestroy();
   }
 
@@ -150,13 +146,13 @@ public class MusicCutFragment extends Fragment {
     @Override
     public void waveformTouchEnd() {
       RxUtil.unsubscribe(mSubscription);
-      mTempOffset = secToMillisec(mWaveformView.fixOffset());
+      mTempOffset = UnitConversionUtil.secToMillisec(mWaveformView.fixOffset());
       mParentFragment.cutMusic(mTempOffset);
       mParentFragment.startPlayer();
       mSubscription = mParentFragment.startSubscribePlayer()
           .observeOn(AndroidSchedulers.mainThread())
           .subscribeOn(Schedulers.newThread())
-          .map(MusicCutFragment::millisecToSec)
+          .map(UnitConversionUtil::millisecToSec)
           .filter(sec -> {
             if (mWaveformView != null && mWaveformView.isValidRunning(sec)) {
               return true;
@@ -175,11 +171,4 @@ public class MusicCutFragment extends Fragment {
     }
   };
 
-  public static int secToMillisec(float sec) {
-    return (int) (sec * 1000);
-  }
-
-  public static float millisecToSec(int millisec) {
-    return millisec / 1000.0f;
-  }
 }
