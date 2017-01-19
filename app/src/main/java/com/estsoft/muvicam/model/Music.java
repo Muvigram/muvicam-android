@@ -20,7 +20,7 @@ public abstract class Music implements Comparable<Music>, Parcelable {
 
   public abstract Uri uri();
   public abstract String title();
-  @Nullable public abstract String artist();
+  public abstract String artist();
   @Nullable public abstract Bitmap thumbnail();
 
   public static Music create(Music music) {

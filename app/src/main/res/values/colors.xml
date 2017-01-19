@@ -18,11 +18,19 @@
 
     <!-- Background color -->
     <color name="backgroundWhite">@color/grey_white_1000</color>
+    <color name="backgroundWhiteGrey">@color/grey_100</color>
     <color name="backgroundLightGrey">@color/grey_300</color>
+
+    <color name="backgroundOpaqueWhite">#F2F2F2F2</color>
     <color name="backgroundOpaqueGrey">#98989898</color>
 
+    <!-- Button color -->
+    <color name="buttonBlueAccent">@color/light_blue_A700</color>
 
 
+    <!--
+    ///*** Localized color scheme should be below this comment. ***///
+    -->
 
     <!-- Editor PickerColor-->
     <color name="Black">#000000</color>
@@ -37,5 +45,13 @@
 
     <color name="resultSpace">#FF546A</color>
     <color name="editorTrimmer">#FFAE4A</color>
+
+    <!--
+    ///*** Example for localized color scheme. ***///
+    -->
+    <color name="library_video_item_unsupported">#99000000</color>
+    <color name="library_video_item_selected">#59FFFFFF</color>
+
+    <color name="hide_text">#99FFFFFF</color>
 
 </resources>
