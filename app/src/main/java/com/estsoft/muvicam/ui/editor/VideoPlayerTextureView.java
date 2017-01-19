@@ -50,7 +50,7 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
         this.muvicamMediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
             @Override
             public void onSeekComplete(MediaPlayer mediaPlayer) {
-                Log.d(TAG, "seekTest: " + mediaPlayer.getCurrentPosition());
+                Log.d(TAG, "seekTest1 c: " + mediaPlayer.getCurrentPosition());
                 nowVideo.setStart(mediaPlayer.getCurrentPosition());
                 mediaPlayer.start();
             }

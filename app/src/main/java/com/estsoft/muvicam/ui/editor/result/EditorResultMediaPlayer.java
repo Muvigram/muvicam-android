@@ -29,8 +29,8 @@ public class EditorResultMediaPlayer extends MediaPlayer {
 
             if (isMusicPlayer) {
                 activity.findViewById(R.id.editor_result_progress).bringToFront();
+                activity.findViewById(R.id.editor_result_delete).setVisibility(View.VISIBLE);
                 activity.findViewById(R.id.editor_result_progress).setVisibility(View.VISIBLE);
-                activity.findViewById(R.id.editor_result_delete).setVisibility(View.GONE);
             }
         }
     };
@@ -41,10 +41,10 @@ public class EditorResultMediaPlayer extends MediaPlayer {
                 activity.findViewById(R.id.editor_result_black_screen).bringToFront();
                 ((ProgressBar) activity.findViewById(R.id.editor_result_progress)).setProgress(0);
 
+                activity.findViewById(R.id.editor_result_progress).setVisibility(View.GONE);
                 activity.findViewById(R.id.editor_result_space_linear).bringToFront();
                 activity.findViewById(R.id.editor_result_delete).bringToFront();
                 activity.findViewById(R.id.editor_result_progress).setVisibility(View.GONE);
-                activity.findViewById(R.id.editor_result_delete).setVisibility(View.VISIBLE);
 
             }
         }
