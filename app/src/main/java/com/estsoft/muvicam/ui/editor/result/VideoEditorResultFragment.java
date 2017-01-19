@@ -27,6 +27,7 @@ import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.ui.editor.EditorActivity;
 import com.estsoft.muvicam.ui.editor.ResultBarView;
 import com.estsoft.muvicam.ui.editor.VideoPlayerTextureView;
+import com.estsoft.muvicam.ui.editor.edit.TrimmerBackGroundView;
 import com.estsoft.muvicam.ui.editor.edit.VideoEditorEditFragment;
 import com.estsoft.muvicam.ui.share.ShareActivity;
 
@@ -194,7 +195,6 @@ public class VideoEditorResultFragment extends Fragment {
             deleteButton.setTranslationX(deleteButtonLocation(resultVideosTotalTime));
             //    deleteButton.setVisibility(View.VISIBLE);
         }
-
         return v;
     }
 
@@ -367,7 +367,7 @@ public class VideoEditorResultFragment extends Fragment {
                     if (flag && musicResultPlayer.isPlaying()) {
                         int progress = musicResultPlayer.getCurrentPosition() / 150;
                         resultProgressBar.setProgress(progress);
-                        resultThread.sleep(1);
+                        resultThread.sleep(50);
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
