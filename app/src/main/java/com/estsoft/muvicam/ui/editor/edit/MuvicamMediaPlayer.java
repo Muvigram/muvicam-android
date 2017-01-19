@@ -75,6 +75,8 @@ public class MuvicamMediaPlayer extends MediaPlayer {
         if (VERBOSE) Log.d(TAG, "seekTo: resulted ... " + userSeek);
         long ceilingMilliSec = (long)Math.ceil( userSeek / (double) MICRO_TO_MILLI );
         if (VERBOSE) Log.d(TAG, "seekTo: roundedMilliSec ... " + ceilingMilliSec);
+        Log.d(TAG, "seekTo: seetTest1 request ... " + i);
+        Log.d(TAG, "seekTo: seekTest1 " + ceilingMilliSec);
         super.seekTo( (int) ceilingMilliSec);
     }
 

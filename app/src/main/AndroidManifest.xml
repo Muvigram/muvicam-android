@@ -31,6 +31,9 @@
         <activity
             android:name=".ui.library.LibraryActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.library.LibraryActivity"
+            android:screenOrientation="portrait" />
         <activity android:name=".ui.editor.EditorActivity"></activity>
     </application>
 

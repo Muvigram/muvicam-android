@@ -44,8 +44,7 @@ public class VideoEditSelectedNumberAdapter extends RecyclerView.Adapter<VideoEd
         int fragmentNumber = position + 1;
         Log.d(TAG, "onBindViewHolder: "+fragmentNumber);
         holder.videoNumber.setText("" + fragmentNumber);
-        holder.videoNumber.setTextColor(ContextCompat.getColor(mActivity, R.color.textWhite));
-        // TODO - caution when merging.
+        holder.videoNumber.setTextColor(ContextCompat.getColor(mActivity, R.color.White));
       }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
