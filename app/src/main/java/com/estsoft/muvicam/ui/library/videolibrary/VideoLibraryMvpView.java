@@ -16,6 +16,6 @@ public interface VideoLibraryMvpView extends MvpView {
     void showError();
 
     // selection
-    void selectVideo(Video[] videos);
-    void releaseVideo(Video[] videos);
+    void selectVideo(List<Video> videos);
+    void releaseVideo(List<Video> videos);
 }

@@ -23,12 +23,15 @@ public class VideoService {
   public VideoService(Context context) {
     mContext = context;
   }
+
+  private int mIdColumn;
   private int mPathColumn;
   private int mHeightColumn;
   private int mWidthColumn;
   private int mDurationColumn;
 
   public void initColumnIndex(Cursor cursor) {
+    mIdColumn = cursor.getColumnIndex(MediaStore.Video.Media._ID);
     mPathColumn = cursor.getColumnIndex(MediaStore.Video.Media.DATA);
     mHeightColumn = cursor.getColumnIndex(MediaStore.Video.Media.HEIGHT);
     mWidthColumn = cursor.getColumnIndex(MediaStore.Video.Media.WIDTH);
@@ -49,14 +52,14 @@ public class VideoService {
 
     return CursorObservable.create(videoCursor, false)
         .filter(this::isValid)
-        .retry() // TODO - verify the effect.
         .map(cursor -> Video.builder()
             .setUri(getUri(cursor))
             .setDuration(getDuration(cursor))
             .setWidth(getWidth(cursor))
             .setHeight(getHeight(cursor))
             .setThumbnail(getThumbnail(cursor))
-            .build());
+            .build())
+        .doOnCompleted(videoCursor::close);
   }
 
   private boolean isValid(Cursor cursor) {
@@ -80,8 +83,20 @@ public class VideoService {
   }
 
   public Bitmap getThumbnail(Cursor cursor) {
+
     String path = cursor.getString(mPathColumn);
-    return ThumbnailUtils.createVideoThumbnail(path, MediaStore.Video.Thumbnails.MICRO_KIND);
+
+    return ThumbnailUtils.createVideoThumbnail(path,
+        MediaStore.Video.Thumbnails.MINI_KIND);
+
+    /*long id = cursor.getLong(mIdColumn);
+    Timber.e("PATH : %s", id);
+    Bitmap bmp = MediaStore.Video.Thumbnails.getThumbnail(
+        mContext.getContentResolver(),
+        id, MediaStore.Video.Thumbnails.MINI_KIND,
+        null);
+
+    return bmp;*/
   }
 
 }

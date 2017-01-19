@@ -90,7 +90,7 @@ public class VideoLibraryFragment extends Fragment implements VideoLibraryMvpVie
     super.onActivityCreated(savedInstanceState);
     // Set up recycler view with GridLayoutManager
     mRecyclerView.setAdapter(mAdapter);
-    mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
+    mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
 
     // Load videos from local library
     mPresenter.loadVideos();
@@ -144,12 +144,12 @@ public class VideoLibraryFragment extends Fragment implements VideoLibraryMvpVie
   }
 
   @Override
-  public void selectVideo(Video[] videos) {
+  public void selectVideo(List<Video> videos) {
     mAdapter.updateView(videos);
   }
 
   @Override
-  public void releaseVideo(Video[] videos) {
+  public void releaseVideo(List<Video> videos) {
     mAdapter.updateView(videos);
   }
 

@@ -19,6 +19,8 @@ import java.util.Locale;
 import javax.inject.Inject;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
+import timber.log.Timber;
 
 @VideoLibraryScope
 public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdapter.VideoViewHolder> {
@@ -59,7 +61,7 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
 
   @Override
   public void onBindViewHolder(VideoViewHolder holder, int position) {
-    holder.bindVideo(mVideos.get(position), position);
+    holder.bindVideo(mVideos.get(position));
   }
 
   //
@@ -73,33 +75,34 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
     @BindView(R.id.library_video_item_main_duration)  TextView mVideoDuration;
     @BindView(R.id.library_video_item_selected_order) TextView mSelectedOrder;
 
-    public void bindVideo(Video video, int position) {
-
+    public void bindVideo(Video video) {
       // Main frame
       mLayoutMain.setVisibility(View.VISIBLE);
-      mVideoThumbnail.setImageBitmap(video.thumbnail());
+      if (video.thumbnail() != null) {
+        mVideoThumbnail.setImageBitmap(video.thumbnail());
+      }
       mVideoDuration.setText(getDurationFormat(video.duration()));
 
       // Selected frame
       if (video.isSelected()) {
         mLayoutSelected.setVisibility(View.VISIBLE);
-        mSelectedOrder.setText(video.getSelectionOrder());
+        mSelectedOrder.setText(String.valueOf(video.getSelectionOrder() + 1));
       } else {
-        mLayoutSelected.setVisibility(View.GONE);
+        mLayoutSelected.setVisibility(View.INVISIBLE);
       }
 
       // Supported aspect ratio (16:9)
       if (isSupportedRatio(video.width(), video.height())) {
-        mLayoutUnsupported.setVisibility(View.GONE);
+        mLayoutUnsupported.setVisibility(View.INVISIBLE);
       } else { // unsupported aspect ratio (NOT 16:9)
         mLayoutUnsupported.setVisibility(View.VISIBLE);
       }
 
       mLayoutMain.setOnClickListener(v -> {
         if (video.isSelected()) {
-          mFragment.getPresenter().onItemSelected(video);
-        } else /* if not selected */ {
           mFragment.getPresenter().onItemReleased(video);
+        } else /* if not selected */ {
+          mFragment.getPresenter().onItemSelected(video);
         }
 
       });
@@ -107,12 +110,14 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
 
     public VideoViewHolder(View itemView) {
       super(itemView);
+      ButterKnife.bind(this, itemView);
     }
   }
 
-  public void updateView(Video[] videos) {
+  public void updateView(List<Video> videos) {
     int pos;
-    for (Video video : videos) {
+    for (int i = 0; i < videos.size(); i++) {
+      Video video = videos.get(i);
       pos = mVideos.indexOf(video);
       notifyItemChanged(pos);
     }

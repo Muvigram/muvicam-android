@@ -19,6 +19,7 @@ import timber.log.Timber;
 
 
 /**
+ *
  * Created by Administrator on 2017-01-05.
  */
 
@@ -48,6 +49,8 @@ public class VideoLibraryPresenter extends BasePresenter<VideoLibraryMvpView> {
   }
 
   public void loadVideos() {
+    List<Video> stock = new ArrayList<>();
+
     checkViewAttached();
     RxUtil.unsubscribe(mSubscription);
     mSubscription = mDataManager.getVideos()
@@ -55,15 +58,17 @@ public class VideoLibraryPresenter extends BasePresenter<VideoLibraryMvpView> {
         .subscribeOn(Schedulers.io())
         .subscribe(
             videos -> {
-              if (videos.isEmpty()) {
-                getMvpView().showVideosEmpty();
-              } else {
-                getMvpView().showVideos(videos);
-              }
+              stock.addAll(videos);
+              getMvpView().showVideos(stock);
             },
             e -> {
               Timber.e(e, "There was an error loading the videos.");
               getMvpView().showError();
+            },
+            () -> {
+              if (stock.isEmpty()) {
+                getMvpView().showVideosEmpty();
+              }
             }
         );
   }
@@ -76,14 +81,15 @@ public class VideoLibraryPresenter extends BasePresenter<VideoLibraryMvpView> {
 
   public void onItemReleased(Video video) {
     video.released();
-    removeVideo(video);
     getMvpView().releaseVideo(mSelectedVideos);
+    removeVideo(video);
   }
 
   public List<EditorVideo> getVideos() {
     List<EditorVideo> editorVideoList = new ArrayList<>();
 
-    for (Video video : mSelectedVideos) {
+    for (int i = 0; i < mSelectedVideos.size(); i++) {
+      Video video = mSelectedVideos.get(i);
       EditorVideo editorVideo = new EditorVideo();
       editorVideo.setDurationMiliSec(video.duration());
       editorVideo.setVideoPath(video.uri().toString());
@@ -94,34 +100,23 @@ public class VideoLibraryPresenter extends BasePresenter<VideoLibraryMvpView> {
   }
 
   private static final int MAX_SELECTION = 5;
-  private Video[] mSelectedVideos = new Video[MAX_SELECTION];
+  private List<Video> mSelectedVideos = new ArrayList<>();
 
   private void pushVideo(Video item) {
-    if (mSelectedVideos.length == MAX_SELECTION) {
-      Timber.i("Selected video array is empty.");
+    if (mSelectedVideos.size() == MAX_SELECTION) {
+      Timber.i("Selected video array is full.");
       return;
     }
-    item.setSelectionOrder(mSelectedVideos.length);
-    mSelectedVideos[mSelectedVideos.length] = item;
+    item.setSelectionOrder(mSelectedVideos.size());
+    mSelectedVideos.add(item);
   }
 
   private Video removeVideo(Video item) {
-    if (mSelectedVideos.length == 0) {
-      Timber.i("Selected video array is full.");
+    if (mSelectedVideos.size() == 0) {
+      Timber.i("Selected video array is empty.");
       return null;
     }
-
-    int i; // 0, 1, 2, 3, 4
-
-    //noinspection StatementWithEmptyBody
-    for (i = 0; i < MAX_SELECTION && mSelectedVideos[i].compareTo(item) != 0; i++)
-      ;
-    Video temp = mSelectedVideos[i++];
-    for (; i < MAX_SELECTION; i++) {
-      mSelectedVideos[i].setSelectionOrder(i-1);
-      mSelectedVideos[i-1] = mSelectedVideos[i];
-    }
-
-    return temp;
+    int i = mSelectedVideos.indexOf(item);
+    return i == -1 ? null : mSelectedVideos.remove(i);
   }
 }
