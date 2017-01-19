@@ -3,7 +3,6 @@ package com.estsoft.muvicam.data.local;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.provider.MediaStore;
 
@@ -11,8 +10,11 @@ import com.estsoft.muvicam.model.Video;
 import com.estsoft.muvicam.util.CursorObservable;
 
 import rx.Observable;
+import timber.log.Timber;
+
 
 /**
+ *
  * Created by jaylim on 12/01/2017.
  */
 
@@ -22,6 +24,7 @@ public class VideoService {
 
   public VideoService(Context context) {
     mContext = context;
+
   }
 
   private int mIdColumn;
@@ -83,20 +86,16 @@ public class VideoService {
   }
 
   public Bitmap getThumbnail(Cursor cursor) {
-
-    String path = cursor.getString(mPathColumn);
-
-    return ThumbnailUtils.createVideoThumbnail(path,
-        MediaStore.Video.Thumbnails.MINI_KIND);
-
-    /*long id = cursor.getLong(mIdColumn);
+    long id = cursor.getLong(mIdColumn);
     Timber.e("PATH : %s", id);
     Bitmap bmp = MediaStore.Video.Thumbnails.getThumbnail(
         mContext.getContentResolver(),
         id, MediaStore.Video.Thumbnails.MINI_KIND,
         null);
 
-    return bmp;*/
+    return bmp;
   }
+
+
 
 }

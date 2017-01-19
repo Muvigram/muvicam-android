@@ -145,6 +145,7 @@ public class HomeActivity extends BaseActivity {
       int xor = DEFAULT_UI_SETTING ^ visibility;
       if (xor != 0 && mBackgroundHandler != null) {
         mBackgroundHandler.postDelayed(this::hideDecorView, 1500);
+        // TODO - sync with top scroll bar.
       }
     });
   }
@@ -244,6 +245,7 @@ public class HomeActivity extends BaseActivity {
       mViewPager.disableScroll();
     }
   }
+
 }
 
 
