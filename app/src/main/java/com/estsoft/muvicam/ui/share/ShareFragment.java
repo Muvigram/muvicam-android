@@ -2,8 +2,6 @@ package com.estsoft.muvicam.ui.share;
 
 
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -23,7 +21,6 @@ import com.estsoft.muvicam.transcoder.noneencode.MediaConcater;
 import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
 import com.estsoft.muvicam.transcoder.wrappers.MediaEditorNew;
 import com.estsoft.muvicam.transcoder.wrappers.ProgressListener;
-import com.estsoft.muvicam.ui.home.music.MusicMvpView;
 import com.estsoft.muvicam.ui.share.injection.DaggerShareComponent;
 import com.estsoft.muvicam.ui.share.injection.ShareComponent;
 
@@ -31,6 +28,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 
 /**
@@ -41,7 +39,7 @@ import butterknife.Unbinder;
  * Use the {@link ShareFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ShareFragment extends Fragment implements View.OnClickListener, ShareMvpView {
+public class ShareFragment extends Fragment implements ShareMvpView {
     private static final String TAG = "ShareFragment";
 
     ShareComponent mShareComponent;
@@ -98,33 +96,23 @@ public class ShareFragment extends Fragment implements View.OnClickListener, Sha
 
     @BindView(R.id.result_video) VideoView mVideoView;
     @BindView(R.id.sns_facebook) ImageView mFacebook;
+    @BindView(R.id.sns_twitter) ImageView mTwitter;
     @BindView(R.id.sns_instagram) ImageView mInstagram;
-    @BindView(R.id.sns_youtube) ImageView mYoutube;
-    @BindView(R.id.sns_line) ImageView mNaverLine;
     @BindView(R.id.sns_local_store) ImageView mLocalStore;
     @BindView(R.id.custom_progress) CircularProgressBar mProgressbar;
     @BindView(R.id.progress_container) FrameLayout mProgressContainer;
     @BindView(R.id.thumbnail_holder) ImageView mThumbnailHolder;
+
+    @OnClick(R.id.sns_facebook) public void onFacebookClicked() { mPresenter.facebookConnect(); }
+    @OnClick(R.id.sns_twitter) public void onTwitterClicked() { mPresenter.twitterConnect(); }
+    @OnClick(R.id.sns_instagram) public void onInstagramClicked() { mPresenter.instagramConnect(); }
+    @OnClick(R.id.sns_local_store) public void onLocalstoreClicked() { mPresenter.storeToGallery(); }
+
     Unbinder mUnbinder;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (getArguments() != null ) {
-            setupTranscodeModeAndStoreValues( getArguments() );
-        }
-
-        mOutputPath = TranscodeUtils.getAppCashingFile( getContext() );
-
-//        if (getArguments() != null) {
-//            mVideoPaths = (String[])getArguments().getSerializable( EXTRA_VIDEO_PATHS );
-//            mVideoOffsets = (int[])getArguments().getSerializable( EXTRA_VIDEO_OFFSETS );
-//            mMusicPath = (String)getArguments().getSerializable( EXTRA_MUSIC_PATH );
-//            mMusicOffset = (int)getArguments().getSerializable( EXTRA_MUSIC_OFFSET );
-//            mMusicLength = (int)getArguments().getSerializable( EXTRA_MUSIC_LENGTH );
-//            mFromEditor = (boolean)getArguments().getSerializable( EXTRA_FROM_CAMERA );
-//        }
     }
 
     @Override
@@ -132,8 +120,8 @@ public class ShareFragment extends Fragment implements View.OnClickListener, Sha
                              Bundle savedInstanceState) {
         View view = inflater.inflate( R.layout.fragment_share, container, false );
         mUnbinder = ButterKnife.bind(this, view);
-        viewBind( view );
-        viewListenerSetting();
+//        viewBind( view );
+//        viewListenerSetting();
         return view;
     }
 
@@ -146,8 +134,19 @@ public class ShareFragment extends Fragment implements View.OnClickListener, Sha
                 .activityComponent( ac ).build();
         mShareComponent.inject( this );
         mPresenter.attachView( this );
-        Log.d(TAG, "onViewCreated: " + mPresenter.toString());
-        workTranscode();
+        if (getArguments() != null ) {
+            mPresenter.setVideoParams(
+                    (String[])getArguments().getSerializable( EXTRA_VIDEO_PATHS ),
+                    (int[])getArguments().getSerializable( EXTRA_VIDEO_OFFSETS ),
+                    (int[])getArguments().getSerializable( EXTRA_VIDEO_STARTS ),
+                    (int[])getArguments().getSerializable( EXTRA_VIDEO_ENDS ),
+                    (String)getArguments().getSerializable( EXTRA_MUSIC_PATH ),
+                    (int)getArguments().getSerializable( EXTRA_MUSIC_OFFSET ),
+                    (int)getArguments().getSerializable( EXTRA_MUSIC_LENGTH ),
+                    (boolean)getArguments().getSerializable( EXTRA_FROM_CAMERA ));
+        }
+        mPresenter.doTranscode();
+//        workTranscode();
 
     }
 
@@ -177,29 +176,14 @@ public class ShareFragment extends Fragment implements View.OnClickListener, Sha
         super.onDestroy();
     }
 
-    private void setupTranscodeModeAndStoreValues (Bundle bundle ) {
-        mVideoPaths = (String[])getArguments().getSerializable( EXTRA_VIDEO_PATHS );
-        mMusicPath = (String)getArguments().getSerializable( EXTRA_MUSIC_PATH );
-        mMusicOffset = (int)getArguments().getSerializable( EXTRA_MUSIC_OFFSET );
-        mMusicLength = (int)getArguments().getSerializable( EXTRA_MUSIC_LENGTH );
-        mFromEditor = (boolean)getArguments().getSerializable( EXTRA_FROM_CAMERA );
-        if ( mFromEditor ) {
-            // Transcode mode
-            mVideoStarts = (int[])getArguments().getSerializable( EXTRA_VIDEO_STARTS );
-            mVideoEnds = (int[])getArguments().getSerializable( EXTRA_VIDEO_ENDS );
-        } else {
-            // Concat mode
-            mVideoOffsets = (int[])getArguments().getSerializable( EXTRA_VIDEO_OFFSETS );
-        }
-    }
 
+//    private void onFacebookClicked() {
+//        Toast.makeText(getContext(), "onFacebookClicked", Toast.LENGTH_SHORT).show();
+//    }
+//    private void onInstagramClicked() {
+//        Toast.makeText(getContext(), "onInstagramClicked", Toast.LENGTH_SHORT).show();
+//    }
 
-    private void onFacebookClicked() {
-        Toast.makeText(getContext(), "onFacebookClicked", Toast.LENGTH_SHORT).show();
-    }
-    private void onInstagramClicked() {
-        Toast.makeText(getContext(), "onInstagramClicked", Toast.LENGTH_SHORT).show();
-    }
     private void onYoutubeClicked() {
         Toast.makeText(getContext(), "onYoutubeClicked", Toast.LENGTH_SHORT).show();
     }
@@ -238,6 +222,16 @@ public class ShareFragment extends Fragment implements View.OnClickListener, Sha
         }).start();
     }
 
+    @Override
+    public void showToast( String msg ) {
+        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT ).show();
+    }
+
+    @Override
+    public void holdFirstThumbnail(Bitmap bitmap) {
+        mThumbnailHolder.setImageBitmap( bitmap );
+    }
+
     private void transcodeTranslator() {
         int transcodeMode = mMusicPath.equals("") ? MediaEditorNew.NORMAL : MediaEditorNew.MUTE_AND_ADD_MUSIC;
         MediaEditorNew editor = new MediaEditorNew( mOutputPath, transcodeMode, mProgressListener );
@@ -254,7 +248,7 @@ public class ShareFragment extends Fragment implements View.OnClickListener, Sha
             Log.e(TAG, "transcodeTranslator: [music] ... "  + mMusicOffset + " / " + mMusicLength + " / " + (mMusicLength - mMusicOffset) );
             editor.addMusicSegment( mMusicPath, (long)(mMusicOffset * MILLI_TO_MICRO), 100 );
         }
-        editor.start();
+        editor.startWork();
     }
 
     private void concatTranslator() {
@@ -271,7 +265,19 @@ public class ShareFragment extends Fragment implements View.OnClickListener, Sha
             Log.e(TAG, "concatTranslater: [music] ... "  + mMusicOffset + " / " + mMusicLength + " / " + (mMusicLength - mMusicOffset) );
             concater.addMusicSegment( mMusicPath, (long)(mMusicOffset * MILLI_TO_MICRO), 100 );
         }
-        concater.start();
+        concater.startWork();
+    }
+
+    @Override
+    public void updateProgress( float progress, boolean isFinished ) {
+        if (!isFinished ) {
+            if (mProgressContainer.getVisibility() != View.VISIBLE ) mProgressContainer.setVisibility( View.VISIBLE );
+            if ( progress == 0 ) mProgressbar.setProgress( 0 );
+            mProgressbar.setProgressWithAnimation( progress + 10 );
+        } else {
+            mProgressbar.setProgressWithAnimation( 100 );
+            mProgressContainer.setVisibility( View.GONE );
+        }
     }
 
     private ProgressListener mProgressListener = new ProgressListener() {
@@ -308,25 +314,23 @@ public class ShareFragment extends Fragment implements View.OnClickListener, Sha
      * view settings and view binding
      */
     private void viewBind( View view ) {
-        mFacebook.setTag(facebookTag);
         mFacebook.setVisibility(View.INVISIBLE);
-        mInstagram.setTag(instagramTag);
         mInstagram.setVisibility(View.INVISIBLE);
-        mYoutube.setTag(youtubeTag);
-        mYoutube.setVisibility(View.INVISIBLE);
-        mNaverLine.setTag(naverLineTag);
-        mNaverLine.setVisibility(View.INVISIBLE);
-        mLocalStore.setTag(localStoreTag);
-        mThumbnailHolder.setImageBitmap( getFirstThumbnail( mVideoPaths[0] ) );
+        mTwitter.setVisibility(View.INVISIBLE);
         mProgressContainer.setOnTouchListener(disableTouch);
         mProgressContainer.setVisibility(View.GONE);
     }
-    private void viewListenerSetting() {
-        mFacebook.setOnClickListener(this);
-        mInstagram.setOnClickListener(this);
-        mYoutube.setOnClickListener(this);
-        mNaverLine.setOnClickListener(this);
-        mLocalStore.setOnClickListener(this);
+
+    @Override
+    public void videoSetAndStart( String videoPath ) {
+        mVideoView.setOnCompletionListener( mediaPlayer  ->    mVideoView.start()   );
+        mVideoView.setOnPreparedListener( mediaPlayer ->  {
+            mVideoView.start();
+//                disappearThumbnail( 200 );
+            mThumbnailHolder.setVisibility(View.GONE);
+        });
+        mVideoView.setVideoPath( videoPath );
+
     }
 
     private void videoViewSetting() {
@@ -339,17 +343,6 @@ public class ShareFragment extends Fragment implements View.OnClickListener, Sha
         mVideoView.setVideoPath( mOutputPath );
     }
 
-    private Bitmap getFirstThumbnail(String path ) {
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource( path );
-        Bitmap bitmap = retriever.getFrameAtTime(0);
-        if (bitmap.getWidth() > bitmap.getHeight()) {
-            Matrix matrix = new Matrix();
-            matrix.postRotate(90);
-            bitmap = Bitmap.createBitmap( bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-        }
-        return bitmap;
-    }
     private void disappearThumbnail( final long timeUs ) {
         new Thread(new Runnable() {
             @Override
@@ -396,7 +389,7 @@ public class ShareFragment extends Fragment implements View.OnClickListener, Sha
     }
 
     public static ShareFragment newInstance(String[] videoPaths, int[] videoOffsets, int[] videoStarts, int[] videoEnds,
-                                            String musicPath, int musicOffset, int musicLength, boolean fromCamera ) {
+                                            String musicPath, int musicOffset, int musicLength, boolean fromEditor) {
         ShareFragment fragment = new ShareFragment();
         Bundle args = new Bundle();
         args.putSerializable( EXTRA_VIDEO_PATHS, videoPaths );
@@ -406,25 +399,8 @@ public class ShareFragment extends Fragment implements View.OnClickListener, Sha
         args.putSerializable( EXTRA_MUSIC_PATH, musicPath );
         args.putSerializable( EXTRA_MUSIC_OFFSET, musicOffset );
         args.putSerializable( EXTRA_MUSIC_LENGTH, musicLength );
-        args.putSerializable( EXTRA_FROM_CAMERA, fromCamera );
+        args.putSerializable( EXTRA_FROM_CAMERA, fromEditor);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    private final String facebookTag = "facebook";
-    private final String instagramTag = "instagram";
-    private final String youtubeTag = "youtube";
-    private final String naverLineTag = "naverLine";
-    private final String localStoreTag = "localStore";
-    @Override
-    public void onClick(View view) {
-        String tag = (String)view.getTag();
-        switch ( tag ) {
-            case facebookTag : onFacebookClicked(); break;
-            case instagramTag : onInstagramClicked(); break;
-            case youtubeTag : onYoutubeClicked(); break;
-            case naverLineTag : onNaverLineClicked(); break;
-            case localStoreTag : onLocalStoreClicked(); break;
-        }
     }
 }

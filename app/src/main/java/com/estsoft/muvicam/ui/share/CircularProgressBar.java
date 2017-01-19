@@ -173,7 +173,7 @@ public class CircularProgressBar extends View {
     public void setProgressWithAnimation(float progress) {
 
         ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(this, "progress", progress);
-        objectAnimator.setDuration( 500 );
+        objectAnimator.setDuration( 250 );
         objectAnimator.setInterpolator(new DecelerateInterpolator());
         objectAnimator.start();
     }

@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.estsoft.muvicam.transcoder.transcoders.BufferListener;
 import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
+import com.estsoft.muvicam.transcoder.wrappers.MediaTranscoder;
 import com.estsoft.muvicam.transcoder.wrappers.ProgressListener;
 
 import java.io.IOException;
@@ -19,7 +20,7 @@ import java.util.List;
  * Created by estsoft on 2017-01-03.
  */
 
-public class MediaConcater {
+public class MediaConcater implements MediaTranscoder {
     private static final String TAG = "MediaConcater";
     public static final String AAC_MIME_TYPE = "audio/mp4a-latm";
     public static final int NORMAL = -98;
@@ -54,6 +55,7 @@ public class MediaConcater {
 
 
     //NOTE startTimeUs is checked for I-Frame Sync before this
+    @Override
     public void addSegment(String inputFilePath, long startTimeUs, long endTimeUs, int audioVolume ) {
         int mode = MediaConcatSegment.NORMAL;
         if ( currentMode == MUTE_AND_ADD_MUSIC ) mode = MediaConcatSegment.VIDEO_ONLY;
@@ -67,6 +69,7 @@ public class MediaConcater {
         if ( currentMode == NORMAL ) setAudioTrackToMuxer( inputFilePath );
     }
 
+    @Override
     public void addMusicSegment(String inputFilePath, long offsetUs, int audioVolume ) {
         if ( currentMode == NORMAL ) throw new IllegalStateException( "to add MusicSegment, mode should be ADD_MUSIC or MUTE_AND_ADD_MUSIC " );
         mMusicSegment = new MediaConcatAudioSegment(mBufferListener, inputFilePath, offsetUs, audioVolume);
@@ -110,8 +113,8 @@ public class MediaConcater {
         }
     }
 
-
-    public void start() {
+    @Override
+    public void startWork() {
         if (mListener != null) callListener( ProgressListener.START );
         if (mMusicSegment != null) mMusicSegment.prepare();
 
@@ -216,6 +219,11 @@ public class MediaConcater {
         }
     };
 
+    @Override
+    public void initVideoTarget(int interval, int frameRate, int bitrate, int rotation, int width, int height) {
+    }
 
-
+    @Override
+    public void initAudioTarget(int sampleRate, int channelCount, int bitrate) {
+    }
 }
