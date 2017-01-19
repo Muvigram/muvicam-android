@@ -25,6 +25,7 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnFocusChange;
+import butterknife.OnTextChanged;
 import butterknife.Unbinder;
 import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.R;
@@ -52,6 +53,12 @@ public class MusicFragment extends Fragment implements MusicMvpView {
 
   @BindView(R.id.music_search_bar_edit_text) EditText mSearchTextBar;
   @BindView(R.id.music_search_recyclerview) RecyclerView mRecyclerView;
+
+  @OnTextChanged(R.id.music_search_bar_edit_text)
+  public void searchBarSearchRequested(CharSequence text) {
+    mPresenter.loadMusics(text);
+  }
+
 
   @OnFocusChange(R.id.music_search_bar_edit_text)
   public void searchBarOnFocus(View v, boolean hasFocus) {
@@ -110,7 +117,7 @@ public class MusicFragment extends Fragment implements MusicMvpView {
       // return; TODO - ???
     }
 
-    mPresenter.loadMusics();
+    mPresenter.loadMusics(null);
   }
 
   @Override

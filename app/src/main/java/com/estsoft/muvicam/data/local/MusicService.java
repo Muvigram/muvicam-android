@@ -33,6 +33,7 @@ public class MusicService {
   private int mDurationColumn;
 
   public void initColumnIndex(Cursor cursor) {
+
     mPathColumn = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
     mTitleColumn = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
     mArtistColumn = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
@@ -51,9 +52,9 @@ public class MusicService {
       return null;
     }
 
-    return CursorObservable.create(musicCursor, false)
-        .onBackpressureBuffer(128) // TODO - for "MissingBackPressureException"
-        .filter(this::isEnoughDuration)
+    return CursorObservable.create(musicCursor, true)
+        //.onBackpressureBuffer(128) // TODO - for "MissingBackPressureException"
+        .filter(this::isValid)
         .map(cursor -> Music.builder()
             .setUri(getUri(cursor))
             .setTitle(getTitle(cursor))
@@ -63,7 +64,7 @@ public class MusicService {
         .doOnCompleted(musicCursor::close);
   }
 
-  public boolean isEnoughDuration(Cursor cursor) {
+  public boolean isValid(Cursor cursor) {
     return Integer.parseInt(cursor.getString(mDurationColumn)) > 15000/* 15 sec */;
   }
 

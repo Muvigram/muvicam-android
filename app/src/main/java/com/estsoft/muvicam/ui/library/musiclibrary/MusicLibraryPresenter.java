@@ -10,6 +10,7 @@ import com.estsoft.muvicam.util.RxUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -45,47 +46,26 @@ public class MusicLibraryPresenter extends BasePresenter<MusicLibraryMvpView> {
   }
 
   public void loadMusics(@Nullable CharSequence text) {
-    List<Music> musics = new ArrayList<>();
-
-    String str = text == null ? "" : text.toString();
-    String[] tokens = str.split("[ \\t\\n\\u000B\\f\\r]+");
-
+    List<Music> stock = new ArrayList<>();
     checkViewAttached();
     RxUtil.unsubscribe(mSubscription);
-    mSubscription = mDataManager.getMusics()
+    mSubscription = mDataManager.getMusics(text)
         .observeOn(AndroidSchedulers.mainThread())
         .subscribeOn(Schedulers.io())
-        .filter(music -> filterOutMusics(music, tokens))
         .subscribe(
-            music -> {
-              musics.add(music);
-              if (musics.size() % 10 == 0) {
-                getMvpView().showMusics(musics);
-              }
+            musics -> {
+              stock.addAll(musics);
+              getMvpView().showMusics(stock);
             },
             e -> {
               Timber.e(e, "There was an error loading the music");
               getMvpView().showError();
             },
             () -> {
-              if (musics.isEmpty()) {
+              if (stock.isEmpty()) {
                 getMvpView().showMusicsEmpty();
-              } else {
-                getMvpView().showMusics(musics);
               }
             }
         );
-  }
-
-  private static boolean filterOutMusics(Music music, String[] tokens) {
-    String title = music.title();
-    String artist = music.artist();
-    for (int i = 0; i < tokens.length; i++) {
-      String token = tokens[i];
-      if (title.contains(token) || artist.contains(token)) {
-        return true;
-      }
-    }
-    return false;
   }
 }

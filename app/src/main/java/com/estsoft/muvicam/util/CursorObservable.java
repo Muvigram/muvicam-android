@@ -17,19 +17,19 @@ public class CursorObservable {
 
     return Observable.create(sub -> {
       if (sub.isUnsubscribed()) return;
-      if(cursor != null && cursor.moveToFirst()){
+      if(cursor == null || !cursor.moveToFirst()){
         sub.onCompleted();
         return;
       }
       try {
-        while (cursor != null && cursor.moveToNext()) {
+        while (cursor.moveToNext()) {
           sub.onNext(cursor);
         }
         sub.onCompleted();
       } catch (Exception e) {
         sub.onError(e);
       } finally {
-        if (autoClose && cursor != null && !cursor.isClosed()) {
+        if (autoClose && !cursor.isClosed()) {
           cursor.close();
         }
       }

@@ -1,5 +1,7 @@
 package com.estsoft.muvicam.ui.home.music;
 
+import android.support.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -47,31 +49,25 @@ public class MusicPresenter extends BasePresenter<MusicMvpView> {
   }
 
   /* Business logic here */
-  public void loadMusics() {
-
-    List<Music> musics = new ArrayList<>();
-
+  public void loadMusics(@Nullable CharSequence text) {
+    List<Music> stock = new ArrayList<>();
     checkViewAttached();
     RxUtil.unsubscribe(mSubscription);
-    mSubscription = mDataManager.getMusics()
+    mSubscription = mDataManager.getMusics(text)
         .observeOn(AndroidSchedulers.mainThread())
         .subscribeOn(Schedulers.io())
         .subscribe(
-            music -> {
-              musics.add(music);
-              if (musics.size() % 10 == 0) {
-                getMvpView().showMusics(musics);
-              }
+            musics -> {
+              stock.addAll(musics);
+              getMvpView().showMusics(stock);
             },
             e -> {
               Timber.e(e, "There was an error loading the music");
               getMvpView().showError();
             },
             () -> {
-              if (musics.isEmpty()) {
+              if (stock.isEmpty()) {
                 getMvpView().showMusicsEmpty();
-              } else {
-                getMvpView().showMusics(musics);
               }
             }
         );
