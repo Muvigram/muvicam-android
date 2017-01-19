@@ -1,16 +1,19 @@
 package com.estsoft.muvicam.model;
 
 import android.content.Context;
-import android.os.Environment;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.Pair;
 
 
 import com.estsoft.muvicam.transcoder.utils.ThumbnailUtil;
 import com.estsoft.muvicam.ui.selector.videoselector.VideoSelectorFragment;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import rx.Subscription;
 
 /**
  * Created by Administrator on 2017-01-05.
@@ -31,21 +34,47 @@ public class SelectorVideoData {
         return selectorVideoData;
     }
 
-    public Pair<ArrayList<EditorVideo>, ArrayList<String>> getVideos(Context context) {
-        ArrayList<String> videoPaths = new ArrayList<>();
-        String externalStorageDirectoryPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath() + "/Camera";
-        File cameraDir = new File(externalStorageDirectoryPath);
-        if (cameraDir.listFiles() != null) {
-            for (File f : cameraDir.listFiles()) {
-                if (f.getName().endsWith(".mp4")) {
-                    EditorVideo editorVideo = new EditorVideo();
-                    editorVideo.setVideoPath(f.getAbsolutePath());
-                    allVideos.add(editorVideo);
-                    videoPaths.add(editorVideo.getVideoPath());
+    private Subscription mSubscription;
 
-                }
+    private int mPathColumn;
+
+    public void initColumnIndex(Cursor cursor) {
+        mPathColumn = cursor.getColumnIndex(MediaStore.Video.Media.DATA);
+    }
+
+    private boolean isValid(Cursor cursor) {
+        return cursor.getString(mPathColumn).endsWith(".mp4");
+    }
+
+    public Uri getUri(Cursor cursor) {
+        return Uri.parse(cursor.getString(mPathColumn));
+    }
+
+    // TODO - 본 directory가 아닐경우 탐색 불가, DB 사용해서 가져와야 함
+    public Pair<ArrayList<EditorVideo>, ArrayList<String>> getVideos(Context context) {
+
+        ArrayList<String> videoPaths = new ArrayList<>();
+
+        Cursor videoCursor = context.getContentResolver().query(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            null, null, null, null
+        );
+        initColumnIndex(videoCursor);
+
+        if (videoCursor == null || !videoCursor.moveToFirst()) {
+            return null;
+        }
+
+        for (; !videoCursor.isLast(); videoCursor.moveToNext()) {
+            if (isValid(videoCursor)) {
+                Uri uri = getUri(videoCursor);
+                EditorVideo editorVideo = new EditorVideo();
+                editorVideo.setVideoPath(uri.toString());
+                allVideos.add(editorVideo);
+                videoPaths.add(editorVideo.getVideoPath());
             }
         }
+
         Pair<ArrayList<EditorVideo>, ArrayList<String>> pair = new Pair<>(allVideos,videoPaths);
         return pair;
     }

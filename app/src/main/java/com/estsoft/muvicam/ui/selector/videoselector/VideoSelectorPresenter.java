@@ -60,8 +60,9 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
     }
 
     public void loadVideos(final Context context, final ThumbnailUtil.VideoMetaDataListener listener) {
+        // TODO - 자료 중복, (이미 EditorVideo가 Path를 포함하고 있음) ref. getVideos(...);
         Pair<ArrayList<EditorVideo>, ArrayList<String>> pair = selectorVideoData.getVideos(context);
-        final ArrayList videos = pair.first;
+        final ArrayList<EditorVideo> videos = pair.first;
         ((Activity) context).runOnUiThread(new Runnable() {
             @Override
             public void run() {
