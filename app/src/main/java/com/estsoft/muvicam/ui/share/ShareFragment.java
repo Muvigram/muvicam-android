@@ -1,17 +1,15 @@
 package com.estsoft.muvicam.ui.share;
 
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.MediaMetadataRetriever;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -20,10 +18,14 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.estsoft.muvicam.R;
+import com.estsoft.muvicam.injection.component.ActivityComponent;
 import com.estsoft.muvicam.transcoder.noneencode.MediaConcater;
 import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
 import com.estsoft.muvicam.transcoder.wrappers.MediaEditorNew;
 import com.estsoft.muvicam.transcoder.wrappers.ProgressListener;
+import com.estsoft.muvicam.ui.home.music.MusicMvpView;
+import com.estsoft.muvicam.ui.share.injection.DaggerShareComponent;
+import com.estsoft.muvicam.ui.share.injection.ShareComponent;
 
 import javax.inject.Inject;
 
@@ -39,8 +41,10 @@ import butterknife.Unbinder;
  * Use the {@link ShareFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ShareFragment extends Fragment implements View.OnClickListener {
+public class ShareFragment extends Fragment implements View.OnClickListener, ShareMvpView {
     private static final String TAG = "ShareFragment";
+
+    ShareComponent mShareComponent;
 
     private final static String EXTRA_VIDEO_PATHS = "ShareFragment.videoPaths";
     private final static String EXTRA_VIDEO_OFFSETS = "ShareFragment.videoOffsets";
@@ -48,6 +52,8 @@ public class ShareFragment extends Fragment implements View.OnClickListener {
     private final static String EXTRA_MUSIC_OFFSET = "ShareFragment.musicOffset";
     private final static String EXTRA_MUSIC_LENGTH = "ShareFragment.musicLength";
     private final static String EXTRA_FROM_CAMERA = "ShareFragment.fromCamera";
+    private final static String EXTRA_VIDEO_STARTS = "ShareFragment.videoStarts";
+    private final static String EXTRA_VIDEO_ENDS = "ShareFragment.videoEnds";
 
 //    private static final String TEST_PATH_ORIGIN_CAMERA_01 = "/storage/emulated/0/test_video/20161212_112049.mp4";
 //    private static final String TEST_PATH_ORIGIN_CAMERA_02 = "/storage/emulated/0/test_video/20161130_131929.mp4";
@@ -78,13 +84,17 @@ public class ShareFragment extends Fragment implements View.OnClickListener {
 
     private String[] mVideoPaths;
     private int[] mVideoOffsets;
+    private int[] mVideoStarts;
+    private int[] mVideoEnds;
     private String mMusicPath;
     private int mMusicOffset;
     private int mMusicLength;
     private String mOutputPath;
-    private boolean mFromCamera;
+    private boolean mFromEditor;
 
     private boolean localCopied;
+
+    @Inject SharePresenter mPresenter;
 
     @BindView(R.id.result_video) VideoView mVideoView;
     @BindView(R.id.sns_facebook) ImageView mFacebook;
@@ -100,15 +110,21 @@ public class ShareFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mVideoPaths = (String[])getArguments().getSerializable( EXTRA_VIDEO_PATHS );
-            mVideoOffsets = (int[])getArguments().getSerializable( EXTRA_VIDEO_OFFSETS );
-            mMusicPath = (String)getArguments().getSerializable( EXTRA_MUSIC_PATH );
-            mMusicOffset = (int)getArguments().getSerializable( EXTRA_MUSIC_OFFSET );
-            mMusicLength = (int)getArguments().getSerializable( EXTRA_MUSIC_LENGTH );
-            mFromCamera = (boolean)getArguments().getSerializable( EXTRA_FROM_CAMERA );
+
+        if (getArguments() != null ) {
+            setupTranscodeModeAndStoreValues( getArguments() );
         }
+
         mOutputPath = TranscodeUtils.getAppCashingFile( getContext() );
+
+//        if (getArguments() != null) {
+//            mVideoPaths = (String[])getArguments().getSerializable( EXTRA_VIDEO_PATHS );
+//            mVideoOffsets = (int[])getArguments().getSerializable( EXTRA_VIDEO_OFFSETS );
+//            mMusicPath = (String)getArguments().getSerializable( EXTRA_MUSIC_PATH );
+//            mMusicOffset = (int)getArguments().getSerializable( EXTRA_MUSIC_OFFSET );
+//            mMusicLength = (int)getArguments().getSerializable( EXTRA_MUSIC_LENGTH );
+//            mFromEditor = (boolean)getArguments().getSerializable( EXTRA_FROM_CAMERA );
+//        }
     }
 
     @Override
@@ -116,14 +132,67 @@ public class ShareFragment extends Fragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
         View view = inflater.inflate( R.layout.fragment_share, container, false );
         mUnbinder = ButterKnife.bind(this, view);
-
         viewBind( view );
         viewListenerSetting();
-
-        workTranscode();
-
         return view;
     }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        ActivityComponent ac = ShareActivity.get( this ).getComponent();
+        mShareComponent = DaggerShareComponent.builder()
+                .activityComponent( ac ).build();
+        mShareComponent.inject( this );
+        mPresenter.attachView( this );
+        Log.d(TAG, "onViewCreated: " + mPresenter.toString());
+        workTranscode();
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onDestroyView() {
+        mUnbinder.unbind();
+        if (mUnbinder != null) {
+            mUnbinder = null;
+        }
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        mPresenter.detachView();
+        if (mPresenter != null) {
+            mPresenter = null;
+        }
+        if (mShareComponent != null) {
+            mShareComponent = null;
+        }
+        super.onDestroy();
+    }
+
+    private void setupTranscodeModeAndStoreValues (Bundle bundle ) {
+        mVideoPaths = (String[])getArguments().getSerializable( EXTRA_VIDEO_PATHS );
+        mMusicPath = (String)getArguments().getSerializable( EXTRA_MUSIC_PATH );
+        mMusicOffset = (int)getArguments().getSerializable( EXTRA_MUSIC_OFFSET );
+        mMusicLength = (int)getArguments().getSerializable( EXTRA_MUSIC_LENGTH );
+        mFromEditor = (boolean)getArguments().getSerializable( EXTRA_FROM_CAMERA );
+        if ( mFromEditor ) {
+            // Transcode mode
+            mVideoStarts = (int[])getArguments().getSerializable( EXTRA_VIDEO_STARTS );
+            mVideoEnds = (int[])getArguments().getSerializable( EXTRA_VIDEO_ENDS );
+        } else {
+            // Concat mode
+            mVideoOffsets = (int[])getArguments().getSerializable( EXTRA_VIDEO_OFFSETS );
+        }
+    }
+
 
     private void onFacebookClicked() {
         Toast.makeText(getContext(), "onFacebookClicked", Toast.LENGTH_SHORT).show();
@@ -153,10 +222,18 @@ public class ShareFragment extends Fragment implements View.OnClickListener {
 
     private void workTranscode() {
         currentWork = TRANSCODE;
+
+        if (mFromEditor) Toast.makeText( getContext(), " Transcoding ", Toast.LENGTH_LONG ).show();
+        else Toast.makeText( getContext(), " Concating ", Toast.LENGTH_LONG ).show();
+
         new Thread(() -> {
 
-            if ( mFromCamera ) transcodeTranslator();
-            else concatTranslator();
+            if (mFromEditor) {
+                transcodeTranslator();
+            }
+            else{
+                concatTranslator();
+            }
 
         }).start();
     }
@@ -195,20 +272,6 @@ public class ShareFragment extends Fragment implements View.OnClickListener {
             concater.addMusicSegment( mMusicPath, (long)(mMusicOffset * MILLI_TO_MICRO), 100 );
         }
         concater.start();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onDestroyView() {
-        mUnbinder.unbind();
-        if (mUnbinder != null) {
-            mUnbinder = null;
-        }
-        super.onDestroyView();
     }
 
     private ProgressListener mProgressListener = new ProgressListener() {
@@ -332,11 +395,14 @@ public class ShareFragment extends Fragment implements View.OnClickListener {
         return (ShareFragment) fragment.getParentFragment();
     }
 
-    public static ShareFragment newInstance(String[] videoPaths, int[] videoOffsets, String musicPath, int musicOffset, int musicLength, boolean fromCamera ) {
+    public static ShareFragment newInstance(String[] videoPaths, int[] videoOffsets, int[] videoStarts, int[] videoEnds,
+                                            String musicPath, int musicOffset, int musicLength, boolean fromCamera ) {
         ShareFragment fragment = new ShareFragment();
         Bundle args = new Bundle();
         args.putSerializable( EXTRA_VIDEO_PATHS, videoPaths );
         args.putSerializable( EXTRA_VIDEO_OFFSETS, videoOffsets );
+        args.putSerializable( EXTRA_VIDEO_STARTS, videoStarts );
+        args.putSerializable( EXTRA_VIDEO_ENDS, videoEnds );
         args.putSerializable( EXTRA_MUSIC_PATH, musicPath );
         args.putSerializable( EXTRA_MUSIC_OFFSET, musicOffset );
         args.putSerializable( EXTRA_MUSIC_LENGTH, musicLength );

@@ -11,8 +11,10 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.estsoft.muvicam.R;
+import com.estsoft.muvicam.injection.component.ActivityComponent;
 import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.ui.base.BaseActivity;
+import com.estsoft.muvicam.ui.share.injection.ShareComponent;
 
 import java.io.File;
 import java.util.Locale;
@@ -35,18 +37,23 @@ public class ShareActivity extends BaseActivity {
   private final static String EXTRA_MUSIC_LENGTH = "ShareActivity.musicLength";
   private final static String EXTRA_FROM_CAMERA = "ShareActivity.fromCamera";
 
-  public static Intent newIntent(Context packageContext, String[] videoPaths, int[] videoOffsets,
-                                 String musicPath, int musicOffset, int musicLength, boolean fromCamera ) {
 
+  private final static String EXTRA_VIDEO_START_TIMES = "ShareActivity.videoStartTimes";
+  private final static String EXTRA_VIDEO_END_TIMES = "ShareActivity.videoEndTimes";
+
+  public Intent newIntent( Context packageContext, String[] videoPaths, int[] videoStartTimes[], int[] videoEndTimes,
+                           String musicPath, int musicOffset, int musicLength, boolean fromEditor) {
     Intent intent = new Intent(packageContext, ShareActivity.class);
     intent.putExtra(EXTRA_VIDEO_PATHS, videoPaths);
-    intent.putExtra(EXTRA_VIDEO_OFFSETS, videoOffsets);
+    intent.putExtra(EXTRA_VIDEO_START_TIMES, videoStartTimes);
+    intent.putExtra(EXTRA_VIDEO_END_TIMES, videoEndTimes);
     intent.putExtra(EXTRA_MUSIC_PATH, musicPath);
     intent.putExtra(EXTRA_MUSIC_OFFSET, musicOffset);
     intent.putExtra(EXTRA_MUSIC_LENGTH, musicLength);
-    intent.putExtra(EXTRA_FROM_CAMERA, fromCamera);
+    intent.putExtra(EXTRA_FROM_CAMERA, fromEditor);
 
     return intent;
+
   }
 
   public static Intent newIntent(Context packageContext, String[] videoPaths, int[] videoOffsets,
@@ -67,11 +74,15 @@ public class ShareActivity extends BaseActivity {
   private String mMusicPath;
   private int mMusicOffset;
   private int mMusicLength;
-  private boolean mFromCamera;
+  private boolean mFromEditor;
+
+  private int[] mVideoStarts;
+  private int[] mVideoEnds;
 
   public static ShareActivity get(Fragment fragment) {
     return (ShareActivity)fragment.getActivity();
   }
+  public ActivityComponent getComponent() { return getActivityComponent(); }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -107,12 +118,15 @@ public class ShareActivity extends BaseActivity {
   private Fragment createDefaultFragment() {
     mVideoPaths = getIntent().getStringArrayExtra(EXTRA_VIDEO_PATHS);
     mVideoOffsets = getIntent().getIntArrayExtra(EXTRA_VIDEO_OFFSETS);
+    mVideoStarts = getIntent().getIntArrayExtra(EXTRA_VIDEO_START_TIMES);
+    mVideoEnds = getIntent().getIntArrayExtra(EXTRA_VIDEO_END_TIMES);
     mMusicPath = getIntent().getStringExtra(EXTRA_MUSIC_PATH);
     mMusicOffset = getIntent().getIntExtra(EXTRA_MUSIC_OFFSET, 0);
     mMusicLength = getIntent().getIntExtra(EXTRA_MUSIC_LENGTH, 0);
-    mFromCamera = getIntent().getBooleanExtra(EXTRA_FROM_CAMERA, false);
+    mFromEditor = getIntent().getBooleanExtra(EXTRA_FROM_CAMERA, false);
 
-    return ShareFragment.newInstance( mVideoPaths, mVideoOffsets, mMusicPath, mMusicOffset, mMusicLength, mFromCamera );
+    return ShareFragment.newInstance( mVideoPaths, mVideoOffsets, mVideoStarts, mVideoEnds,
+            mMusicPath, mMusicOffset, mMusicLength, mFromEditor );
   }
 
 }
