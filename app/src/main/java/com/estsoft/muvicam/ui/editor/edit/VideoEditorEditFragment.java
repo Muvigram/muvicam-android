@@ -57,6 +57,7 @@ public class VideoEditorEditFragment extends Fragment {
     boolean flag = true;
     FrameLayout editorThumbnailFrameLayout;
     TrimmerBackGroundView trimmerBackground;
+    FrameLayout videoTextureLayout;
     ThumbnailUtil.UserBitmapListener thumbnailUtilListener = new ThumbnailUtil.UserBitmapListener() {
         @Override
         public void onBitmapNext(final Bitmap bitmap, final long presentationTimeUs, final boolean isLast) {
@@ -221,7 +222,7 @@ public class VideoEditorEditFragment extends Fragment {
 
         insertButton = (ImageView) v.findViewById(R.id.editor_edit_insert);
         cancelButton = (ImageView) v.findViewById(R.id.editor_edit_cancel);
-        FrameLayout videoTextureLayout = (FrameLayout) v.findViewById(R.id.editor_edit_frame_layout);
+        videoTextureLayout = (FrameLayout) v.findViewById(R.id.editor_edit_frame_layout);
 
         editProgressBar = v.findViewById(R.id.editor_edit_progress);
         thumbnailUtil = new ThumbnailUtil(thumbnailUtilListener, getActivity(), true);
@@ -278,7 +279,22 @@ public class VideoEditorEditFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        videoTextureLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (videoPlayer.isPlaying()) {
+                    videoPlayer.pause();
+                    musicPlayer.pause();
+                } else {
+                    videoPlayer.seekTo(nowVideo.getStart());
+                    musicPlayer.seekTo(musicOffset);
+                    editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
 
+                    videoPlayer.start();
+                    musicPlayer.start();
+                }
+            }
+        });
         seekBarLeft.setOnTouchListener(new View.OnTouchListener() {
                                            @Override
                                            public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -331,10 +347,6 @@ public class VideoEditorEditFragment extends Fragment {
                                                        trimmerBackground.setEndX(seekBarRight.getX());
                                                        trimmerBackground.invalidate();
                                                        videoEditAdapter.notifyDataSetChanged();
-                                                       videoPlayer.seekTo(nowVideo.getStart());
-                                                       //    videoPlayer.pause();
-                                                       //  musicPlayer.pause();
-                                                       editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
 
                                                        break;
 
@@ -372,12 +384,12 @@ public class VideoEditorEditFragment extends Fragment {
                                                        trimmerBackground.setStartX(position + view.getWidth());
                                                        trimmerBackground.setEndX(seekBarRight.getX());
                                                        trimmerBackground.invalidate();
-                                                       videoPlayer.seekTo(nowVideo.getStart());
-                                                       musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
-                                                       editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
-                                                       musicPlayer.start();
-                                                       videoPlayer.start();
-                                                       videoPlayerTextureView.bringToFront();
+
+                                                       if(videoPlayer.isPlaying()) {
+                                                           videoPlayer.seekTo(nowVideo.getStart());
+                                                           musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
+                                                           editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
+                                                       }
                                                        break;
                                                }
                                                return true;
@@ -414,8 +426,8 @@ public class VideoEditorEditFragment extends Fragment {
                                                         } else {
                                                             Log.d(TAG, "onTouch: left");
                                                         }
-                                                        Log.d(TAG, "onTouch: distance"+distance);
-                                                        Log.d(TAG, "onTouch: distance"+getThumbnailSizePSec());
+                                                        Log.d(TAG, "onTouch: distance" + distance);
+                                                        Log.d(TAG, "onTouch: distance" + getThumbnailSizePSec());
 
                                                         if (rX1 > rX2 && distance <= getThumbnailSizePSec()) {
                                                             Log.d(TAG, "seekBarRight: distance less than mindistance");
@@ -445,11 +457,9 @@ public class VideoEditorEditFragment extends Fragment {
                                                             }
                                                             seekBarLeft.setTranslationX(leftPosition);
                                                             nowVideo.setStart((int) Math.floor((leftPosition + seekBarLeft.getWidth() - 5 * dpi)) * 1000 / getThumbnailSizePSec());
-                                                            editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
 
                                                         }
-                                                        //                videoPlayer.pause();
-                                                        //              musicPlayer.pause();
+
                                                         trimmerBackground.setStartX(seekBarLeft.getX() + seekBarLeft.getWidth());
                                                         trimmerBackground.setEndX(position);
                                                         trimmerBackground.invalidate();
@@ -493,12 +503,11 @@ public class VideoEditorEditFragment extends Fragment {
                                                         trimmerBackground.setEndX(position);
                                                         trimmerBackground.invalidate();
                                                         Log.d(TAG, "onTouch: seekTest1 r" + nowVideo.getStart());
-                                                        videoPlayer.seekTo(nowVideo.getStart());
-                                                        musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
-
-                                                        videoPlayer.start();
-                                                        musicPlayer.start();
-                                                        videoPlayerTextureView.bringToFront();
+                                                        if(videoPlayer.isPlaying()) {
+                                                            videoPlayer.seekTo(nowVideo.getStart());
+                                                            musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
+                                                            editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
+                                                        }
                                                         break;
                                                 }
                                                 return true;
@@ -677,16 +686,11 @@ public class VideoEditorEditFragment extends Fragment {
                         if (videoPlayer.getCurrentPosition() >= nowVideo.getEnd()) {
                             Log.d(TAG, "run: paused");
                             Log.d(TAG, "run: geCur" + videoPlayer.getCurrentPosition());
-
                             Log.d(TAG, "run: geStart" + nowVideo.getStart());
                             Log.d(TAG, "run: geEnd" + nowVideo.getEnd());
-                            //         videoPlayer.pause();
                             videoPlayer.seekTo(nowVideo.getStart());
                             musicPlayer.seekTo(musicOffset);
                             editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
-
-//                            videoPlayer.start();
-                            //                          musicPlayer.start();
                         }
 
 
@@ -697,9 +701,6 @@ public class VideoEditorEditFragment extends Fragment {
                         Thread.sleep(50);
                         editProgressBar.setVisibility(View.VISIBLE);
 
-                    } else {
-
-                        editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
                     }
 
                 } catch (InterruptedException e) {
