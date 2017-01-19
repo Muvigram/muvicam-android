@@ -29,8 +29,7 @@
             android:id="@+id/editor_result_space_linear"
             android:layout_width="match_parent"
             android:layout_height="20dp"
-            android:orientation="horizontal"
-             />
+            android:orientation="horizontal" />
 
 
         <ImageView

@@ -45,7 +45,7 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
   @BindView(R.id.library_music_search_bar_skip) TextView mSkipButton;
   @BindView(R.id.library_music_search_bar_back) TextView mBackButton;
   @BindView(R.id.library_music_search_bar_edit_text) EditText mSearchTextBar;
-  @BindView(R.id.library_music_search_bar) RecyclerView mRecyclerView;
+  @BindView(R.id.library_music_search_recyclerview) RecyclerView mRecyclerView;
 
   @OnFocusChange(R.id.library_music_search_bar_edit_text)
   public void searchBarOnFocus(View v, boolean hasFocus) {

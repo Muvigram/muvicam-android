@@ -52,6 +52,7 @@ import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.ui.library.LibraryActivity;
 import com.estsoft.muvicam.ui.home.HomeActivity;
+import com.estsoft.muvicam.ui.selector.SelectorActivity;
 import com.estsoft.muvicam.ui.share.ShareActivity;
 import com.estsoft.muvicam.util.FileUtil;
 import com.estsoft.muvicam.util.RxUtil;
@@ -217,7 +218,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
       @Override
       public void onAnimationEnd(Animation animation) {
-        getActivity().startActivity(LibraryActivity.getIntent(getActivity()));
+        getActivity().startActivity(SelectorActivity.newIntent(getActivity()));
       }
     }));
   }

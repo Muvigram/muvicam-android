@@ -1,5 +1,7 @@
 package com.estsoft.muvicam.ui.selector;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -9,10 +11,9 @@ import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.ui.base.BaseActivity;
 import com.estsoft.muvicam.ui.base.BasePresenter;
-import com.estsoft.muvicam.ui.selector.musicselector.MusicSelectorFragment;
+import com.estsoft.muvicam.ui.library.LibraryActivity;
 import com.estsoft.muvicam.ui.selector.videoselector.VideoSelectorPresenter;
 import com.estsoft.muvicam.ui.selector.videoselector.VideoSelectorFragment;
-import com.estsoft.muvicam.ui.editor.result.VideoEditorResultFragment;
 
 import java.util.ArrayList;
 
@@ -20,6 +21,10 @@ import java.util.ArrayList;
 public class SelectorActivity extends BaseActivity implements VideoSelectorFragment. DataPassListener{
     Fragment fragment;
     private BasePresenter presenter;
+
+    public static Intent newIntent(Context packageContext) {
+        return new Intent(packageContext, SelectorActivity.class);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +34,7 @@ public class SelectorActivity extends BaseActivity implements VideoSelectorFragm
 
         presenter = new VideoSelectorPresenter();
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        fragment = fragmentManager.findFragmentById(R.id.selector_fragment_container);
         if (fragment == null) {
             fragment = new VideoSelectorFragment();
             Bundle bundle = new Bundle();
@@ -45,17 +50,7 @@ public class SelectorActivity extends BaseActivity implements VideoSelectorFragm
 
     @Override
     public void passData(ArrayList<EditorVideo> data) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragment = fragmentManager.findFragmentById(R.id.fragment_container);
-        if (fragment != null) {
-            //remove previous fragments to reduce memory :  picker Fragment or other edit Fragments
-            fragmentManager.beginTransaction().remove(fragment).commit();
-        }
-        fragment = new MusicSelectorFragment();
-        Bundle args = new Bundle();
-        args.putParcelableArrayList(MusicSelectorFragment.DATA_RECEIVE, data);
-        fragment.setArguments(args);
-        fragmentManager.beginTransaction().replace(R.id.selector_fragment_container, fragment).commit();
+        startActivity(LibraryActivity.newIntent(this, data));
     }
 
 

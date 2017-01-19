@@ -3,16 +3,13 @@ package com.estsoft.muvicam.ui.library;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
 
-import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.injection.component.DaggerLibraryComponent;
 import com.estsoft.muvicam.injection.component.LibraryComponent;
 import com.estsoft.muvicam.model.EditorVideo;
@@ -21,14 +18,20 @@ import com.estsoft.muvicam.ui.editor.EditorActivity;
 import com.estsoft.muvicam.ui.library.musiclibrary.MusicLibraryFragment;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class LibraryActivity extends BaseSingleFragmentActivity {
 
+  private static final String EXTRA_VIDEOS = "library.LibraryActivity.editorVideos";
 
-  public static Intent getIntent(Context packageContext) {
+  public static Intent newIntent(Context packageContext) {
     return new Intent(packageContext, LibraryActivity.class);
+  }
+
+  public static Intent newIntent(Context packageContext, ArrayList<EditorVideo> editorVideos) {
+    Intent intent = new Intent(packageContext, LibraryActivity.class);
+    intent.putExtra(EXTRA_VIDEOS, editorVideos);
+    return intent;
   }
 
   private LibraryComponent mLibraryComponent;
@@ -65,22 +68,6 @@ public class LibraryActivity extends BaseSingleFragmentActivity {
     mLibraryComponent.inject(this);
   }
 
-  public void goToNext(@NonNull List<EditorVideo> videos) {
-    FragmentManager fragmentManager = getSupportFragmentManager();
-    Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
-    if (fragment != null) {
-      fragmentManager.beginTransaction()
-          .remove(fragment)
-          .commit();
-    }
-    setVideos(videos);
-    fragment = MusicLibraryFragment.newInstance();
-    fragmentManager.beginTransaction()
-        .replace(R.id.fragment_container, fragment)
-        .commit();
-  }
-
-
   @Override
   protected void onDestroy() {
     super.onDestroy();
@@ -94,16 +81,6 @@ public class LibraryActivity extends BaseSingleFragmentActivity {
     );
   }
 
-  private List<EditorVideo> mVideos = new ArrayList<>();
-
-  /**
-   * Set videos selected from library.
-   * @param videos A list of videos selected from local library.
-   */
-  public void setVideos(List<EditorVideo> videos) {
-    mVideos = videos;
-  }
-
   /**
    * This method would be called to complete the selection of videos and a music.
    * Metadata of a music and videos selected from local library are transferred
@@ -114,7 +91,7 @@ public class LibraryActivity extends BaseSingleFragmentActivity {
    * @param musicLength A length of music file.
    */
   public void completeSelection(@Nullable String musicPath, int musicOffset, int musicLength) {
-    EditorActivity.newIntent(this,
-        (ArrayList<EditorVideo>) mVideos, musicPath, musicOffset, musicLength);
+    ArrayList<EditorVideo> editorVideos = getIntent().getParcelableArrayListExtra(EXTRA_VIDEOS);
+    EditorActivity.newIntent(this, editorVideos, musicPath, musicOffset, musicLength);
   }
 }
