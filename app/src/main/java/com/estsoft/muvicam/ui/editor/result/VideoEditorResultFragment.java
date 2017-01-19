@@ -283,7 +283,20 @@ public class VideoEditorResultFragment extends Fragment {
         doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                getActivity().startActivity(ShareActivity.newIntent();
+                if(resultVideos.size()>0){
+                    String[] videoPaths = new String[resultVideos.size()];
+                    int[] videoStartTimes = new int[resultVideos.size()];
+                    int[] videoEndTimes = new int[resultVideos.size()];
+                    for(EditorVideo resultVideo: resultVideos){
+                        videoPaths[resultVideos.indexOf(resultVideo)] = resultVideo.getVideoPath();
+                        videoStartTimes[resultVideos.indexOf(resultVideo)] = resultVideo.getStart();
+                        videoEndTimes[resultVideos.indexOf(resultVideo)] = resultVideo.getEnd();
+                    }
+                    getActivity().startActivity(ShareActivity.newIntent( getContext(),  videoPaths, videoStartTimes,  videoEndTimes, musicPath, musicOffset, resultVideosTotalTime, true ));
+
+                }else{
+                    Toast.makeText(getContext(),"Edit at least 1 video",Toast.LENGTH_SHORT).show();
+                }
             }
         });
 

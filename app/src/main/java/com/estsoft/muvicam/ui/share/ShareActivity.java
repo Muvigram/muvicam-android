@@ -41,7 +41,7 @@ public class ShareActivity extends BaseActivity {
   private final static String EXTRA_VIDEO_START_TIMES = "ShareActivity.videoStartTimes";
   private final static String EXTRA_VIDEO_END_TIMES = "ShareActivity.videoEndTimes";
 
-  public Intent newIntent( Context packageContext, String[] videoPaths, int[] videoStartTimes[], int[] videoEndTimes,
+  public static Intent newIntent( Context packageContext, String[] videoPaths, int[] videoStartTimes, int[] videoEndTimes,
                            String musicPath, int musicOffset, int musicLength, boolean fromEditor) {
     Intent intent = new Intent(packageContext, ShareActivity.class);
     intent.putExtra(EXTRA_VIDEO_PATHS, videoPaths);
