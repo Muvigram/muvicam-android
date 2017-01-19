@@ -32,6 +32,8 @@
             android:name=".ui.selector.SelectorActivity"
             android:screenOrientation="portrait" />
         <activity android:name=".ui.editor.EditorActivity"></activity>
+
+
     </application>
 
 </manifest>
