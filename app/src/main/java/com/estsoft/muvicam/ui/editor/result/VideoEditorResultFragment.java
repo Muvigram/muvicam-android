@@ -79,21 +79,21 @@ public class VideoEditorResultFragment extends Fragment {
                 Toast.makeText(getContext(), "can not add video less than 1 second", Toast.LENGTH_SHORT).show();
             } else {
                 flag = false;
-                if (videoResultPlayer.isPlaying()) {
-                    videoResultPlayer.pause();
-                    videoResultPlayer.stop();
-                    videoResultPlayer.release();
-                }
-                if (videoResultPlayer2.isPlaying()) {
-                    videoResultPlayer2.pause();
-                    videoResultPlayer2.stop();
-                    videoResultPlayer2.release();
-                }
-                if (musicResultPlayer.isPlaying()) {
-                    musicResultPlayer.pause();
-                    musicResultPlayer.stop();
-                    musicResultPlayer.release();
-                }
+//                if (videoResultPlayer.isPlaying()) {
+//                    videoResultPlayer.pause();
+//                    videoResultPlayer.stop();
+//                    videoResultPlayer.release();
+//                }
+//                if (videoResultPlayer2.isPlaying()) {
+//                    videoResultPlayer2.pause();
+//                    videoResultPlayer2.stop();
+//                    videoResultPlayer2.release();
+//                }
+//                if (musicResultPlayer.isPlaying()) {
+//                    musicResultPlayer.pause();
+//                    musicResultPlayer.stop();
+//                    musicResultPlayer.release();
+//                }
                 mCallBack.passDataFToF(position + 1, selectedVideos, resultVideos, resultVideosTotalTime, musicPath, musicOffset, musicLength);
             }
         }
@@ -262,13 +262,15 @@ public class VideoEditorResultFragment extends Fragment {
                     resultBarViews.remove(resultBarViews.get(resultBarViews.size() - 1));
                     deleteButton.setTranslationX(deleteButtonLocation(resultVideosTotalTime));
                     Log.d(TAG, "onCreateView: resultVideosTotalTime5" + resultVideosTotalTime);
+                    nowVideoNum = 0;
                 } else {
                     deleteButton.setVisibility(View.GONE);
                 }
                 //after removed last video
+
                 if (resultVideos.size() > 0) {
-                    if (resultVideos.size() > 1) prepareVideoPlayer(videoResultPlayer2, 1, false);
-                    prepareVideoPlayer(videoResultPlayer, 0, true);
+                    if (resultVideos.size() > 1) prepareVideoPlayer(videoResultPlayer2, nowVideoNum+1, false);
+                    prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
                     videoResultTextureView.bringToFront();
                     musicResultPlayer.seekTo(musicOffset);
                     videoResultPlayer.start();
@@ -283,7 +285,21 @@ public class VideoEditorResultFragment extends Fragment {
         doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                getActivity().startActivity(ShareActivity.newIntent();
+                if(resultVideos.size()>0){
+                    flag = false;
+                    String[] videoPaths = new String[resultVideos.size()];
+                    int[] videoStartTimes = new int[resultVideos.size()];
+                    int[] videoEndTimes = new int[resultVideos.size()];
+                    for(EditorVideo resultVideo: resultVideos){
+                        videoPaths[resultVideos.indexOf(resultVideo)] = resultVideo.getVideoPath();
+                        videoStartTimes[resultVideos.indexOf(resultVideo)] = resultVideo.getStart();
+                        videoEndTimes[resultVideos.indexOf(resultVideo)] = resultVideo.getEnd();
+                    }
+                    getActivity().startActivity(ShareActivity.newIntent( getContext(),  videoPaths, videoStartTimes,  videoEndTimes, musicPath, musicOffset, resultVideosTotalTime, true ));
+
+                }else{
+                    Toast.makeText(getContext(),"Edit at least 1 video",Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -324,27 +340,7 @@ public class VideoEditorResultFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
-        if (videoResultPlayer != null) {
-            if (flag && videoResultPlayer.isPlaying()) {
-                videoResultPlayer.pause();
-                videoResultPlayer.stop();
-            }
-            videoResultPlayer.release();
-        }
-        if (videoResultPlayer2 != null) {
-            if (flag && videoResultPlayer2.isPlaying()) {
-                videoResultPlayer2.pause();
-                videoResultPlayer2.stop();
-            }
-            videoResultPlayer2.release();
-        }
-        if (musicResultPlayer != null) {
-            if (flag && musicResultPlayer.isPlaying()) {
-                musicResultPlayer.pause();
-                musicResultPlayer.stop();
-            }
-            musicResultPlayer.release();
-        }
+
         nowVideoNum = 0;
         flag = false;
     }
@@ -460,6 +456,28 @@ public class VideoEditorResultFragment extends Fragment {
                     e.printStackTrace(pw);
                     Log.d(TAG, "thread got exception :\n" + sw.toString());
                 }
+            }
+
+            if (videoResultPlayer != null) {
+                if (flag && videoResultPlayer.isPlaying()) {
+                    videoResultPlayer.pause();
+                    videoResultPlayer.stop();
+                }
+               videoResultPlayer.release();
+            }
+            if (videoResultPlayer2 != null) {
+                if (flag && videoResultPlayer2.isPlaying()) {
+                    videoResultPlayer2.pause();
+                    videoResultPlayer2.stop();
+                }
+                videoResultPlayer2.release();
+            }
+            if (musicResultPlayer != null) {
+                if (flag && musicResultPlayer.isPlaying()) {
+                    musicResultPlayer.pause();
+                    musicResultPlayer.stop();
+                }
+                musicResultPlayer.release();
             }
         }
     });
