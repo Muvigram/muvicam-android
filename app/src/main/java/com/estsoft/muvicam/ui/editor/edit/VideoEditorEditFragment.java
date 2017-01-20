@@ -135,7 +135,7 @@ public class VideoEditorEditFragment extends Fragment {
                 }
             });
 
-            trimmerBackground = new TrimmerBackGroundView(getContext(), seekBarLeft.getX() + seekBarLeft.getWidth(), seekBarRight.getWidth());
+            trimmerBackground = new TrimmerBackGroundView(getContext(), seekBarLeft.getX() + seekBarLeft.getWidth(), seekBarRight.getX());
 
 
             videoPlayer.seekTo(nowVideo.getStart());
@@ -689,7 +689,7 @@ public class VideoEditorEditFragment extends Fragment {
                             Log.d(TAG, "run: geStart" + nowVideo.getStart());
                             Log.d(TAG, "run: geEnd" + nowVideo.getEnd());
                             videoPlayer.seekTo(nowVideo.getStart());
-                            musicPlayer.seekTo(musicOffset);
+                            musicPlayer.seekTo(musicOffset+resultVideosTotalTime);
                             editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
                         }
 

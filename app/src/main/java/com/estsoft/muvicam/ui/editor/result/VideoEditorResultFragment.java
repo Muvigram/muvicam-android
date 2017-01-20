@@ -57,7 +57,8 @@ public class VideoEditorResultFragment extends Fragment {
     LinearLayout editorResultBlackScreen;
     FrameLayout linearResultSpace;
     ArrayList<ResultBarView> resultBarViews = new ArrayList<>();
-    EditorResultMediaPlayer videoResultPlayer, videoResultPlayer2, musicResultPlayer;
+    EditorResultMediaPlayer videoResultPlayer, videoResultPlayer2;
+    MediaPlayer musicResultPlayer;
     VideoPlayerTextureView videoResultTextureView, videoResultTextureView2;
     FrameLayout videoSpaceFrameLayout;
     boolean flag = true;
@@ -138,13 +139,57 @@ public class VideoEditorResultFragment extends Fragment {
         nowVideoNum = 0;
         videoResultPlayer = new EditorResultMediaPlayer(getActivity(), 0, true, false);
         videoResultPlayer2 = new EditorResultMediaPlayer(getActivity(), 0, false, false);
-        musicResultPlayer = new EditorResultMediaPlayer(getActivity(), 0, true, true);
+        musicResultPlayer = new MediaPlayer();
         if (resultVideos.size() > 0) {
             try {
                 FileInputStream fisMusic = new FileInputStream(musicPath);
                 FileDescriptor fdMusic = fisMusic.getFD();
                 musicResultPlayer.setDataSource(fdMusic);
-                musicResultPlayer.setOffset(musicOffset);
+                musicResultPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+                    @Override
+                    public void onSeekComplete(MediaPlayer mediaPlayer) {
+                        resultProgressBar.setVisibility(View.VISIBLE);
+                        deleteButton.setVisibility(View.VISIBLE);
+                        mediaPlayer.start();
+                    }
+                });
+                musicResultPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                                              @Override
+                                                              public void onCompletion(MediaPlayer mediaPlayer) {
+                                                                  if (videoResultPlayer.isPlaying()) {
+                                                                      videoResultPlayer.pause();
+                                                                      videoResultPlayer.stop();
+                                                                  }
+                                                                  if (videoResultPlayer2.isPlaying()) {
+                                                                      videoResultPlayer2.pause();
+                                                                      videoResultPlayer2.stop();
+                                                                  }
+
+                                                                  editorResultBlackScreen.bringToFront();
+                                                                  nowVideoNum = 0;
+                                                                  resultProgressBar.setProgress(0);
+                                                                  if (flag && resultVideos.size() > nowVideoNum && !musicResultPlayer.isPlaying()) {
+                                                                      if (resultVideos.size() > nowVideoNum + 1) {
+                                                                          videoResultPlayer2.setFirst(false);
+                                                                          prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
+                                                                      }
+                                                                      videoResultPlayer.setFirst(false);
+                                                                      prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
+                                                                  }
+                                                              }
+                                                          }
+                );
+                musicResultPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener()
+
+                                                        {
+                                                            @Override
+                                                            public void onPrepared(MediaPlayer mediaPlayer) {
+                                                                mediaPlayer.seekTo(musicOffset);
+                                                            }
+                                                        }
+
+                );
+                //musicResultPlayer.setOffset(musicOffset);
                 videoResultPlayer.setVolume(0, 0);
                 videoResultPlayer2.setVolume(0, 0);
             } catch (FileNotFoundException e) {
@@ -269,7 +314,8 @@ public class VideoEditorResultFragment extends Fragment {
                 //after removed last video
 
                 if (resultVideos.size() > 0) {
-                    if (resultVideos.size() > 1) prepareVideoPlayer(videoResultPlayer2, nowVideoNum+1, false);
+                    if (resultVideos.size() > 1)
+                        prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
                     prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
                     videoResultTextureView.bringToFront();
                     musicResultPlayer.seekTo(musicOffset);
@@ -285,20 +331,20 @@ public class VideoEditorResultFragment extends Fragment {
         doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(resultVideos.size()>0){
+                if (resultVideos.size() > 0) {
                     flag = false;
                     String[] videoPaths = new String[resultVideos.size()];
                     int[] videoStartTimes = new int[resultVideos.size()];
                     int[] videoEndTimes = new int[resultVideos.size()];
-                    for(EditorVideo resultVideo: resultVideos){
+                    for (EditorVideo resultVideo : resultVideos) {
                         videoPaths[resultVideos.indexOf(resultVideo)] = resultVideo.getVideoPath();
                         videoStartTimes[resultVideos.indexOf(resultVideo)] = resultVideo.getStart();
                         videoEndTimes[resultVideos.indexOf(resultVideo)] = resultVideo.getEnd();
                     }
-                    getActivity().startActivity(ShareActivity.newIntent( getContext(),  videoPaths, videoStartTimes,  videoEndTimes, musicPath, musicOffset, resultVideosTotalTime, true ));
+                    getActivity().startActivity(ShareActivity.newIntent(getContext(), videoPaths, videoStartTimes, videoEndTimes, musicPath, musicOffset, resultVideosTotalTime, true));
 
-                }else{
-                    Toast.makeText(getContext(),"Edit at least 1 video",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), "Edit at least 1 video", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -306,18 +352,12 @@ public class VideoEditorResultFragment extends Fragment {
         videoSpaceFrameLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (flag && resultVideos.size() > 0 && !musicResultPlayer.isPlaying()) {
-                    nowVideoNum = 0;
-                    if (resultVideos.size() > 0) {
-                        if (resultVideos.size() > 1) {
-                            prepareVideoPlayer(videoResultPlayer2, 1, false);
-                        }
-                        prepareVideoPlayer(videoResultPlayer, 0, true);
-                        videoResultTextureView.bringToFront();
-                        musicResultPlayer.seekTo(musicOffset);
-                        videoResultPlayer.start();
+                if (flag && resultVideos.size() > nowVideoNum && !musicResultPlayer.isPlaying()) {
+                    musicResultPlayer.seekTo(musicOffset);
+                    videoResultPlayer.start();
+                    videoResultTextureView.bringToFront();
 
-                    }
+
                 }
             }
         });
@@ -361,55 +401,79 @@ public class VideoEditorResultFragment extends Fragment {
                 try {
 
                     if (flag && musicResultPlayer.isPlaying()) {
-                        int progress = musicResultPlayer.getCurrentPosition() / 150;
-                        resultProgressBar.setProgress(progress);
-                        resultThread.sleep(50);
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                resultProgressBar.invalidate();
-                            }
-                        });
+
                         if (nowVideoNum % 2 == 0 && flag && videoResultPlayer.isPlaying()) {
                             Log.d(TAG, "run first: " + nowVideoNum + " / " + resultVideos.size());
                             if (videoResultPlayer.getCurrentPosition() >= resultVideos.get(nowVideoNum).getEnd()) {
                                 videoResultPlayer.pause();
                                 videoResultPlayer.stop();
                                 nowVideoNum = nowVideoNum + 1;
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        //here?
-                                        if (!videoResultPlayer2.isPlaying() && nowVideoNum == 0) {
-                                            editorResultBlackScreen.bringToFront();
-                                            linearResultSpace.bringToFront();
-                                        } else {
-                                            videoResultTextureView2.bringToFront();
-                                        }
-                                    }
-                                });
 
                                 if (nowVideoNum < resultVideos.size()) {
                                     Log.d(TAG, "run sec: " + nowVideoNum + " / " + resultVideos.size());
                                     videoResultPlayer2.start();
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            videoResultTextureView2.bringToFront();
+                                        }
+                                    });
 
                                     Log.d(TAG, "run third: " + nowVideoNum + " / " + resultVideos.size());
                                     if (nowVideoNum + 1 < resultVideos.size()) {
                                         videoResultPlayer.setFirst(false);
                                         prepareVideoPlayer(videoResultPlayer, nowVideoNum + 1, true);
                                     }
-
+//                                    else {
+//                                        videoResultPlayer.setFirst(false);
+//                                        prepareVideoPlayer(videoResultPlayer, 0, true);
+//                                    }
+//
                                 } else {
-                                    nowVideoNum = 0;
-                                    videoResultPlayer.setFirst(false);
-                                    prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
+//                                    nowVideoNum = 0;
+//
+//                                    resultProgressBar.setProgress(0);
+//                                    if (nowVideoNum + 1 < resultVideos.size()) {
+//                                        videoResultPlayer2.setFirst(false);
+//                                        prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
+//                                    }
+//                                    videoResultPlayer.setFirst(true);
+//                                    prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
+//
+//                                    musicResultPlayer.seekTo(musicOffset);
 
-                                    if (nowVideoNum + 1 < resultVideos.size()) {
-                                        videoResultPlayer2.setFirst(false);
-                                        prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
+                                    musicResultPlayer.pause();
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            editorResultBlackScreen.bringToFront();
+                                        }
+                                    });
+                                    nowVideoNum = 0;
+                                    resultProgressBar.setProgress(0);
+                                    if (flag && resultVideos.size() > nowVideoNum && !musicResultPlayer.isPlaying()) {
+
+
+                                        if (resultVideos.size() > nowVideoNum + 1) {
+                                            videoResultPlayer2.setFirst(false);
+                                            prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
+                                        }
+                                        videoResultPlayer.setFirst(false);
+                                        prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
+
                                     }
                                 }
 
+                            } else {
+                                int progress = musicResultPlayer.getCurrentPosition() / 150;
+                                resultProgressBar.setProgress(progress);
+                                resultThread.sleep(50);
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        resultProgressBar.invalidate();
+                                    }
+                                });
                             }
                         } else if (nowVideoNum % 2 == 1 && flag && videoResultPlayer2.isPlaying()) {
 
@@ -417,35 +481,68 @@ public class VideoEditorResultFragment extends Fragment {
                                 videoResultPlayer2.pause();
                                 videoResultPlayer2.stop();
                                 nowVideoNum = nowVideoNum + 1;
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (!videoResultPlayer.isPlaying() && nowVideoNum == 0) {
-                                            editorResultBlackScreen.bringToFront();
-                                            linearResultSpace.bringToFront();
-                                        } else {
-                                            videoResultTextureView.bringToFront();
-                                        }
-                                    }
-                                });
+
 
                                 if (nowVideoNum < resultVideos.size()) {
                                     videoResultPlayer.start();
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            videoResultTextureView.bringToFront();
+                                        }
+                                    });
                                     if (nowVideoNum + 1 < resultVideos.size()) {
                                         videoResultPlayer2.setFirst(false);
                                         prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
                                     }
+                                    //else videoplayer1 to start
 
 
                                 } else {
+//                                    nowVideoNum = 0;
+//                                    //always at least 2 videos
+//                                    resultProgressBar.setProgress(0);
+//                                    videoResultPlayer2.setFirst(false);
+//                                    prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
+//
+//                                    musicResultPlayer.seekTo(musicOffset);
+//                                    videoResultPlayer.start();
+//
+//                                    getActivity().runOnUiThread(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+//                                            videoResultTextureView.bringToFront();
+//                                        }
+//                                    });
+                                    musicResultPlayer.pause();
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            editorResultBlackScreen.bringToFront();
+                                        }
+                                    });
                                     nowVideoNum = 0;
-                                    videoResultPlayer.setFirst(false);
-                                    prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
+                                    resultProgressBar.setProgress(0);
+                                    if (flag && resultVideos.size() > nowVideoNum && !musicResultPlayer.isPlaying()) {
+                                        if (resultVideos.size() > nowVideoNum + 1) {
+                                            videoResultPlayer2.setFirst(false);
+                                            prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
+                                        }
+                                        videoResultPlayer.setFirst(false);
+                                        prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
 
-                                    //always at least 2 videos
-                                    videoResultPlayer2.setFirst(false);
-                                    prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
+                                    }
                                 }
+                            } else {
+                                int progress = musicResultPlayer.getCurrentPosition() / 150;
+                                resultProgressBar.setProgress(progress);
+                                resultThread.sleep(50);
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        resultProgressBar.invalidate();
+                                    }
+                                });
                             }
                         }
                     }
@@ -463,7 +560,7 @@ public class VideoEditorResultFragment extends Fragment {
                     videoResultPlayer.pause();
                     videoResultPlayer.stop();
                 }
-               videoResultPlayer.release();
+                videoResultPlayer.release();
             }
             if (videoResultPlayer2 != null) {
                 if (flag && videoResultPlayer2.isPlaying()) {
