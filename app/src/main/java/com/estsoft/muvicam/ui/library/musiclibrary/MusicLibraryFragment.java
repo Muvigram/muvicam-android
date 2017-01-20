@@ -29,6 +29,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnFocusChange;
+import butterknife.OnItemClick;
 import butterknife.OnTextChanged;
 import butterknife.Unbinder;
 
@@ -42,8 +43,8 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
 
   Unbinder mUnbinder;
 
-  @BindView(R.id.library_music_search_bar_skip) TextView mSkipButton;
-  @BindView(R.id.library_music_search_bar_back) TextView mBackButton;
+  // @BindView(R.id.library_music_search_bar_skip) TextView mSkipButton;
+  // @BindView(R.id.library_music_search_bar_back) TextView mBackButton;
   @BindView(R.id.library_music_search_bar_edit_text) EditText mSearchTextBar;
   @BindView(R.id.library_music_search_recyclerview) RecyclerView mRecyclerView;
 
@@ -58,7 +59,14 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
 
   @OnTextChanged(R.id.library_music_search_bar_edit_text)
   public void searchBarSearchRequested(CharSequence text) {
+    if (text.equals(""))
+      mSearchTextBar.clearFocus();
     mPresenter.loadMusics(text);
+  }
+
+  @OnClick(R.id.library_music_search_bar_back)
+  public void backToPrevious(View v) {
+    LibraryActivity.get(this).onBackPressed();
   }
 
   @OnClick(R.id.library_music_search_bar_skip)
@@ -150,6 +158,6 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
 
   public void preventKeyboardPopup() {
     this.getActivity().getWindow().setSoftInputMode(
-        WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
   }
 }

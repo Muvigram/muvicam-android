@@ -1,5 +1,6 @@
 package com.estsoft.muvicam.ui.library.musiclibrary;
 
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -79,7 +80,7 @@ public class MusicLibraryAdapter extends RecyclerView.Adapter<MusicLibraryAdapte
       mArtist.setText(music.artist());
       mMusicButton.setOnClickListener(v -> {
         // TODO - cut music
-        LibraryActivity.get(mMusicButton).completeSelection(music.uri().toString(), 0, 15);
+        LibraryActivity.get(mMusicButton).completeSelection(music.uri().toString(), 15, 15);
       });
     }
 
