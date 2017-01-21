@@ -32,10 +32,14 @@ import butterknife.ButterKnife;
 public class MusicLibraryAdapter extends RecyclerView.Adapter<MusicLibraryAdapter.MusicLibraryViewHolder> {
 
   private List<Music> mMusics;
-
+  private MusicLibraryFragment mFragment;
   @Inject
   public MusicLibraryAdapter() {
     mMusics = new ArrayList<>();
+  }
+
+  public void register(MusicLibraryFragment fragment) {
+    mFragment = fragment;
   }
 
   public void setMusics(List<Music> musics) {
@@ -80,7 +84,7 @@ public class MusicLibraryAdapter extends RecyclerView.Adapter<MusicLibraryAdapte
       mArtist.setText(music.artist());
       mMusicButton.setOnClickListener(v -> {
         // TODO - cut music
-        LibraryActivity.get(mMusicButton).completeSelection(music.uri().toString(), 15, 15);
+        mFragment.showMusicCutDialog(music);
       });
     }
 

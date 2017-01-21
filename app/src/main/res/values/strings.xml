@@ -56,6 +56,7 @@
 
     <string name="library_video_empty_videos">There arn\'t any videos</string>
     <string name="library_video_error_loading">There was a problem loading the videos.</string>
+    <string name="dialog_music_title">Cut Music</string>
 
 
 </resources>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/dialog_music_title"
+        android:textStyle="bold"
+        android:textColor="@color/textBlack"
+        android:padding="10dp"
+        android:background="@color/backgroundWhite"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.1dp"
+        android:background="@color/lineDarkGrey"/>
+
+    <RelativeLayout
+        android:id="@+id/music_dialog_item"
+        android:background="@color/backgroundWhite"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:weightSum="1">
+
+        <ImageView
+            android:id="@+id/music_dialog_item_thumbnail"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="10dp"
+            android:background="@color/backgroundLightGrey"
+            android:layout_centerVertical="true"
+            android:contentDescription="@string/music_album_desc"/>
+
+        <LinearLayout
+            android:id="@+id/music_dialog_item_profile"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            android:gravity="center_vertical"
+            android:layout_toEndOf="@id/music_dialog_item_thumbnail"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/music_dialog_item_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textColor="@color/textBlack"
+                tools:text="Music title here"/>
+
+            <TextView
+                android:id="@+id/music_dialog_item_artist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/textGrey"
+                tools:text="Artist here..."/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <com.estsoft.muvicam.ui.home.camera.WaveformView
+        android:id="@+id/music_dialog_cut_waveform"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@color/backgroundOpaqueGrey"/>
+
+</LinearLayout>

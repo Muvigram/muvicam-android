@@ -1,10 +1,7 @@
 package com.estsoft.muvicam.ui.home.camera;
 
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 
 import com.estsoft.muvicam.R;
-import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.ui.home.HomeActivity;
 import com.estsoft.muvicam.util.RxUtil;
 import com.estsoft.muvicam.util.UnitConversionUtil;
@@ -26,7 +22,6 @@ import butterknife.Unbinder;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import timber.log.Timber;
 
 /**
  * Created by jaylim on 12/17/2016.
@@ -154,7 +149,7 @@ public class MusicCutFragment extends Fragment {
           .subscribeOn(Schedulers.newThread())
           .map(UnitConversionUtil::millisecToSec)
           .filter(sec -> {
-            if (mWaveformView != null && mWaveformView.isValidRunning(sec)) {
+            if (mWaveformView != null && mWaveformView.isValidRunningAt(sec)) {
               return true;
             } else {
               mParentFragment.pausePlayer();

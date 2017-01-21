@@ -101,6 +101,11 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
     mPresenter.attachView(this);
   }
 
+  @Inject
+  public void registerFragment() {
+    mAdapter.register(this);
+  }
+
   @Override
   public void onActivityCreated(@Nullable Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
@@ -156,8 +161,21 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
     ).show();
   }
 
+  private final static String TAG_MUSIC_CUT_DIALOG =
+      "musiclibrary.MusicLibraryFragment.music_cut_dialog";
+
+  @Override
+  public void showMusicCutDialog(Music music) {
+    MusicCutDialogFragment dialog = MusicCutDialogFragment.newInstance(music);
+    dialog.show(getFragmentManager(), TAG_MUSIC_CUT_DIALOG);
+  }
+
   public void preventKeyboardPopup() {
     this.getActivity().getWindow().setSoftInputMode(
         WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+  }
+
+  public MusicLibraryPresenter getPresenter() {
+    return mPresenter;
   }
 }
