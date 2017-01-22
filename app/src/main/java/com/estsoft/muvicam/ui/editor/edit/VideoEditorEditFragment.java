@@ -242,14 +242,26 @@ public class VideoEditorEditFragment extends Fragment {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     Log.d(TAG, "onCompletion: now1");
-                    if (videoPlayer.isPlaying()) videoPlayer.pause();
-                    mediaPlayer.seekTo(musicOffset + resultVideosTotalTime);
-                    videoPlayer.seekTo(nowVideo.getStart());
+                    musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
+musicPlayer.start();
+//                    if (videoPlayer.isPlaying()) videoPlayer.pause();
+//                    mediaPlayer.seekTo(musicOffset + resultVideosTotalTime);
+//                    videoPlayer.seekTo(nowVideo.getStart());
 
-                    editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
-                    videoPlayer.start();
-                    mediaPlayer.start();
-                    videoPlayerTextureView.bringToFront();
+//                    editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
+//                    videoPlayer.start();
+//                    mediaPlayer.start();
+//                    videoPlayerTextureView.bringToFront();
+                    //musicPlayer.start();
+
+//                    videoPlayer.pause();
+//                    musicPlayer.pause();
+//                    videoPlayer.seekTo(nowVideo.getStart());
+//                    musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
+//                    editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
+//                    musicPlayer.start();
+//                    videoPlayer.start();
+
                 }
             });
             editProgressBar.bringToFront();
@@ -287,7 +299,7 @@ public class VideoEditorEditFragment extends Fragment {
                     musicPlayer.pause();
                 } else {
                     videoPlayer.seekTo(nowVideo.getStart());
-                    musicPlayer.seekTo(musicOffset);
+                    musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
                     editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
 
                     videoPlayer.start();
@@ -385,7 +397,7 @@ public class VideoEditorEditFragment extends Fragment {
                                                        trimmerBackground.setEndX(seekBarRight.getX());
                                                        trimmerBackground.invalidate();
 
-                                                       if(videoPlayer.isPlaying()) {
+                                                       if (videoPlayer.isPlaying()) {
                                                            videoPlayer.seekTo(nowVideo.getStart());
                                                            musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
                                                            editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
@@ -503,7 +515,7 @@ public class VideoEditorEditFragment extends Fragment {
                                                         trimmerBackground.setEndX(position);
                                                         trimmerBackground.invalidate();
                                                         Log.d(TAG, "onTouch: seekTest1 r" + nowVideo.getStart());
-                                                        if(videoPlayer.isPlaying()) {
+                                                        if (videoPlayer.isPlaying()) {
                                                             videoPlayer.seekTo(nowVideo.getStart());
                                                             musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
                                                             editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
@@ -681,28 +693,37 @@ public class VideoEditorEditFragment extends Fragment {
 
             while (flag) {
                 try {
-                    if (videoPlayer.isPlaying()) {
+                    if (musicPlayer.isPlaying()) {
+                        int remain = 15000 - resultVideosTotalTime;
 
                         if (videoPlayer.getCurrentPosition() >= nowVideo.getEnd()) {
+
                             Log.d(TAG, "run: paused");
                             Log.d(TAG, "run: geCur" + videoPlayer.getCurrentPosition());
                             Log.d(TAG, "run: geStart" + nowVideo.getStart());
                             Log.d(TAG, "run: geEnd" + nowVideo.getEnd());
+
                             videoPlayer.seekTo(nowVideo.getStart());
-                            musicPlayer.seekTo(musicOffset+resultVideosTotalTime);
                             editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
+
+                            if (nowVideo.getEnd() - nowVideo.getStart() < remain) {
+                                Log.d(TAG, "run: remain"+remain + " / nowvideo: "+(nowVideo.getEnd() - nowVideo.getStart()));
+                                musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
+                            }
+                            continue;
+                        } else {
+
+                            // progress bar
+                            float progressTime = ((float) videoPlayer.getCurrentPosition() - nowVideo.getStart()) / (nowVideo.getEnd() - nowVideo.getStart());
+                            float progress = progressTime * (seekBarRight.getX() - (seekBarLeft.getX() + seekBarLeft.getWidth()));
+                            editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth() + progress);
+                            Thread.sleep(50);
+                            editProgressBar.setVisibility(View.VISIBLE);
+
                         }
 
 
-                        // progress bar
-                        float progressTime = ((float) videoPlayer.getCurrentPosition() - nowVideo.getStart()) / (nowVideo.getEnd() - nowVideo.getStart());
-                        float progress = progressTime * (seekBarRight.getX() - (seekBarLeft.getX() + seekBarLeft.getWidth()));
-                        editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth() + progress);
-                        Thread.sleep(50);
-                        editProgressBar.setVisibility(View.VISIBLE);
-
                     }
-
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

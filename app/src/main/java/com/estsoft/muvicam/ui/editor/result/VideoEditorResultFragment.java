@@ -13,7 +13,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -24,11 +23,8 @@ import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
-import com.estsoft.muvicam.ui.editor.EditorActivity;
 import com.estsoft.muvicam.ui.editor.ResultBarView;
 import com.estsoft.muvicam.ui.editor.VideoPlayerTextureView;
-import com.estsoft.muvicam.ui.editor.edit.TrimmerBackGroundView;
-import com.estsoft.muvicam.ui.editor.edit.VideoEditorEditFragment;
 import com.estsoft.muvicam.ui.share.ShareActivity;
 
 import java.io.FileDescriptor;
@@ -38,7 +34,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.List;
 
 /*
  * will show edit view
@@ -69,7 +64,8 @@ public class VideoEditorResultFragment extends Fragment {
     int resultVideosTotalTime;
     int nowVideoNum;
     DataPassListener mCallBack;
-    ImageView doneButton;
+    ImageView doneButton, homeButton;
+
     VideoEditSelectedNumberAdapter.OnItemClickListener itemClickListener = new VideoEditSelectedNumberAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(View view, int position) {
@@ -215,6 +211,7 @@ public class VideoEditorResultFragment extends Fragment {
         deleteButton = (ImageView) v.findViewById(R.id.editor_result_delete);
         linearResultSpace = (FrameLayout) v.findViewById(R.id.editor_result_space_linear);
         resultProgressBar = (ProgressBar) v.findViewById(R.id.editor_result_progress);
+
         ResultBarView resultBarView;
         Log.d(TAG, "onCreateView: resultVideosTotalTime1" + resultVideosTotalTime);
         int resultTime = 0;
@@ -235,6 +232,8 @@ public class VideoEditorResultFragment extends Fragment {
 
         editorResultBlackScreen = (LinearLayout) v.findViewById(R.id.editor_result_black_screen);
         doneButton = (ImageView) v.findViewById(R.id.editor_done);
+        homeButton = (ImageView) v.findViewById(R.id.editor_home);
+
         if (resultVideosTotalTime > 0) {
             Log.d(TAG, "onCreateView: resultVideosTotalTime2" + resultVideosTotalTime);
             deleteButton.setTranslationX(deleteButtonLocation(resultVideosTotalTime));
@@ -348,6 +347,13 @@ public class VideoEditorResultFragment extends Fragment {
                 }
             }
         });
+        homeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ResultDialog exitDialog = new ResultDialog(getActivity());
+                exitDialog.show();
+            }
+        });
 
         videoSpaceFrameLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -356,7 +362,6 @@ public class VideoEditorResultFragment extends Fragment {
                     musicResultPlayer.seekTo(musicOffset);
                     videoResultPlayer.start();
                     videoResultTextureView.bringToFront();
-
 
                 }
             }
@@ -530,7 +535,6 @@ public class VideoEditorResultFragment extends Fragment {
                                         }
                                         videoResultPlayer.setFirst(false);
                                         prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
-
                                     }
                                 }
                             } else {
