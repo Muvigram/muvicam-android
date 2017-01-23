@@ -138,12 +138,12 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
     private void videoSetAndStart() {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource( mTmpStoredPath );
-        String duration = retriever.extractMetadata( MediaMetadataRetriever.METADATA_KEY_DURATION );
+        int duration = Integer.parseInt(retriever.extractMetadata( MediaMetadataRetriever.METADATA_KEY_DURATION ));
         Log.d(TAG, "videoSetAndStart: " + duration);
         retriever.setDataSource(mLogoVideoFile.getFileDescriptor(), mLogoVideoFile.getStartOffset(), mLogoVideoFile.getLength());
         int logoDuration = Integer.parseInt(
                         retriever.extractMetadata(  MediaMetadataRetriever.METADATA_KEY_DURATION ));
-        mView.videoSetAndStart(mTmpStoredPath, Integer.parseInt( duration ) - logoDuration );
+        mView.videoSetAndStart( mTmpStoredPath, duration - logoDuration );
     }
 
     /* click control */

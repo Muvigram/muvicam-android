@@ -41,8 +41,8 @@
             android:gravity="center">
             <ImageView
                 android:background="@drawable/ic_share_home"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:id="@+id/share_camera_home"/>
         </LinearLayout>
 
@@ -54,8 +54,8 @@
             android:gravity="center">
             <ImageView
                 android:id="@+id/share_save"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:background="@drawable/ic_share_save"/>
         </LinearLayout>
 
