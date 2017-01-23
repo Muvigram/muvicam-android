@@ -72,7 +72,7 @@ public class MusicCutDialogFragment extends DialogFragment {
   @Override
   public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    mMusicPlayer = new MusicPlayer(getActivity());
+    mMusicPlayer = new MusicPlayer(getActivity(), "silence_15_sec.mp3");
     mMusicPlayer.openPlayer();
   }
 
@@ -112,7 +112,7 @@ public class MusicCutDialogFragment extends DialogFragment {
           .create();
     }
 
-    mMusicPlayer.updateMusic(music);
+    mMusicPlayer.setMusic(music.uri());
 
     // set music profile
     if (music.thumbnail() != null) {
@@ -158,7 +158,7 @@ public class MusicCutDialogFragment extends DialogFragment {
     public void waveformTouchEnd() {
       mTempOffset = UnitConversionUtil.secToMillisec(mWaveformView.fixOffset());
       Timber.e("mTempOffset : %d", mTempOffset);
-      mMusicPlayer.cutMusic(mTempOffset);
+      mMusicPlayer.setOffset(mTempOffset);
       RxUtil.unsubscribe(mSubscription);
 
       mMusicPlayer.startPlayer();
