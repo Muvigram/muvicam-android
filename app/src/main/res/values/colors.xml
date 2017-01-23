@@ -45,6 +45,7 @@
 
     <color name="resultSpace">#FF546A</color>
     <color name="editorTrimmer">#FFAE4A</color>
+    <color name="editorThumbnailBackground">#66FFFFFF</color>
 
     <!--
     ///*** Example for localized color scheme. ***///

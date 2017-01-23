@@ -35,6 +35,7 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 Log.d(TAG, "onCompletion: ");
+                mediaPlayer.stop();
             }
         });
 
@@ -61,6 +62,12 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
         super(activity);
         setParams(activity,resultVideo,editorvideoWidth,editorVideoHeight,rotation);
         this.editorResultMediaPlayer = editorResultMediaPlayer;
+        editorResultMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                mediaPlayer.pause();
+            }
+        });
         this.setSurfaceTextureListener(this);
     }
 
