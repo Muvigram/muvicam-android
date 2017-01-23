@@ -71,8 +71,8 @@ public class VideoEditorResultFragment extends Fragment {
 
             Log.d(TAG, "onCreateView: resultVideosTotalTime6" + resultVideosTotalTime);
 
-                flag = false;
-                mCallBack.passDataFToF(position + 1, selectedVideos, resultVideos, resultVideosTotalTime, musicPath, musicOffset, musicLength);
+            flag = false;
+            mCallBack.passDataFToF(position + 1, selectedVideos, resultVideos, resultVideosTotalTime, musicPath, musicOffset, musicLength);
         }
     };
 
@@ -174,7 +174,8 @@ public class VideoEditorResultFragment extends Fragment {
         deleteButton = (ImageView) v.findViewById(R.id.editor_result_delete);
         linearResultSpace = (FrameLayout) v.findViewById(R.id.editor_result_space_linear);
         resultProgressBar = (ProgressBar) v.findViewById(R.id.editor_result_progress);
-buttonsGone = (ImageView) v.findViewById(R.id.editor_result_buttons_gone);
+        resultProgressBar.setProgress(0);
+        buttonsGone = (ImageView) v.findViewById(R.id.editor_result_buttons_gone);
         ResultBarView resultBarView;
         Log.d(TAG, "onCreateView: resultVideosTotalTime1" + resultVideosTotalTime);
         int resultTime = 0;
@@ -279,7 +280,7 @@ buttonsGone = (ImageView) v.findViewById(R.id.editor_result_buttons_gone);
                 } else {
                     deleteButton.setVisibility(View.GONE);
                 }
-                if(selectedVideoButtons.getVisibility() == View.GONE) {
+                if (selectedVideoButtons.getVisibility() == View.GONE) {
                     selectedVideoButtons.setVisibility(View.VISIBLE);
                     buttonsGone.setVisibility(View.GONE);
                 }
@@ -368,13 +369,13 @@ buttonsGone = (ImageView) v.findViewById(R.id.editor_result_buttons_gone);
         ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
         float widthPSec = (float) outMetrics.widthPixels / 15;
         int dpi = outMetrics.densityDpi / 160;
-                if(resultVideosTotalTime >14000){
-                    return (15) * widthPSec - 20 * dpi;
+        if (resultVideosTotalTime > 14000) {
+            return (15) * widthPSec - 20 * dpi;
 
-                }else{
-                    return (resultVideosTotalTime / 1000) * widthPSec - 20 * dpi;
+        } else {
+            return (resultVideosTotalTime / 1000) * widthPSec - 20 * dpi;
 
-                }
+        }
     }
 
     Thread resultThread = new Thread(new Runnable() {
@@ -392,7 +393,6 @@ buttonsGone = (ImageView) v.findViewById(R.id.editor_result_buttons_gone);
                                 videoResultPlayer.pause();
                                 videoResultPlayer.stop();
                                 nowVideoNum = nowVideoNum + 1;
-
                                 if (nowVideoNum < resultVideos.size()) {
                                     Log.d(TAG, "run sec: " + nowVideoNum + " / " + resultVideos.size());
                                     videoResultPlayer2.start();
@@ -408,17 +408,19 @@ buttonsGone = (ImageView) v.findViewById(R.id.editor_result_buttons_gone);
                                         videoResultPlayer.setFirst(false);
                                         prepareVideoPlayer(videoResultPlayer, nowVideoNum + 1, true);
                                     }
-                         } else {
+                                } else {
 
                                     musicResultPlayer.pause();
+                                    nowVideoNum = 0;
+                                    resultProgressBar.setProgress(0);
+
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
                                             editorResultBlackScreen.bringToFront();
                                         }
                                     });
-                                    nowVideoNum = 0;
-                                    resultProgressBar.setProgress(0);
+
                                     if (flag && resultVideos.size() > nowVideoNum && !musicResultPlayer.isPlaying()) {
 
 
@@ -433,7 +435,7 @@ buttonsGone = (ImageView) v.findViewById(R.id.editor_result_buttons_gone);
                                 }
 
                             } else {
-                                int progress = musicResultPlayer.getCurrentPosition() / 150;
+                                int progress = (musicResultPlayer.getCurrentPosition() - musicOffset) / 150;
                                 resultProgressBar.setProgress(progress);
                                 resultThread.sleep(50);
                                 getActivity().runOnUiThread(new Runnable() {
@@ -443,6 +445,7 @@ buttonsGone = (ImageView) v.findViewById(R.id.editor_result_buttons_gone);
                                     }
                                 });
                             }
+
                         } else if (nowVideoNum % 2 == 1 && flag && videoResultPlayer2.isPlaying()) {
 
                             if (videoResultPlayer2.getCurrentPosition() >= resultVideos.get(nowVideoNum).getEnd()) {
@@ -466,14 +469,15 @@ buttonsGone = (ImageView) v.findViewById(R.id.editor_result_buttons_gone);
                                     //else videoplayer1 to start
                                 } else {
                                     musicResultPlayer.pause();
+                                    nowVideoNum = 0;
+                                    resultProgressBar.setProgress(0);
+
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
                                             editorResultBlackScreen.bringToFront();
                                         }
                                     });
-                                    nowVideoNum = 0;
-                                    resultProgressBar.setProgress(0);
                                     if (flag && resultVideos.size() > nowVideoNum && !musicResultPlayer.isPlaying()) {
                                         if (resultVideos.size() > nowVideoNum + 1) {
                                             videoResultPlayer2.setFirst(false);
@@ -484,7 +488,7 @@ buttonsGone = (ImageView) v.findViewById(R.id.editor_result_buttons_gone);
                                     }
                                 }
                             } else {
-                                int progress = musicResultPlayer.getCurrentPosition() / 150;
+                                int progress = (musicResultPlayer.getCurrentPosition() - musicOffset) / 150;
                                 resultProgressBar.setProgress(progress);
                                 resultThread.sleep(50);
                                 getActivity().runOnUiThread(new Runnable() {
@@ -495,6 +499,7 @@ buttonsGone = (ImageView) v.findViewById(R.id.editor_result_buttons_gone);
                                 });
                             }
                         }
+
                     }
                 } catch (InterruptedException e) {
                     e.getStackTrace();

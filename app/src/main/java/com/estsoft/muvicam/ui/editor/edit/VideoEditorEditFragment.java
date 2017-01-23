@@ -184,8 +184,8 @@ public class VideoEditorEditFragment extends Fragment {
             musicLength = args.getInt(VideoEditorResultFragment.EXTRA_MUSIC_LENGTH, 0);
             nowVideo = new EditorVideo();
             nowVideo.setVideoPath(selectedVideos.get(selectedNum - 1).getVideoPath());
-            nowVideo.setDurationMiliSec(selectedVideos.get(selectedNum-1).getDurationMiliSec());
-           nowVideo.setNumSelected(selectedNum);
+            nowVideo.setDurationMiliSec(selectedVideos.get(selectedNum - 1).getDurationMiliSec());
+            nowVideo.setNumSelected(selectedNum);
 
         }
 
@@ -250,23 +250,6 @@ public class VideoEditorEditFragment extends Fragment {
                     videoPlayer.seekTo(nowVideo.getStart());
                     musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
                     musicPlayer.start();
-//                    if (videoPlayer.isPlaying()) videoPlayer.pause();
-//                    mediaPlayer.seekTo(musicOffset + resultVideosTotalTime);
-//                    videoPlayer.seekTo(nowVideo.getStart());
-
-//                    editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
-//                    videoPlayer.start();
-//                    mediaPlayer.start();
-//                    videoPlayerTextureView.bringToFront();
-                    //musicPlayer.start();
-
-//                    videoPlayer.pause();
-//                    musicPlayer.pause();
-//                    videoPlayer.seekTo(nowVideo.getStart());
-//                    musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
-//                    editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
-//                    musicPlayer.start();
-//                    videoPlayer.start();
 
                 }
             });
@@ -701,18 +684,18 @@ public class VideoEditorEditFragment extends Fragment {
             while (flag) {
                 try {
                     if (flag && musicPlayer.isPlaying()) {
-                        Log.d(TAG, "run: length 1 / "+(nowVideo.getEnd()-nowVideo.getStart()+1000));
-                        Log.d(TAG, "run: length 2 / "+(musicLength-(musicOffset + resultVideosTotalTime)));
-                       if(nowVideo.getEnd()-nowVideo.getStart()+1000 >=musicLength-(musicOffset + resultVideosTotalTime)){
-                           isMaxLength = true;
-                       }else{
-                           isMaxLength = false;
-                       }
+                        Log.d(TAG, "run: length 1 / " + (nowVideo.getEnd() - nowVideo.getStart() + 1000));
+                        Log.d(TAG, "run: length 2 / " + (musicLength - resultVideosTotalTime));
+                        if (nowVideo.getEnd() - nowVideo.getStart() + 1000 >= musicLength - resultVideosTotalTime) {
+                            isMaxLength = true;
+                        } else {
+                            isMaxLength = false;
+                        }
 
-                        Log.d(TAG, "run: isMaxLength: "+isMaxLength);
-                        Log.d(TAG, "run: t getC"+videoPlayer.getCurrentPosition());
-                        Log.d(TAG, "run: t nowE"+nowVideo.getEnd());
-                        if (flag && videoPlayer.getCurrentPosition() >= nowVideo.getEnd()-100) {
+                        Log.d(TAG, "run: isMaxLength: " + isMaxLength);
+                        Log.d(TAG, "run: t getC" + videoPlayer.getCurrentPosition());
+                        Log.d(TAG, "run: t nowE" + nowVideo.getEnd());
+                        if (flag && videoPlayer.getCurrentPosition() >= nowVideo.getEnd() - 100) {
 
                             Log.d(TAG, "run: paused");
                             Log.d(TAG, "run: geCur" + videoPlayer.getCurrentPosition());
@@ -721,7 +704,7 @@ public class VideoEditorEditFragment extends Fragment {
 
                             //       editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
 
-                            if (!isMaxLength) {
+                            if (!isMaxLength || (isMaxLength && musicPlayer.getCurrentPosition() < musicPlayer.getDuration())) {
                                 Log.d(TAG, "run: " + " / nowvideo: " + (nowVideo.getEnd() - nowVideo.getStart()));
                                 videoPlayer.seekTo(nowVideo.getStart());
                                 musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
