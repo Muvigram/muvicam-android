@@ -1,5 +1,7 @@
 package com.estsoft.muvicam.ui.home;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -44,6 +46,10 @@ public class HomeActivity extends BaseActivity {
 
   public HomeComponent getComponent() {
     return mHomeComponent;
+  }
+
+  public static Intent newIntent(Context packageContext) {
+    return new Intent(packageContext, HomeActivity.class);
   }
 
   public static HomeActivity get(Fragment fragment) {
