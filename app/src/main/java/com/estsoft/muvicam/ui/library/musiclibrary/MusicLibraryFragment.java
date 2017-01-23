@@ -71,7 +71,7 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
 
   @OnClick(R.id.library_music_search_bar_skip)
   public void skipSelectMusic(View v) {
-    LibraryActivity.get(this).completeSelection(null, 0, 15);
+    LibraryActivity.get(this).completeSelection(null, 0, 15000);
   }
 
   @Inject MusicLibraryAdapter mAdapter;
