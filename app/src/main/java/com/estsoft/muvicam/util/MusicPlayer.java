@@ -10,12 +10,23 @@ import com.estsoft.muvicam.model.Music;
 
 import java.io.IOException;
 
-import javax.inject.Inject;
-
 import rx.Observable;
 import timber.log.Timber;
 
 /**
+ * Customized music player. This class
+ *  1. uses {@link MediaPlayer} to playing music.
+ *  2. is designed to
+ *    1) set and play music
+ *    2) seek to a specific point
+ *    3) to publish a current position as a {@link Observable} object.
+ *
+ * ** Caution **
+ * There are some additional dependencies which are badly designed.
+ * Additional dependencies //TODO - Resolve following unnecessary dependencies.
+ *  1. Model object {@link Music}.
+ *  2. silence_15_sec.mp3 file in assets folder.
+ *
  * Created by jaylim on 21/01/2017.
  */
 
