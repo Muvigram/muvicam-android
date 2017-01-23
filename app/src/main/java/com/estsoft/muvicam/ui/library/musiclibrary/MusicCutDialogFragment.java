@@ -64,8 +64,8 @@ public class MusicCutDialogFragment extends DialogFragment {
   @BindView(R.id.music_dialog_item_title) TextView mTitle;
   @BindView(R.id.music_dialog_cut_waveform) WaveformView mWaveformView;
 
+  private Music mMusic;
   private int mOffset;
-  private int mTempOffset;
 
   private MusicPlayer mMusicPlayer;
 
@@ -99,38 +99,37 @@ public class MusicCutDialogFragment extends DialogFragment {
   public Dialog onCreateDialog(Bundle savedInstanceState) {
     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-    Music music = getArguments().getParcelable(ARG_MUSIC);
+    mMusic = getArguments().getParcelable(ARG_MUSIC);
     mOffset = getArguments().getInt(ARG_OFFSET);
 
     LayoutInflater inflater = getActivity().getLayoutInflater();
     View view = inflater.inflate(R.layout.dialog_music_cut, null);
     mUnbinder = ButterKnife.bind(this, view);
 
-    if (music == null) {
+    if (mMusic == null) {
       return builder.setMessage("There was an error loading music.")
           .setPositiveButton(android.R.string.ok, (dialog, id) -> dialog.dismiss())
           .create();
     }
 
-    mMusicPlayer.setMusic(music.uri());
+    mMusicPlayer.setMusic(mMusic.uri());
 
     // set music profile
-    if (music.thumbnail() != null) {
-      mThumbnail.setImageBitmap(music.thumbnail());
+    if (mMusic.thumbnail() != null) {
+      mThumbnail.setImageBitmap(mMusic.thumbnail());
     } else {
       mThumbnail.setImageResource(R.drawable.music_item_no_album_art);
     }
-    mTitle.setText(music.title());
-    mArtist.setText(music.artist());
+    mTitle.setText(mMusic.title());
+    mArtist.setText(mMusic.artist());
 
     // set waveform
-    mWaveformView.setSoundFile(music.uri(), UnitConversionUtil.millisecToSec(mOffset));
+    mWaveformView.setSoundFile(mMusic.uri(), UnitConversionUtil.millisecToSec(mOffset));
     mWaveformView.setListener(mWaveformListener);
 
     builder.setView(view)
         .setPositiveButton(android.R.string.ok, (dialog, id) -> {
-          mOffset = mTempOffset;
-          LibraryActivity.get(this).completeSelection(music.uri().toString(), mOffset, 15);
+          LibraryActivity.get(this).completeSelection(mMusic.uri().toString(), mOffset, 15);
         })
         .setNegativeButton(android.R.string.cancel, (dialog, id) -> dismiss());
 
@@ -156,9 +155,9 @@ public class MusicCutDialogFragment extends DialogFragment {
 
     @Override
     public void waveformTouchEnd() {
-      mTempOffset = UnitConversionUtil.secToMillisec(mWaveformView.fixOffset());
-      Timber.e("mTempOffset : %d", mTempOffset);
-      mMusicPlayer.setOffset(mTempOffset);
+      mOffset = UnitConversionUtil.secToMillisec(mWaveformView.fixOffset());
+      Timber.e("mOffset : %d", mOffset);
+      mMusicPlayer.setOffset(mOffset);
       RxUtil.unsubscribe(mSubscription);
 
       mMusicPlayer.startPlayer();

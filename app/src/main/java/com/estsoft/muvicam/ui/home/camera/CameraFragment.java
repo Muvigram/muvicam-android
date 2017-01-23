@@ -56,6 +56,7 @@ import com.estsoft.muvicam.ui.home.HomeActivity;
 import com.estsoft.muvicam.ui.selector.SelectorActivity;
 import com.estsoft.muvicam.ui.share.ShareActivity;
 import com.estsoft.muvicam.util.FileUtil;
+import com.estsoft.muvicam.util.MusicPlayer;
 import com.estsoft.muvicam.util.RxUtil;
 import com.jakewharton.rxbinding.view.RxView;
 
@@ -99,46 +100,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   public static CameraFragment get(Fragment fragment) {
     return (CameraFragment) fragment.getParentFragment();
-  }
-
-  public void sendAllInformation() {
-
-    String[] videoPaths = new String[mVideoStack.size()];
-    int i = 0;
-    int j = 0;
-    for (File file : mVideoStack.toArray(new File[mVideoStack.size()])) {
-      String fileName = String.format(Locale.US, "%d_%d.mp4",
-          System.currentTimeMillis(), j++);
-      File newFile = new File(mDir, fileName);
-      new Thread() {
-        @Override
-        public void run() {
-          super.run();
-          try {
-            FileUtil.copyFile(file, newFile);
-          } catch (IOException e) {
-            e.printStackTrace();
-          } finally {
-            Toast.makeText(getActivity(), "SAVE : " + mDir.toString() + fileName, Toast.LENGTH_SHORT).show();
-            Timber.e("Save the file $$ dir : %s, file : %s\n", mDir.toString(), fileName);
-          }
-        }
-      }.run();
-      videoPaths[i++] = newFile.toString();
-    }
-
-    int[] videoOffsets = new int[mOffsetStack.size()];
-    i = 0;
-    for (Integer videoOffset : mOffsetStack.toArray(new Integer[mOffsetStack.size()])) {
-      videoOffsets[i++] = videoOffset;
-    }
-
-    String mMusicPath = mMusic == null ? "" : mMusic.uri().toString();
-
-    Intent intent = ShareActivity.newIntent(getContext(), videoPaths, videoOffsets,
-        mMusicPath, mMusicOffset, mPlayer.getCurrentPosition() - mMusicOffset);
-
-    getActivity().startActivity(intent);
   }
 
   private Unbinder mUnbinder;
@@ -199,7 +160,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_ok_button)
   public void _completeVideo(View v) {
-    if (mVideoStack.isEmpty() || mPlayer.getCurrentPosition() - mMusicOffset < 5000) {
+    if (mVideoStack.isEmpty() || mMusicPlayer.getCurrentPosition() - mMusicOffset < 5000) {
       return;
     }
     v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
@@ -234,12 +195,51 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       public void onAnimationEnd(Animation animation) {
         hideTrashbin();
         popVideoFile();
-        rewindPlayer(mStackBar.deleteRecentRecord() + mMusicOffset);
+        mMusicPlayer.rewindPlayer(mStackBar.deleteRecentRecord() + mMusicOffset);
         updateTrashbin();
       }
     }));
   }
 
+  public void sendAllInformation() { // TODO -refactoring
+
+    String[] videoPaths = new String[mVideoStack.size()];
+    int i = 0;
+    int j = 0;
+    for (File file : mVideoStack.toArray(new File[mVideoStack.size()])) {
+      String fileName = String.format(Locale.US, "%d_%d.mp4",
+          System.currentTimeMillis(), j++);
+      File newFile = new File(mDir, fileName);
+      new Thread() {
+        @Override
+        public void run() {
+          super.run();
+          try {
+            FileUtil.copyFile(file, newFile);
+          } catch (IOException e) {
+            e.printStackTrace();
+          } finally {
+            Toast.makeText(getActivity(), "SAVE : " + mDir.toString() + fileName, Toast.LENGTH_SHORT).show();
+            Timber.e("Save the file $$ dir : %s, file : %s\n", mDir.toString(), fileName);
+          }
+        }
+      }.run();
+      videoPaths[i++] = newFile.toString();
+    }
+
+    int[] videoOffsets = new int[mOffsetStack.size()];
+    i = 0;
+    for (Integer videoOffset : mOffsetStack.toArray(new Integer[mOffsetStack.size()])) {
+      videoOffsets[i++] = videoOffset;
+    }
+
+    String mMusicPath = mMusic == null ? "" : mMusic.uri().toString();
+
+    Intent intent = ShareActivity.newIntent(getContext(), videoPaths, videoOffsets,
+        mMusicPath, mMusicOffset, mMusicPlayer.getCurrentPosition() - mMusicOffset);
+
+    getActivity().startActivity(intent);
+  }
 
   // STEP - VIEW BINDING //////////////////////////////////////////////////////////////////////////
 
@@ -253,8 +253,9 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     super.onCreate(savedInstanceState);
     setUpStorageDir();
     startBackgroundThread();
-    openPlayer();   // player
-    setUpPlayer();  //
+    mMusicPlayer = new MusicPlayer(getActivity(), "silence_15_sec.mp3");
+    mMusicPlayer.openPlayer();   // player
+    mMusicPlayer.setUpPlayer();  //
   }
 
   @Nullable
@@ -287,18 +288,12 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     return view;
   }
 
-  private int calculateDelay() {
-    Timber.e("CUR : %d, STD : %d\n", mPlayer.getCurrentPosition(), mMusicOffset + mVideoOffset + 1000);
-    if (mPlayer.getCurrentPosition() - mMusicOffset < 14000)
-      return mPlayer.getCurrentPosition() < mMusicOffset + mVideoOffset + 1000 ?
-          mMusicOffset + mVideoOffset + 1000 - mPlayer.getCurrentPosition() : 0;
-    else
-      return 1000;
-  }
+
 
   @Override
   public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
+
     mLibraryButton.updateThumbnailButton();
     mStackBar.setTimeBound(15000, 5000);
   }
@@ -351,9 +346,24 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @Override
   public void onDestroy() {
-    closePlayer();  // player
+    mMusicPlayer.closePlayer();  // player
     stopBackgroundThread(); // TODO
     super.onDestroy();
+  }
+
+  // STEP - MUSIC PLAYER //////////////////////////////////////////////////////////////////////DONE
+  private Music mMusic = null;
+  private int mMusicOffset = 0;
+  MusicPlayer mMusicPlayer;
+
+  public void changeMusic(Music music) {
+    mMusicPlayer.setOnCompleteSetupListener(mp -> {
+      mMusicPlayer = mp;
+      requestUiChange(UI_LOGIC_MUSIC_UPDATE_COMPLETE);
+    });
+
+    mMusic = music;
+    mMusicPlayer.setMusicAsync(music.uri());
   }
 
   // STEP - VIDEO RECORDING BUTTON INTERACTION ////////////////////////////////////NEED REFACTORING
@@ -445,18 +455,18 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   }
 
   private void updateVideoOffset() {
-    mVideoOffset = mPlayer.getCurrentPosition() - mMusicOffset;
+    mVideoOffset = mMusicPlayer.getCurrentPosition() - mMusicOffset;
   }
 
   Subscription mStackBarSubscription;
 
   public void setStackBarOnListen() {
-    mStackBarSubscription = startSubscribePlayer()
+    mStackBarSubscription = mMusicPlayer.startSubscribePlayer()
         .observeOn(AndroidSchedulers.mainThread())
         .subscribeOn(Schedulers.newThread())
         .filter(millisec -> {
           if (!isRecording) {
-            stopSubscribePlayer();
+            mMusicPlayer.stopSubscribePlayer();
           }
           return isRecording;
         })
@@ -932,7 +942,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
         } catch (InterruptedException e) {
           e.printStackTrace();
         } finally {
-          pausePlayer();
+          mMusicPlayer.pausePlayer();
           requestUiChange(UI_LOGIC_SHOW_PERIPHERAL_BUTTONS);
           isRecording = false;
         }
@@ -956,8 +966,18 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     }.start();
   }
 
+  private int calculateDelay() {
+    Timber.e("CUR : %d, STD : %d\n", mMusicPlayer.getCurrentPosition(), mMusicOffset + mVideoOffset + 1000);
+    if (mMusicPlayer.getCurrentPosition() - mMusicOffset < 14000) {
+      return mMusicPlayer.getCurrentPosition() < mMusicOffset + mVideoOffset + 1000 ?
+          mMusicOffset + mVideoOffset + 1000 - mMusicPlayer.getCurrentPosition() : 0;
+    } else {
+      return 1000;
+    }
+  }
+
   private void stopRecording() {
-    pausePlayer();
+    mMusicPlayer.pausePlayer();
     stopRecorder();
     startPreviewing();
     requestUiChange(UI_LOGIC_SHOW_PERIPHERAL_BUTTONS);
@@ -1071,7 +1091,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
       // media recorder
       startRecorder();
-      startPlayer();
+      mMusicPlayer.startPlayer();
     }
 
     @Override
@@ -1157,107 +1177,8 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     mRecorder.reset();
   }
 
-  // STEP - MUSIC PLAYER //////////////////////////////////////////////////////////////////////DONE
 
-  private Music mMusic = null;
-  private int mMusicOffset = 0;
 
-  public void updateMusic(@Nullable Music music) {
-    // TODO - background
-    stopPlayer();
-    mMusic = music;
-    mMusicOffset = 0;
-    setUpPlayer();
-  }
-
-  public void cutMusic(int musicOffset) {
-    pausePlayer();
-    mMusicOffset = musicOffset;
-    mPlayer.seekTo(mMusicOffset);
-  }
-
-  private MediaPlayer mPlayer;
-
-  public void openPlayer() {
-    if (mPlayer == null) { // Construct new player and set listener
-      mPlayer = new MediaPlayer();
-    } else { // Reset player so that becomes
-      mPlayer.reset();
-    }
-  }
-
-  public void closePlayer() {
-    mPlayer.release();
-    if (mPlayer != null) {
-      mPlayer = null;
-    }
-  }
-
-  public void setUpPlayer() {
-    mPlayer.setOnPreparedListener(mp -> {
-      mPlayer = mp;
-      mPlayer.seekTo(mMusicOffset);
-      requestUiChange(UI_LOGIC_MUSIC_UPDATE_COMPLETE);
-    });
-    try {
-      if (mMusic == null) {
-        AssetFileDescriptor afd = getResources().getAssets().openFd("silence_15_sec.mp3");
-        mPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-      } else {
-        mPlayer.setDataSource(getContext(), mMusic.uri());
-      }
-      mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-      mPlayer.prepareAsync();
-    } catch (IOException e) {
-      Timber.e(e, "prepare() failed");
-    }
-  }
-
-  public void startPlayer() {
-    if (mPlayer != null && !mPlayer.isPlaying()) {
-      mPlayer.start();
-    }
-  }
-
-  public void pausePlayer() {
-    if (mPlayer != null && mPlayer.isPlaying()) {
-      mPlayer.pause();
-    }
-  }
-
-  public void stopPlayer() {
-    if (mPlayer != null) {
-      mPlayer.stop();
-      mPlayer.reset();
-    }
-  }
-
-  public void rewindPlayer(int millisec) {
-    pausePlayer();
-    mPlayer.seekTo(millisec);
-  }
-
-  private boolean isStopped = false;
-
-  public Observable<Integer> startSubscribePlayer() {
-    isStopped = false;
-    return Observable.create(subscriber -> {
-      while (!isStopped) {
-        subscriber.onNext(mPlayer.getCurrentPosition());
-        try {
-          Thread.sleep(50);
-        } catch (InterruptedException e) {
-          subscriber.onError(e);
-          e.printStackTrace();
-        }
-      }
-      subscriber.onCompleted();
-    });
-  }
-
-  public void stopSubscribePlayer() {
-    isStopped = true;
-  }
 
   // STEP - PERMISSION FOR CAMERA /////////////////////////////////////////////////////////////DONE
 
@@ -1474,7 +1395,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           duringShootingVideo = true;
           mCutButton.setImageResource(R.drawable.camera_cut_button_inactive_30dp);
           mSelfieButton.setImageResource(R.drawable.camera_selfie_button_inactive_30dp);
-          if (mPlayer.getCurrentPosition() - mMusicOffset < 5000)
+          if (mMusicPlayer.getCurrentPosition() - mMusicOffset < 5000)
             mOkButton.setImageResource(R.drawable.camera_ok_button_inactive_30dp);
           else
             mOkButton.setImageResource(R.drawable.camera_ok_button_active_30dp);
@@ -1524,6 +1445,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           break;
         case UI_LOGIC_MUSIC_UPDATE_COMPLETE:
           mMusicButton.setAlbumArt(mMusic);
+          Timber.e("ERRRORROOOR");
           mMusicButton.startAnimation(getAnimation(getActivity(), R.anim.rotating));
           if (mMusic != null) {
             mCutButton.setImageResource(R.drawable.camera_cut_button_active_30dp);

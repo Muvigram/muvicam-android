@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.estsoft.muvicam.ui.home.camera.CameraFragment;
+
 import java.io.IOException;
 
 import rx.Observable;
@@ -17,14 +19,25 @@ import timber.log.Timber;
  * Customized music player. This class
  *  1. uses {@link MediaPlayer} to playing music.
  *  2. is designed to
- *    1) set and play music
- *    2) seek to a specific point
- *    3) to publish a current position as a {@link Observable} object.
+ *    1) setup media player synchronously and asynchronously.
+ *    2) set and play music.
+ *    3) seek to a specific point.
+ *    4) to publish a current position as a {@link Observable} object.
  *
  * Created by jaylim on 21/01/2017.
  */
 
 public class MusicPlayer {
+
+  public interface OnCompleteSetupListener {
+    void onCompleteSetup(MusicPlayer musicPlayer);
+  }
+
+  private OnCompleteSetupListener mOnCompleteSetupListener;
+
+  public void setOnCompleteSetupListener(OnCompleteSetupListener listener) {
+    mOnCompleteSetupListener = listener;
+  }
 
   /* Field */
   private final Context mContext;
@@ -56,8 +69,15 @@ public class MusicPlayer {
     this.mDefaultAsset = defaultAsset;
   }
 
+  public void setMusicAsync(@Nullable Uri musicUri) {
+    stopPlayer();
+    mMusicUri = musicUri;
+    mOffset = 0;
+    setUpPlayerAsync();
+  }
+
+
   public void setMusic(@Nullable Uri musicUri) {
-    // TODO - background
     stopPlayer();
     mMusicUri = musicUri;
     mOffset = 0;
@@ -68,6 +88,10 @@ public class MusicPlayer {
     pausePlayer();
     mOffset = offset;
     mPlayer.seekTo(mOffset);
+  }
+
+  public int getCurrentPosition() {
+    return mPlayer.getCurrentPosition();
   }
 
   public void openPlayer() {
@@ -89,6 +113,20 @@ public class MusicPlayer {
     mPlayer.setOnPreparedListener(mp -> {
       mPlayer = mp;
       mPlayer.seekTo(mOffset);
+    });
+
+    setDataSource();
+    mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+
+    mPlayer.prepareAsync();
+  }
+
+  public void setUpPlayerAsync() {
+    mPlayer.setOnPreparedListener(mp -> {
+      mPlayer = mp;
+      mPlayer.seekTo(mOffset);
+
+      mOnCompleteSetupListener.onCompleteSetup(this);
     });
 
     setDataSource();
