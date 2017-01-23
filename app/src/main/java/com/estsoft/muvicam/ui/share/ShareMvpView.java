@@ -13,5 +13,5 @@ public interface ShareMvpView extends MvpView {
     void showToast( String msg );
     void updateProgress( float progress, boolean isFinished );
     void holdFirstThumbnail(Bitmap bitmap );
-    void videoSetAndStart( String videoPath );
+    void videoSetAndStart( String videoPath, int durationMs );
 }

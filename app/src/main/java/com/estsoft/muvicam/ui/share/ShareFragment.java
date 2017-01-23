@@ -6,21 +6,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.injection.component.ActivityComponent;
-import com.estsoft.muvicam.transcoder.noneencode.MediaConcater;
-import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
-import com.estsoft.muvicam.transcoder.wrappers.MediaEditorNew;
-import com.estsoft.muvicam.transcoder.wrappers.ProgressListener;
 import com.estsoft.muvicam.ui.share.injection.DaggerShareComponent;
 import com.estsoft.muvicam.ui.share.injection.ShareComponent;
 
@@ -41,9 +35,6 @@ import butterknife.Unbinder;
  */
 public class ShareFragment extends Fragment implements ShareMvpView {
     private static final String TAG = "ShareFragment";
-
-    ShareComponent mShareComponent;
-
     private final static String EXTRA_VIDEO_PATHS = "ShareFragment.videoPaths";
     private final static String EXTRA_VIDEO_OFFSETS = "ShareFragment.videoOffsets";
     private final static String EXTRA_MUSIC_PATH = "ShareFragment.musicPath";
@@ -53,60 +44,26 @@ public class ShareFragment extends Fragment implements ShareMvpView {
     private final static String EXTRA_VIDEO_STARTS = "ShareFragment.videoStarts";
     private final static String EXTRA_VIDEO_ENDS = "ShareFragment.videoEnds";
 
-//    private static final String TEST_PATH_ORIGIN_CAMERA_01 = "/storage/emulated/0/test_video/20161212_112049.mp4";
-//    private static final String TEST_PATH_ORIGIN_CAMERA_02 = "/storage/emulated/0/test_video/20161130_131929.mp4";
-//    private static final String TEST_PATH_ORIGIN_CAMERA_03 = "/storage/emulated/0/test_video/20161208_144759.mp4";
-//
-//    private static final String TEST_PATH_MUVIGRAM_CAMERA_01 = "/storage/emulated/0/test_video/1483402446855_0.mp4";
-//    private static final String TEST_PATH_MUVIGRAM_CAMERA_02 = "/storage/emulated/0/test_video/1483402446906_1.mp4";
-//    private static final String TEST_PATH_MUVIGRAM_CAMERA_03 = "/storage/emulated/0/test_video/1483402484394_0.mp4";
-//    private static final String TEST_PATH_MUVIGRAM_CAMERA_04 = "/storage/emulated/0/test_video/1483402593109_0.mp4";
-//    private static final String TEST_PATH_MUVIGRAM_CAMERA_05 = "/storage/emulated/0/test_video/1483402633321_2.mp4";
-//
-//    private static final String TEST_PATH_MUVIGRAM_CAMERA_5000K = "/storage/emulated/0/test_video/camera_sample_5000k.mp4";
-//    private static final String TEST_PATH_OUTSIDE_GIRLSDAY = "/storage/emulated/0/test_video/girlsday_sample.mp4";
-//
-//    private static final String TEST_PATH_NEXUS_CAMERA_01 = "/storage/emulated/0/test_video/nexus_sample01.mp4";
-//    private static final String TEST_PATH_NEXUS_CAMERA_02 = "/storage/emulated/0/test_video/nexus_sample02.mp4";
-//
-//    private static final String TEST_PATH_MP3_63S = "/storage/emulated/0/test_video/sample_sound_63s.mp3";
-//    private static final String TEST_PATH_MP3_221S = "/storage/emulated/0/test_video/sample_song_221s.mp3";
-//    private static final String TEST_PATH_MP3_253S = "/storage/emulated/0/test_video/sample_song_253s.mp3";
 
-    private static final int MICRO_WEIGHT = 1000000;
-    private static final int MILLI_TO_MICRO = 1000;
-
-    private final int LOCAL_STORE = -55;
-    private final int TRANSCODE = -56;
-    private int currentWork = LOCAL_STORE;
-
-    private String[] mVideoPaths;
-    private int[] mVideoOffsets;
-    private int[] mVideoStarts;
-    private int[] mVideoEnds;
-    private String mMusicPath;
-    private int mMusicOffset;
-    private int mMusicLength;
-    private String mOutputPath;
-    private boolean mFromEditor;
-
-    private boolean localCopied;
-
+    ShareComponent mShareComponent;
     @Inject SharePresenter mPresenter;
 
-    @BindView(R.id.result_video) VideoView mVideoView;
-    @BindView(R.id.sns_facebook) ImageView mFacebook;
-    @BindView(R.id.sns_twitter) ImageView mTwitter;
-    @BindView(R.id.sns_instagram) ImageView mInstagram;
-    @BindView(R.id.sns_local_store) ImageView mLocalStore;
-    @BindView(R.id.custom_progress) CircularProgressBar mProgressbar;
-    @BindView(R.id.progress_container) FrameLayout mProgressContainer;
-    @BindView(R.id.thumbnail_holder) ImageView mThumbnailHolder;
+    @BindView(R.id.share_result_video) ShareVideoView mVideoView;
+    @BindView(R.id.share_camera_home) ImageView mHome;
+    @BindView(R.id.share_save) ImageView mSave;
+    @BindView(R.id.share_sns_facebook) ImageView mFacebook;
+    @BindView(R.id.share_sns_twitter) ImageView mTwitter;
+    @BindView(R.id.share_sns_instagram) ImageView mInstagram;
+    @BindView(R.id.share_sns_local_store) ImageView mLocalStore;
+    @BindView(R.id.share_custom_progress) CircularProgressBar mProgressbar;
+    @BindView(R.id.share_progress_container) FrameLayout mProgressContainer;
+    @BindView(R.id.share_thumbnail_holder) ImageView mThumbnailHolder;
 
-    @OnClick(R.id.sns_facebook) public void onFacebookClicked() { mPresenter.facebookConnect(); }
-    @OnClick(R.id.sns_twitter) public void onTwitterClicked() { mPresenter.twitterConnect(); }
-    @OnClick(R.id.sns_instagram) public void onInstagramClicked() { mPresenter.instagramConnect(); }
-    @OnClick(R.id.sns_local_store) public void onLocalstoreClicked() { mPresenter.storeToGallery(); }
+    @OnClick(R.id.share_sns_facebook) public void onFacebookClicked() { mPresenter.facebookConnect(); }
+    @OnClick(R.id.share_sns_twitter) public void onTwitterClicked() { mPresenter.twitterConnect(); }
+    @OnClick(R.id.share_sns_instagram) public void onInstagramClicked() { mPresenter.instagramConnect(); }
+    @OnClick(R.id.share_sns_local_store) public void onLocalstoreClicked() { mPresenter.storeToGallery(); }
+    @OnClick(R.id.share_save) public void onSaveClicked() { mPresenter.storeToGallery(); }
 
     Unbinder mUnbinder;
 
@@ -120,8 +77,7 @@ public class ShareFragment extends Fragment implements ShareMvpView {
                              Bundle savedInstanceState) {
         View view = inflater.inflate( R.layout.fragment_share, container, false );
         mUnbinder = ButterKnife.bind(this, view);
-//        viewBind( view );
-//        viewListenerSetting();
+        mProgressContainer.setOnTouchListener(((containerView, event) -> true));
         return view;
     }
 
@@ -146,7 +102,6 @@ public class ShareFragment extends Fragment implements ShareMvpView {
                     (boolean)getArguments().getSerializable( EXTRA_FROM_CAMERA ));
         }
         mPresenter.doTranscode();
-//        workTranscode();
 
     }
 
@@ -156,7 +111,25 @@ public class ShareFragment extends Fragment implements ShareMvpView {
     }
 
     @Override
+    public void onResume() {
+        mVideoView.start();
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mVideoView.pause();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
+
+    @Override
     public void onDestroyView() {
+        mVideoView.stopPlayback();
         mUnbinder.unbind();
         if (mUnbinder != null) {
             mUnbinder = null;
@@ -176,52 +149,6 @@ public class ShareFragment extends Fragment implements ShareMvpView {
         super.onDestroy();
     }
 
-
-//    private void onFacebookClicked() {
-//        Toast.makeText(getContext(), "onFacebookClicked", Toast.LENGTH_SHORT).show();
-//    }
-//    private void onInstagramClicked() {
-//        Toast.makeText(getContext(), "onInstagramClicked", Toast.LENGTH_SHORT).show();
-//    }
-
-    private void onYoutubeClicked() {
-        Toast.makeText(getContext(), "onYoutubeClicked", Toast.LENGTH_SHORT).show();
-    }
-    private void onNaverLineClicked() {
-        Toast.makeText(getContext(), "onNaverLineClicked", Toast.LENGTH_SHORT).show();
-    }
-    private void onLocalStoreClicked() {
-        if (localCopied) return;
-        localCopied = true;
-        currentWork = LOCAL_STORE;
-        new Thread(() -> {
-                final String fileName = TranscodeUtils.distinctCodeByCurrentTime("muvigram", ".mp4");
-                TranscodeUtils.storeInGallery(TranscodeUtils.getAppCashingFile(getContext()),
-                        fileName, getContext(), mProgressListener);
-                getActivity().runOnUiThread(() -> {
-                        Toast.makeText(getContext(), fileName, Toast.LENGTH_LONG).show();
-                });
-        }).start();
-    }
-
-    private void workTranscode() {
-        currentWork = TRANSCODE;
-
-        if (mFromEditor) Toast.makeText( getContext(), " Transcoding ", Toast.LENGTH_LONG ).show();
-        else Toast.makeText( getContext(), " Concating ", Toast.LENGTH_LONG ).show();
-
-        new Thread(() -> {
-
-            if (mFromEditor) {
-                transcodeTranslator();
-            }
-            else{
-                concatTranslator();
-            }
-
-        }).start();
-    }
-
     @Override
     public void showToast( String msg ) {
         Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT ).show();
@@ -231,139 +158,34 @@ public class ShareFragment extends Fragment implements ShareMvpView {
     public void holdFirstThumbnail(Bitmap bitmap) {
         mThumbnailHolder.setImageBitmap( bitmap );
     }
-
-    private void transcodeTranslator() {
-        int transcodeMode = mMusicPath.equals("") ? MediaEditorNew.NORMAL : MediaEditorNew.MUTE_AND_ADD_MUSIC;
-        MediaEditorNew editor = new MediaEditorNew( mOutputPath, transcodeMode, mProgressListener );
-        editor.initVideoTarget( 1, 30, 5000000, 90, 1280, 720 );
-        editor.initAudioTarget( 44100, 2, 128 * 1000 );
-        for ( int i = 0; i < mVideoPaths.length; i ++ ) {
-            long startTimeUs = 0;
-            long endTimeUs = i == mVideoOffsets.length - 1 ? mMusicLength - mVideoOffsets[i] : mVideoOffsets[i + 1] - mVideoOffsets[i];
-            endTimeUs *= MILLI_TO_MICRO;
-            Log.e(TAG, "transcodeTranslator: [" + i + "] ... "  + startTimeUs + " / " + endTimeUs );
-            editor.addSegment( mVideoPaths[i], startTimeUs, endTimeUs, 100);
-        }
-        if (transcodeMode == MediaEditorNew.MUTE_AND_ADD_MUSIC) {
-            Log.e(TAG, "transcodeTranslator: [music] ... "  + mMusicOffset + " / " + mMusicLength + " / " + (mMusicLength - mMusicOffset) );
-            editor.addMusicSegment( mMusicPath, (long)(mMusicOffset * MILLI_TO_MICRO), 100 );
-        }
-        editor.startWork();
-    }
-
-    private void concatTranslator() {
-        int concatMode = mMusicPath.equals("") ? MediaConcater.NORMAL : MediaConcater.MUTE_AND_ADD_MUSIC;
-        MediaConcater concater = new MediaConcater( mOutputPath, concatMode, mProgressListener );
-        for ( int i = 0; i < mVideoPaths.length; i ++ ) {
-            long startTImeUs = 0;
-            long endTimeUs = i == mVideoOffsets.length - 1 ? mMusicLength - mVideoOffsets[i] : mVideoOffsets[i + 1] - mVideoOffsets[i];
-            endTimeUs *= MILLI_TO_MICRO;
-            Log.e(TAG, "concatTranslater: [" + i + "] ... "  + startTImeUs + " / " + endTimeUs );
-            concater.addSegment( mVideoPaths[i], startTImeUs, endTimeUs, 100);
-        }
-        if (concatMode == MediaConcater.MUTE_AND_ADD_MUSIC) {
-            Log.e(TAG, "concatTranslater: [music] ... "  + mMusicOffset + " / " + mMusicLength + " / " + (mMusicLength - mMusicOffset) );
-            concater.addMusicSegment( mMusicPath, (long)(mMusicOffset * MILLI_TO_MICRO), 100 );
-        }
-        concater.startWork();
-    }
-
     @Override
     public void updateProgress( float progress, boolean isFinished ) {
         if (!isFinished ) {
             if (mProgressContainer.getVisibility() != View.VISIBLE ) mProgressContainer.setVisibility( View.VISIBLE );
             if ( progress == 0 ) mProgressbar.setProgress( 0 );
-            mProgressbar.setProgressWithAnimation( progress + 10 );
+            mProgressbar.setProgressWithAnimation( progress );
         } else {
             mProgressbar.setProgressWithAnimation( 100 );
             mProgressContainer.setVisibility( View.GONE );
         }
     }
 
-    private ProgressListener mProgressListener = new ProgressListener() {
-        @Override
-        public void onStart(long estimatedDurationUs) {
-            getActivity().runOnUiThread(() -> {
-                    mProgressbar.setProgress(0);
-                    mProgressContainer.setVisibility(View.VISIBLE);
-                });
-        }
-
-        @Override
-        public void onProgress(long currentDurationUs, final int percentage) {
-            getActivity().runOnUiThread( () -> {
-                mProgressbar.setProgressWithAnimation(percentage + 10);
-            });
-        }
-
-        @Override
-        public void onComplete(long totalDuration) {
-            getActivity().runOnUiThread(() -> {
-                    mProgressbar.setProgressWithAnimation( 100 );
-                    mProgressContainer.setVisibility(View.GONE);
-                    if (currentWork == TRANSCODE) videoViewSetting();
-            });
-        }
-        @Override
-        public void onError(Exception exception) {
-
-        }
-    };
-
     /**
      * view settings and view binding
      */
-    private void viewBind( View view ) {
-        mFacebook.setVisibility(View.INVISIBLE);
-        mInstagram.setVisibility(View.INVISIBLE);
-        mTwitter.setVisibility(View.INVISIBLE);
-        mProgressContainer.setOnTouchListener(disableTouch);
-        mProgressContainer.setVisibility(View.GONE);
-    }
 
     @Override
-    public void videoSetAndStart( String videoPath ) {
+    public void videoSetAndStart( String videoPath, int durationMs ) {
         mVideoView.setOnCompletionListener( mediaPlayer  ->    mVideoView.start()   );
         mVideoView.setOnPreparedListener( mediaPlayer ->  {
-            mVideoView.start();
-//                disappearThumbnail( 200 );
+
+//            mVideoView.start();
             mThumbnailHolder.setVisibility(View.GONE);
+
         });
+        mVideoView.setupReplay( 0, durationMs , null );
         mVideoView.setVideoPath( videoPath );
-
     }
-
-    private void videoViewSetting() {
-        mVideoView.setOnCompletionListener( mediaPlayer  ->    mVideoView.start()   );
-        mVideoView.setOnPreparedListener( mediaPlayer ->  {
-            mVideoView.start();
-//                disappearThumbnail( 200 );
-            mThumbnailHolder.setVisibility(View.GONE);
-        });
-        mVideoView.setVideoPath( mOutputPath );
-    }
-
-    private void disappearThumbnail( final long timeUs ) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(timeUs);
-                } catch ( InterruptedException e ) {
-                    e.printStackTrace();
-                }
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mThumbnailHolder.setVisibility(View.GONE);
-                    }
-                });
-            }
-        }).start();
-    }
-
-    private View.OnTouchListener disableTouch = ((view, event) -> true);
-
 
     /**
      * This interface must be implemented by activities that contain this

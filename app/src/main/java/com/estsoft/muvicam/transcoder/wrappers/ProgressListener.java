@@ -5,7 +5,7 @@ package com.estsoft.muvicam.transcoder.wrappers;
  */
 
 public interface ProgressListener {
-    int PROGRESS_INTERVAL = 25;
+    int PROGRESS_INTERVAL = 10;
     int START = -123;
     int PROGRESS = -124;
     int COMPLETE = -125;

@@ -99,12 +99,14 @@ public class EditorVideo implements Parcelable {
 
         parcel.writeInt(start);
         parcel.writeInt(end);
+        parcel.writeInt(durationMiliSec);
     }
 
     public void readFromParcel(Parcel in) {
         videoPath = in.readString();
     start = in.readInt();
     end = in.readInt();
+        durationMiliSec = in.readInt();
 }
 
     public boolean getIsLast() {

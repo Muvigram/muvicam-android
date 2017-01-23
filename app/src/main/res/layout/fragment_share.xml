@@ -10,10 +10,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center">
-        <VideoView
+        <com.estsoft.muvicam.ui.share.ShareVideoView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/result_video"/>
+            android:id="@+id/share_result_video"/>
     </LinearLayout>
 
     <LinearLayout
@@ -23,7 +23,42 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/thumbnail_holder"/>
+            android:id="@+id/share_thumbnail_holder"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:gravity="center">
+            <ImageView
+                android:background="@drawable/ic_share_home"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:id="@+id/share_camera_home"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="10dp"
+            android:gravity="center">
+            <ImageView
+                android:id="@+id/share_save"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/ic_share_save"/>
+        </LinearLayout>
+
     </LinearLayout>
 
     <LinearLayout
@@ -44,7 +79,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_sns_facebook_60dp"
-                android:id="@+id/sns_facebook"/>
+                android:id="@+id/share_sns_facebook"/>
         </LinearLayout>
 
         <LinearLayout
@@ -57,7 +92,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_sns_twitter_60dp"
-                android:id="@+id/sns_twitter"/>
+                android:id="@+id/share_sns_twitter"/>
         </LinearLayout>
 
         <LinearLayout
@@ -69,7 +104,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_sns_instagram_60dp"
-                android:id="@+id/sns_instagram"/>
+                android:id="@+id/share_sns_instagram"/>
         </LinearLayout>
 
         <LinearLayout
@@ -81,7 +116,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ic_sns_gallery_60dp"
-                android:id="@+id/sns_local_store"/>
+                android:id="@+id/share_sns_local_store"/>
         </LinearLayout>
 
 
@@ -91,7 +126,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/progress_container">
+        android:id="@+id/share_progress_container">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -107,7 +142,7 @@
             android:layout_gravity="center"
             app:progressBarThickness="5dp"
             app:progress="0"
-            android:id="@+id/custom_progress"/>
+            android:id="@+id/share_custom_progress"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

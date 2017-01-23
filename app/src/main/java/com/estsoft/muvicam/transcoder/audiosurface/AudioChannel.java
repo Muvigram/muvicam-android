@@ -41,6 +41,7 @@ public class AudioChannel {
     private float mVolume;
 
     private int mInputSampleRate;
+    private int mEncodeSampleRate;
     private boolean mResampleRequired;
     private int mInputChannelCount;
     private int mOutputChannelCount;
@@ -53,12 +54,14 @@ public class AudioChannel {
         this.mVolume = volume;
         mFilledSamples = new ArrayDeque<>();
         mBufferedSamples = new ArrayDeque<>();
+        mResampler = new Resampler();
     }
 
     public void setActualDecodeFormat( final MediaFormat decodeFormat ) {
         mActualDecodeFormat = decodeFormat;
         mInputSampleRate = mActualDecodeFormat.getInteger( MediaFormat.KEY_SAMPLE_RATE );
-        if (mInputSampleRate != mEncodeFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE)) {
+        mEncodeSampleRate = mEncodeFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE);
+        if (mInputSampleRate != mEncodeSampleRate) {
             mResampleRequired = true;
             Log.e(TAG, "setActualDecodeFormat: Audio Resampling required" + "\tsource : " + mInputSampleRate + "\t target : " + mEncodeFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE) );
 //            throw new UnsupportedOperationException("Audio sample rate conversion not supported yet." + " ||| source : " + mInputSampleRate + " / target : " + mEncodeFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE));
@@ -144,7 +147,8 @@ public class AudioChannel {
         if (mResampleRequired) {
             short[] samples = new short[ inSample.data.remaining() ];
             inSample.data.get( samples );
-            inSample.data = ShortBuffer.wrap(mResampler.reSample( samples, 48000, 44100));
+            //TODO
+            inSample.data = ShortBuffer.wrap(mResampler.reSample( samples, mInputSampleRate, mEncodeSampleRate));
         }
 
         final long presentationTimeUs = remix(inSample, outBuffer);

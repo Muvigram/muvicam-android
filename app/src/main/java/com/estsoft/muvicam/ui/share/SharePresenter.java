@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.MediaMetadataRetriever;
@@ -12,6 +13,7 @@ import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.injection.qualifier.ActivityContext;
 import com.estsoft.muvicam.transcoder.noneencode.MediaConcater;
 import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
@@ -35,6 +37,7 @@ import rx.Subscription;
 @ShareScope
 public class SharePresenter extends BasePresenter<ShareMvpView>{
     private static final String TAG = "SharePresenter";
+    private final String EXPORT_VIDEO_TYPE = "video/*";
     private final int MILLI_TO_MICRO = 1000;
     private final int MODE_TRANSCODE = -2016;
     private final int MODE_CONCATENATION = -2017;
@@ -57,10 +60,10 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
 
     /* temporary OutputPath app cashing dir */
     private String mTmpStoredPath;
+    private AssetFileDescriptor mLogoVideoFile;
 
     private int mTranscodeMode;
     private MediaTranscoder mEditor;
-
 
     private boolean localCopied;
     private String galleryFileName;
@@ -70,6 +73,7 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
         mContext = context;
         mActivity = activity;
         mTmpStoredPath = TranscodeUtils.getAppCashingFile( mContext );
+        mLogoVideoFile = mContext.getResources().openRawResourceFd(R.raw.logo_video_1s);
         Toast.makeText(mContext, mTmpStoredPath, Toast.LENGTH_LONG).show();
         Log.e(TAG, "SharePresenter: " + mTmpStoredPath );
     }
@@ -89,17 +93,19 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
                                 String musicPath, int musicOffset, int musicLength, boolean fromEditor ) {
         mVideoPaths = videoPaths;
         mMusicPath = musicPath;
+        Log.d(TAG, "setVideoParams: " + musicPath);
         mMusicOffset = musicOffset;
         mMusicLength = musicLength;
         mTranscodeMode = fromEditor ? MODE_TRANSCODE : MODE_CONCATENATION;
-        if ( fromEditor ) {
+
+        if ( !fromEditor ) {
+            mVideoOffsets = videoOffsets;
+            translate();
+        } else {
             mVideoStarts = videoStarts;
             mVideoEnds = videoEnds;
-        } else {
-            mVideoOffsets = videoOffsets;
         }
     }
-
 
     /* Business logic here */
 
@@ -114,11 +120,7 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
         if (mEditor != null) mEditor = null;
         new Thread(() ->  {
 
-            if ( mTranscodeMode == MODE_TRANSCODE ) {
-                mEditor = transcodeTranslate();
-            } else {
-                mEditor = concatTranslate();
-            }
+            mEditor = getTranscoder();
             mEditor.startWork();
             mEditor = null;
 
@@ -128,34 +130,46 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
 
     private void setProgressInUiThread( int progress, boolean isFinished ) {
         mActivity.runOnUiThread(() -> {
-            final float percentage = progress > 90 ? 99.9f : progress;
+            final float percentage = progress > 95 ? 100f : progress;
             mView.updateProgress( percentage, isFinished );
         });
     }
 
     private void videoSetAndStart() {
-        mView.videoSetAndStart(mTmpStoredPath);
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource( mTmpStoredPath );
+        int duration = Integer.parseInt(retriever.extractMetadata( MediaMetadataRetriever.METADATA_KEY_DURATION ));
+        Log.d(TAG, "videoSetAndStart: " + duration);
+        retriever.setDataSource(mLogoVideoFile.getFileDescriptor(), mLogoVideoFile.getStartOffset(), mLogoVideoFile.getLength());
+        int logoDuration = Integer.parseInt(
+                        retriever.extractMetadata(  MediaMetadataRetriever.METADATA_KEY_DURATION ));
+        mView.videoSetAndStart( mTmpStoredPath, duration - logoDuration );
     }
 
     /* click control */
     public void facebookConnect() {
-        Intent intent = getIntentTo( "com.facebook.katana" );
-        intent = intent == null ? getMarketIntent( "com.facebook.katana" ) : intent;
+        String pakageName = mContext.getResources().getString(R.string.facebook_package);
+        Intent intent = getIntentTo( pakageName );
+        intent = intent == null ? getMarketIntent(pakageName) : intent;
         mContext.startActivity( intent );
     }
     public void twitterConnect() {
-        Intent intent = getIntentTo( "com.twitter.android" );
-        intent = intent == null ? getMarketIntent( "com.twitter.android" ) : intent;
+        String pakageName = mContext.getResources().getString(R.string.twitter_package);
+        Intent intent = getIntentTo( pakageName );
+        intent = intent == null ? getMarketIntent( pakageName ) : intent;
         mContext.startActivity( intent );
     }
     public void instagramConnect() {
-        Intent intent = getIntentTo( "com.instagram.android" );
-        intent = intent == null ? getMarketIntent( "com.twitter.android" ) : intent;
+        String pakageName = mContext.getResources().getString(R.string.instagram_package);
+        Intent intent = getIntentTo( pakageName );
+        intent = intent == null ? getMarketIntent( pakageName ) : intent;
         mContext.startActivity( intent );
     }
     public void storeToGallery() {
         storingToGallery();
     }
+
+
 
     /* for model? */
     private Intent getMarketIntent( String packageName ) {
@@ -167,8 +181,8 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
         File videoFile = new File( mTmpStoredPath );
         Intent intent = new Intent( Intent.ACTION_SEND );
         intent.putExtra( Intent.EXTRA_STREAM, Uri.fromFile( videoFile ) );
-        intent.putExtra( Intent.EXTRA_TEXT, "#FromMuvicam" );
-        intent.setType( "video/*" );
+        intent.putExtra( Intent.EXTRA_TEXT, mContext.getResources().getString(R.string.export_hashtag) );
+        intent.setType( EXPORT_VIDEO_TYPE );
         PackageManager packManager = mContext.getPackageManager();
         List<ResolveInfo> resolvedInfoList = packManager.queryIntentActivities(intent,  PackageManager.MATCH_DEFAULT_ONLY);
         for(ResolveInfo resolveInfo: resolvedInfoList){
@@ -197,21 +211,37 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
         } ).start();
     }
 
-    private MediaTranscoder transcodeTranslate() {
+    private void translate() {
+        mVideoStarts = new int[ mVideoOffsets.length ];
+        mVideoEnds = new int[ mVideoOffsets.length ];
+        for ( int i = 0; i < mVideoOffsets.length; i ++ ) {
+            int startTimeMs = 0;
+            int endTimeMs = i == mVideoOffsets.length - 1 ? mMusicLength - mVideoOffsets[i] : mVideoOffsets[i + 1] - mVideoOffsets[i];
+            Log.e(TAG, "translate: [" + i + "] ... "  + startTimeMs + " / " + endTimeMs );
+            mVideoStarts[i] = startTimeMs;
+            mVideoEnds[i] = endTimeMs;
+        }
+    }
+
+    private MediaTranscoder getTranscoder() {
         int transcodeMode = mMusicPath.equals("") ? MediaEditorNew.NORMAL : MediaEditorNew.MUTE_AND_ADD_MUSIC;
-        MediaEditorNew editor = new MediaEditorNew(mTmpStoredPath, transcodeMode, mTranscodeProgressListener);
+        MediaTranscoder editor = new MediaEditorNew(mTmpStoredPath, transcodeMode, mTranscodeProgressListener);
         editor.initVideoTarget( 1, 30, 5000000, 90, 1280, 720 );
         editor.initAudioTarget( 44100, 2, 128 * 1000 );
 
         for ( int i = 0; i < mVideoPaths.length; i ++ ) {
             editor.addSegment( mVideoPaths[i], mVideoStarts[i] * MILLI_TO_MICRO, mVideoEnds[i] * MILLI_TO_MICRO, 100 );
-            Log.d(TAG, "transcodeTranslate: [" + i + "] ... " + mVideoStarts[i] * MILLI_TO_MICRO + " / " + mVideoEnds[i] * MILLI_TO_MICRO );
+            Log.d(TAG, "getTranscoder: [" + i + "] ... " + mVideoStarts[i] * MILLI_TO_MICRO + " / " + mVideoEnds[i] * MILLI_TO_MICRO );
         }
+
+        editor.addLogoSegment(mLogoVideoFile, -1, -1, 100);
+
         if (transcodeMode == MediaEditorNew.MUTE_AND_ADD_MUSIC) {
             editor.addMusicSegment( mMusicPath, (long)(mMusicOffset * MILLI_TO_MICRO), 100);
         }
         return editor;
     }
+
     private MediaTranscoder concatTranslate() {
         int concatMode = mMusicPath.equals("") ? MediaConcater.NORMAL : MediaConcater.MUTE_AND_ADD_MUSIC;
         MediaConcater concater = new MediaConcater(mTmpStoredPath, concatMode, mTranscodeProgressListener);
@@ -229,6 +259,7 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
 
         return concater;
     }
+
     private Bitmap getFirstThumbnail(String path ) {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource( path );

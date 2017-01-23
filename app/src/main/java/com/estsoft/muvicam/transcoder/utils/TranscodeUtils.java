@@ -129,7 +129,7 @@ public class TranscodeUtils {
                 os.write( data );
                 fileProgressed ++;
                 if (fileProgressed % copyUnit == 0) {
-                    if (listener != null) listener.onProgress( -1, fileProgressed * 100 / fileWeight );
+                    if (listener != null) listener.onProgress( -1, (fileProgressed * 100 / fileWeight) + 10 );
                 }
             }
             is.close();
