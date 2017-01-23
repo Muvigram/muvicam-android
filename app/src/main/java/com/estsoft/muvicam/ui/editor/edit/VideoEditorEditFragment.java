@@ -59,6 +59,7 @@ public class VideoEditorEditFragment extends Fragment {
     TrimmerBackGroundView trimmerBackground;
     FrameLayout videoTextureLayout;
     float progressInit;
+    boolean wasPlaying, isMaxLength;
     ThumbnailUtil.UserBitmapListener thumbnailUtilListener = new ThumbnailUtil.UserBitmapListener() {
         @Override
         public void onBitmapNext(final Bitmap bitmap, final long presentationTimeUs, final boolean isLast) {
@@ -183,10 +184,13 @@ public class VideoEditorEditFragment extends Fragment {
             musicLength = args.getInt(VideoEditorResultFragment.EXTRA_MUSIC_LENGTH, 0);
             nowVideo = new EditorVideo();
             nowVideo.setVideoPath(selectedVideos.get(selectedNum - 1).getVideoPath());
-            nowVideo.setNumSelected(selectedNum);
+            nowVideo.setDurationMiliSec(selectedVideos.get(selectedNum-1).getDurationMiliSec());
+           nowVideo.setNumSelected(selectedNum);
+
         }
 
-
+        wasPlaying = false;
+        isMaxLength = true;
     }
 
     @Override
@@ -243,8 +247,9 @@ public class VideoEditorEditFragment extends Fragment {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     Log.d(TAG, "onCompletion: now1");
+                    videoPlayer.seekTo(nowVideo.getStart());
                     musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
-musicPlayer.start();
+                    musicPlayer.start();
 //                    if (videoPlayer.isPlaying()) videoPlayer.pause();
 //                    mediaPlayer.seekTo(musicOffset + resultVideosTotalTime);
 //                    videoPlayer.seekTo(nowVideo.getStart());
@@ -292,7 +297,7 @@ musicPlayer.start();
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-         videoTextureLayout.setOnClickListener(new View.OnClickListener() {
+        videoTextureLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (videoPlayer.isPlaying()) {
@@ -321,6 +326,11 @@ musicPlayer.start();
 
                                                switch (motionEvent.getAction()) {
                                                    case MotionEvent.ACTION_DOWN:
+                                                       if (musicPlayer.isPlaying()) {
+                                                           musicPlayer.pause();
+                                                           videoPlayer.pause();
+                                                           wasPlaying = true;
+                                                       }
                                                        delta = X - view.getTranslationX();
                                                        lX1 = motionEvent.getX();
                                                        Log.d(TAG, "seekBarLeft: action_down" + delta);
@@ -397,9 +407,12 @@ musicPlayer.start();
                                                        trimmerBackground.setEndX(seekBarRight.getX());
                                                        trimmerBackground.invalidate();
 
-                                                       if (videoPlayer.isPlaying()) {
+                                                       if (wasPlaying) {
                                                            videoPlayer.seekTo(nowVideo.getStart());
                                                            musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
+                                                           musicPlayer.start();
+                                                           wasPlaying = false;
+                                                           editProgressBar.invalidate();
                                                        }
                                                        break;
                                                }
@@ -425,6 +438,11 @@ musicPlayer.start();
                                                 float remainTime = 15000 - resultVideosTotalTime;
                                                 switch (motionEvent.getAction()) {
                                                     case MotionEvent.ACTION_DOWN:
+                                                        if (musicPlayer.isPlaying()) {
+                                                            musicPlayer.pause();
+                                                            videoPlayer.pause();
+                                                            wasPlaying = true;
+                                                        }
                                                         rX1 = motionEvent.getX();
                                                         delta = X - view.getTranslationX();
                                                         Log.d(TAG, "seekBarRight: action_down" + delta);
@@ -514,9 +532,11 @@ musicPlayer.start();
                                                         trimmerBackground.setEndX(position);
                                                         trimmerBackground.invalidate();
                                                         Log.d(TAG, "onTouch: seekTest1 r" + nowVideo.getStart());
-                                                        if (videoPlayer.isPlaying()) {
+                                                        if (wasPlaying) {
                                                             videoPlayer.seekTo(nowVideo.getStart());
                                                             musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
+                                                            musicPlayer.start();
+                                                            wasPlaying = false;
                                                         }
                                                         break;
                                                 }
@@ -680,21 +700,30 @@ musicPlayer.start();
 
             while (flag) {
                 try {
-                    if (flag&&musicPlayer.isPlaying()) {
-                        int remain = 15000 - resultVideosTotalTime;
+                    if (flag && musicPlayer.isPlaying()) {
+                        Log.d(TAG, "run: length 1 / "+(nowVideo.getEnd()-nowVideo.getStart()+1000));
+                        Log.d(TAG, "run: length 2 / "+(musicLength-(musicOffset + resultVideosTotalTime)));
+                       if(nowVideo.getEnd()-nowVideo.getStart()+1000 >=musicLength-(musicOffset + resultVideosTotalTime)){
+                           isMaxLength = true;
+                       }else{
+                           isMaxLength = false;
+                       }
 
-                        if (flag&&videoPlayer.getCurrentPosition() >= nowVideo.getEnd()) {
+                        Log.d(TAG, "run: isMaxLength: "+isMaxLength);
+                        Log.d(TAG, "run: t getC"+videoPlayer.getCurrentPosition());
+                        Log.d(TAG, "run: t nowE"+nowVideo.getEnd());
+                        if (flag && videoPlayer.getCurrentPosition() >= nowVideo.getEnd()-100) {
 
                             Log.d(TAG, "run: paused");
                             Log.d(TAG, "run: geCur" + videoPlayer.getCurrentPosition());
                             Log.d(TAG, "run: geStart" + nowVideo.getStart());
                             Log.d(TAG, "run: geEnd" + nowVideo.getEnd());
 
-                            videoPlayer.seekTo(nowVideo.getStart());
-                     //       editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
+                            //       editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
 
-                            if (nowVideo.getEnd() - nowVideo.getStart() < remain) {
-                                Log.d(TAG, "run: remain"+remain + " / nowvideo: "+(nowVideo.getEnd() - nowVideo.getStart()));
+                            if (!isMaxLength) {
+                                Log.d(TAG, "run: " + " / nowvideo: " + (nowVideo.getEnd() - nowVideo.getStart()));
+                                videoPlayer.seekTo(nowVideo.getStart());
                                 musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
                             }
                             continue;
@@ -718,7 +747,8 @@ musicPlayer.start();
             if (musicPlayer != null) {
                 if (flag && musicPlayer.isPlaying()) {
                     musicPlayer.pause();
-                    musicPlayer.stop();;
+                    musicPlayer.stop();
+                    ;
                 }
                 musicPlayer.release();
             }

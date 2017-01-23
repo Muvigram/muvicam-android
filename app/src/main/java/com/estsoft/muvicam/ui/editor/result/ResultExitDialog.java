@@ -16,11 +16,11 @@ import com.estsoft.muvicam.ui.home.HomeActivity;
  * Created by Administrator on 2017-01-22.
  */
 
-public class ResultDialog extends Dialog {
+public class ResultExitDialog extends Dialog {
     LinearLayout editorToHome;
     ImageView editorToHomeNo, editorToHomeYes;
     Context context;
-    public ResultDialog(Context context) {
+    public ResultExitDialog(Context context) {
         super(context);
         this.context = context;
     }
@@ -40,7 +40,7 @@ public class ResultDialog extends Dialog {
         editorToHomeYes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                 context.startActivity(HomeActivity.newIntent(context));
+              //   context.startActivity(HomeActivity.newIntent(context));
             }
         });
         editorToHomeNo.setOnClickListener(new View.OnClickListener() {

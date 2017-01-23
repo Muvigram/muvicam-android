@@ -78,10 +78,12 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorView
     public void onAttach(Context context) {
         super.onAttach(context);
         presenter = ((SelectorActivity) getActivity()).getPresenter();
+        Log.d(TAG, "onAttach: isnull?"+(presenter==null));
         ((VideoSelectorPresenter) presenter).setSelectorVideoData(SelectorVideoData.getInstance());
         presenter.attachView(this);
 
-        ((VideoSelectorPresenter) presenter).setmCallBack(((DataPassListener) context));
+        ((VideoSelectorPresenter) presenter).setmCallBack(((DataPassListener) getContext()));
+
     }
 
     public VideoSelectorFragment() {
