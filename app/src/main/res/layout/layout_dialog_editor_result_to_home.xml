@@ -3,35 +3,51 @@
     android:id="@+id/editor_result_ask_to_home"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:background="@color/selectorVideoSelected"
+    android:background="@color/White"
     android:orientation="vertical"
     android:padding="3dp">
 
-    <ImageView
-        android:layout_width="250dp"
-        android:layout_height="45dp"
-        android:src="@drawable/editor_result_home_question" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/backgroundWhite"
+        android:padding="10dp"
+        android:text="Do you want to exit?"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/textBlack"
+        android:textStyle="bold" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.1dp"
+        android:background="@color/lineDarkGrey" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:orientation="horizontal">
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp">
 
-        <ImageView
+        <TextView
             android:id="@+id/editor_result_ask_to_home_yes"
             android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginRight="25dp"
-            android:src="@drawable/editor_result_yes" />
+            android:layout_height="30dp"
+            android:layout_marginRight="2dp"
+            android:gravity="center_vertical"
+            android:text="Yes"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/textBlack" />
 
-        <ImageView
+        <TextView
             android:id="@+id/editor_result_ask_to_home_no"
             android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginLeft="25dp"
-            android:src="@drawable/editor_result_no" />
+            android:layout_height="30dp"
+            android:layout_marginLeft="2dp"
+            android:gravity="center_vertical"
+            android:text="No"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/textBlack" />
     </LinearLayout>
-
 </LinearLayout>
