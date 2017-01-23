@@ -48,7 +48,7 @@ public class VideoEditorResultFragment extends Fragment {
     public final static String EXTRA_MUSIC_OFFSET = "VideoEditorResultFragment.musicOffset";
     public final static String EXTRA_MUSIC_LENGTH = "VideoEditorResultFragment.musicLength";
     RecyclerView selectedVideoButtons;
-    ImageView deleteButton;
+    ImageView deleteButton, buttonsGone;
     LinearLayout editorResultBlackScreen;
     FrameLayout linearResultSpace;
     ArrayList<ResultBarView> resultBarViews = new ArrayList<>();
@@ -71,10 +71,7 @@ public class VideoEditorResultFragment extends Fragment {
         public void onItemClick(View view, int position) {
 
             Log.d(TAG, "onCreateView: resultVideosTotalTime6" + resultVideosTotalTime);
-            int remainTime = 15000 - resultVideosTotalTime;
-            if (remainTime < 1000) {
-                Toast.makeText(getContext(), "can not add video less than 1 second", Toast.LENGTH_SHORT).show();
-            } else {
+
                 flag = false;
 //                if (videoResultPlayer.isPlaying()) {
 //                    videoResultPlayer.pause();
@@ -92,7 +89,6 @@ public class VideoEditorResultFragment extends Fragment {
 //                    musicResultPlayer.release();
 //                }
                 mCallBack.passDataFToF(position + 1, selectedVideos, resultVideos, resultVideosTotalTime, musicPath, musicOffset, musicLength);
-            }
         }
     };
 
@@ -211,7 +207,7 @@ public class VideoEditorResultFragment extends Fragment {
         deleteButton = (ImageView) v.findViewById(R.id.editor_result_delete);
         linearResultSpace = (FrameLayout) v.findViewById(R.id.editor_result_space_linear);
         resultProgressBar = (ProgressBar) v.findViewById(R.id.editor_result_progress);
-
+buttonsGone = (ImageView) v.findViewById(R.id.editor_result_buttons_gone);
         ResultBarView resultBarView;
         Log.d(TAG, "onCreateView: resultVideosTotalTime1" + resultVideosTotalTime);
         int resultTime = 0;
@@ -238,6 +234,11 @@ public class VideoEditorResultFragment extends Fragment {
             Log.d(TAG, "onCreateView: resultVideosTotalTime2" + resultVideosTotalTime);
             deleteButton.setTranslationX(deleteButtonLocation(resultVideosTotalTime));
             //    deleteButton.setVisibility(View.VISIBLE);
+        }
+        int remainTime = 15000 - resultVideosTotalTime;
+        if (remainTime < 1000) {
+            selectedVideoButtons.setVisibility(View.GONE);
+            buttonsGone.setVisibility(View.VISIBLE);
         }
         return v;
     }
@@ -307,8 +308,13 @@ public class VideoEditorResultFragment extends Fragment {
                     deleteButton.setTranslationX(deleteButtonLocation(resultVideosTotalTime));
                     Log.d(TAG, "onCreateView: resultVideosTotalTime5" + resultVideosTotalTime);
                     nowVideoNum = 0;
+
                 } else {
                     deleteButton.setVisibility(View.GONE);
+                }
+                if(selectedVideoButtons.getVisibility() == View.GONE) {
+                    selectedVideoButtons.setVisibility(View.VISIBLE);
+                    buttonsGone.setVisibility(View.GONE);
                 }
                 //after removed last video
 

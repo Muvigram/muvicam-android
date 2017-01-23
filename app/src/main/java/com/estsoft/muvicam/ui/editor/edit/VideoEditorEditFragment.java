@@ -58,6 +58,7 @@ public class VideoEditorEditFragment extends Fragment {
     FrameLayout editorThumbnailFrameLayout;
     TrimmerBackGroundView trimmerBackground;
     FrameLayout videoTextureLayout;
+    float progressInit;
     ThumbnailUtil.UserBitmapListener thumbnailUtilListener = new ThumbnailUtil.UserBitmapListener() {
         @Override
         public void onBitmapNext(final Bitmap bitmap, final long presentationTimeUs, final boolean isLast) {
@@ -291,7 +292,7 @@ musicPlayer.start();
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        videoTextureLayout.setOnClickListener(new View.OnClickListener() {
+         videoTextureLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (videoPlayer.isPlaying()) {
@@ -300,7 +301,6 @@ musicPlayer.start();
                 } else {
                     videoPlayer.seekTo(nowVideo.getStart());
                     musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
-                    editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
 
                     videoPlayer.start();
                     musicPlayer.start();
@@ -400,7 +400,6 @@ musicPlayer.start();
                                                        if (videoPlayer.isPlaying()) {
                                                            videoPlayer.seekTo(nowVideo.getStart());
                                                            musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
-                                                           editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
                                                        }
                                                        break;
                                                }
@@ -518,7 +517,6 @@ musicPlayer.start();
                                                         if (videoPlayer.isPlaying()) {
                                                             videoPlayer.seekTo(nowVideo.getStart());
                                                             musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
-                                                            editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
                                                         }
                                                         break;
                                                 }
@@ -650,17 +648,6 @@ musicPlayer.start();
     @Override
     public void onPause() {
         super.onPause();
-        if (musicPlayer != null && musicPlayer.isPlaying()) {
-            musicPlayer.pause();
-            musicPlayer.stop();
-            musicPlayer.release();
-        }
-
-        if (videoPlayer != null && videoPlayer.isPlaying()) {
-            videoPlayer.pause();
-            videoPlayer.stop();
-            videoPlayer.release();
-        }
         flag = false;
     }
 
@@ -693,10 +680,10 @@ musicPlayer.start();
 
             while (flag) {
                 try {
-                    if (musicPlayer.isPlaying()) {
+                    if (flag&&musicPlayer.isPlaying()) {
                         int remain = 15000 - resultVideosTotalTime;
 
-                        if (videoPlayer.getCurrentPosition() >= nowVideo.getEnd()) {
+                        if (flag&&videoPlayer.getCurrentPosition() >= nowVideo.getEnd()) {
 
                             Log.d(TAG, "run: paused");
                             Log.d(TAG, "run: geCur" + videoPlayer.getCurrentPosition());
@@ -704,14 +691,14 @@ musicPlayer.start();
                             Log.d(TAG, "run: geEnd" + nowVideo.getEnd());
 
                             videoPlayer.seekTo(nowVideo.getStart());
-                            editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
+                     //       editProgressBar.setX(seekBarLeft.getX() + seekBarLeft.getWidth());
 
                             if (nowVideo.getEnd() - nowVideo.getStart() < remain) {
                                 Log.d(TAG, "run: remain"+remain + " / nowvideo: "+(nowVideo.getEnd() - nowVideo.getStart()));
                                 musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
                             }
                             continue;
-                        } else {
+                        } else if (flag && videoPlayer.getCurrentPosition() < nowVideo.getEnd()) {
 
                             // progress bar
                             float progressTime = ((float) videoPlayer.getCurrentPosition() - nowVideo.getStart()) / (nowVideo.getEnd() - nowVideo.getStart());
@@ -727,6 +714,21 @@ musicPlayer.start();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+            }
+            if (musicPlayer != null) {
+                if (flag && musicPlayer.isPlaying()) {
+                    musicPlayer.pause();
+                    musicPlayer.stop();;
+                }
+                musicPlayer.release();
+            }
+
+            if (videoPlayer != null) {
+                if (flag && videoPlayer.isPlaying()) {
+                    videoPlayer.pause();
+                    videoPlayer.stop();
+                }
+                videoPlayer.release();
             }
         }
     });
