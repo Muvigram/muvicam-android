@@ -6,7 +6,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.AssetFileDescriptor;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
@@ -18,8 +17,6 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
@@ -51,7 +48,6 @@ import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Music;
-import com.estsoft.muvicam.ui.library.LibraryActivity;
 import com.estsoft.muvicam.ui.home.HomeActivity;
 import com.estsoft.muvicam.ui.selector.SelectorActivity;
 import com.estsoft.muvicam.ui.share.ShareActivity;
@@ -126,7 +122,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     Fragment fragment = cfm.findFragmentById(R.id.camera_container_music_cut);
 
     if (fragment == null) {
-      fragment = MusicCutFragment.newInstance(mMusic.uri(), mMusicOffset);
+      fragment = MusicCutFragment.newInstance(mMusic, mMusicPlayer.getOffset());
       final FragmentTransaction transaction = cfm.beginTransaction()
           .add(R.id.camera_container_music_cut, fragment);
 
@@ -160,7 +156,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_ok_button)
   public void _completeVideo(View v) {
-    if (mVideoStack.isEmpty() || mMusicPlayer.getCurrentPosition() - mMusicOffset < 5000) {
+    if (mVideoStack.isEmpty() || mMusicPlayer.getRelativePosition() < 5000) {
       return;
     }
     v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
@@ -195,7 +191,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       public void onAnimationEnd(Animation animation) {
         hideTrashbin();
         popVideoFile();
-        mMusicPlayer.rewindPlayer(mStackBar.deleteRecentRecord() + mMusicOffset);
+        mMusicPlayer.rewindPlayer(mStackBar.deleteRecentRecord() + mMusicPlayer.getOffset());
         updateTrashbin();
       }
     }));
@@ -236,7 +232,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     String mMusicPath = mMusic == null ? "" : mMusic.uri().toString();
 
     Intent intent = ShareActivity.newIntent(getContext(), videoPaths, videoOffsets,
-        mMusicPath, mMusicOffset, mMusicPlayer.getCurrentPosition() - mMusicOffset);
+        mMusicPath, mMusicPlayer.getOffset(), mMusicPlayer.getRelativePosition());
 
     getActivity().startActivity(intent);
   }
@@ -353,7 +349,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   // STEP - MUSIC PLAYER //////////////////////////////////////////////////////////////////////DONE
   private Music mMusic = null;
-  private int mMusicOffset = 0;
   MusicPlayer mMusicPlayer;
 
   public void changeMusic(Music music) {
@@ -364,6 +359,10 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
     mMusic = music;
     mMusicPlayer.setMusicAsync(music.uri());
+  }
+
+  public void changeOffset(int offset) {
+    mMusicPlayer.setOffset(offset);
   }
 
   // STEP - VIDEO RECORDING BUTTON INTERACTION ////////////////////////////////////NEED REFACTORING
@@ -455,7 +454,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   }
 
   private void updateVideoOffset() {
-    mVideoOffset = mMusicPlayer.getCurrentPosition() - mMusicOffset;
+    mVideoOffset = mMusicPlayer.getRelativePosition();
   }
 
   Subscription mStackBarSubscription;
@@ -470,7 +469,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           }
           return isRecording;
         })
-        .map(millisec -> (millisec - mMusicOffset))
+        .map(millisec -> (millisec - mMusicPlayer.getOffset()))
         .filter(millisec -> {
           if (millisec >= 15000) {
             stopRecording();
@@ -967,10 +966,10 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   }
 
   private int calculateDelay() {
-    Timber.e("CUR : %d, STD : %d\n", mMusicPlayer.getCurrentPosition(), mMusicOffset + mVideoOffset + 1000);
-    if (mMusicPlayer.getCurrentPosition() - mMusicOffset < 14000) {
-      return mMusicPlayer.getCurrentPosition() < mMusicOffset + mVideoOffset + 1000 ?
-          mMusicOffset + mVideoOffset + 1000 - mMusicPlayer.getCurrentPosition() : 0;
+    Timber.e("CUR : %d, STD : %d\n", mMusicPlayer.getRelativePosition(), mVideoOffset + 1000);
+    if (mMusicPlayer.getRelativePosition() < 14000) {
+      return mMusicPlayer.getRelativePosition() < (mVideoOffset + 1000) ?
+          (mVideoOffset + 1000) - mMusicPlayer.getRelativePosition() : 0;
     } else {
       return 1000;
     }
@@ -1395,7 +1394,8 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           duringShootingVideo = true;
           mCutButton.setImageResource(R.drawable.camera_cut_button_inactive_30dp);
           mSelfieButton.setImageResource(R.drawable.camera_selfie_button_inactive_30dp);
-          if (mMusicPlayer.getCurrentPosition() - mMusicOffset < 5000)
+          mSelfieButton.setImageResource(R.drawable.camera_selfie_button_inactive_30dp);
+          if (mMusicPlayer.getRelativePosition() < 5000)
             mOkButton.setImageResource(R.drawable.camera_ok_button_inactive_30dp);
           else
             mOkButton.setImageResource(R.drawable.camera_ok_button_active_30dp);

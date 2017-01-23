@@ -107,7 +107,7 @@ public class MusicCutDialogFragment extends DialogFragment {
     mUnbinder = ButterKnife.bind(this, view);
 
     if (mMusic == null) {
-      return builder.setMessage("There was an error loading music.")
+      return builder.setMessage(getString(R.string.music_cut_error_loading))
           .setPositiveButton(android.R.string.ok, (dialog, id) -> dialog.dismiss())
           .create();
     }
@@ -175,7 +175,6 @@ public class MusicCutDialogFragment extends DialogFragment {
             }
           })
           .subscribe(
-              //
               mWaveformView::updateUi,
               Throwable::printStackTrace,
               () -> RxUtil.unsubscribe(mSubscription)

@@ -90,8 +90,16 @@ public class MusicPlayer {
     mPlayer.seekTo(mOffset);
   }
 
-  public int getCurrentPosition() {
+  public int getAbsolutePosition() {
     return mPlayer.getCurrentPosition();
+  }
+
+  public int getOffset() {
+    return mOffset;
+  }
+
+  public int getRelativePosition() {
+    return mPlayer.getCurrentPosition() - mOffset;
   }
 
   public void openPlayer() {
