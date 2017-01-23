@@ -58,5 +58,10 @@
     <string name="library_video_error_loading">There was a problem loading the videos.</string>
     <string name="dialog_music_title">Cut Music</string>
 
+    <!-- video export app packages -->
+    <string name="facebook_package">com.facebook.katana</string>
+    <string name="twitter_package">com.twitter.android</string>
+    <string name="instagram_package">com.instagram.android</string>
+    <string name="export_hashtag">#Muvicam</string>
 
 </resources>

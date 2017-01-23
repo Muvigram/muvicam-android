@@ -1,5 +1,6 @@
 package com.estsoft.muvicam.transcoder.wrappers;
 
+import android.content.res.AssetFileDescriptor;
 import android.media.MediaCodec;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
@@ -10,6 +11,7 @@ import android.util.Log;
 import com.estsoft.muvicam.transcoder.transcoders.BufferListener;
 import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -19,7 +21,8 @@ import java.util.List;
  * Created by estsoft on 2016-12-21.
  */
 
-public class MediaEditorNew implements MediaTranscoder {
+public
+class MediaEditorNew implements MediaTranscoder {
     private static final String TAG = "MediaEditorNew";
     public static final int NORMAL = -12;
     public static final int MUTE_AND_ADD_MUSIC = -13;
@@ -67,6 +70,8 @@ public class MediaEditorNew implements MediaTranscoder {
         mTarget.initAudioTarget( sampleRate, channelCount, bitrate );
         mMuxer.setAudioParams( sampleRate );
     }
+
+
     @Override
     public void addSegment(String inputFilePath, long startTimeUs, long endTimeUs, int audioVolume  ) {
         if ( musicSegmentAdded ) throw new IllegalStateException( "music segment can be added after all segments added " );
@@ -82,10 +87,29 @@ public class MediaEditorNew implements MediaTranscoder {
             mTotalEstimatedDuration += segment.getEndTimeUs() - segment.getStartTimeUs();
             Log.e(TAG, "addSegment: Adding segment ... " + inputFilePath + " / " + segment.getStartTimeUs() + " to " + segment.getEndTimeUs() );
         } else {
-            Log.e(TAG, "addSegment: Skipping segment ... " + inputFilePath + " / " + segment.getStartTimeUs() + " to " + segment.getEndTimeUs() );
+            Log.e(TAG, "addSegment: Skipping segment ... " + inputFilePath + " / " + segment.getStartTimeUs() + " to " + segment.getEndTimeUs());
         }
-
     }
+
+    @Override
+    public void addLogoSegment(AssetFileDescriptor inputFile, long startTimeUs, long endTimeUs, int audioVolume) {
+        if ( musicSegmentAdded ) throw new IllegalStateException( "music segment can be added after all segments added " );
+        if ( !(endTimeUs < 0) && startTimeUs >= endTimeUs) throw new IllegalStateException( "start can't be later than end " );
+
+        int mode = MediaSegmentNew.NORMAL;
+        if ( CURRENT_MODE == MUTE_AND_ADD_MUSIC ) mode = MediaSegmentNew.VIDEO_ONLY;
+        MediaSegmentNew segment = new MediaSegmentNew( mTarget, inputFile, mBufferListener,
+                startTimeUs, endTimeUs, audioVolume, mode );
+        // NOTE check startTime over total duration
+        if ( segment.getStartTimeUs() < segment.getEndTimeUs() ) {
+            mSegmentLists.add(segment);
+//            mTotalEstimatedDuration += segment.getEndTimeUs() - segment.getStartTimeUs();
+            Log.e(TAG, "addSegment: Adding segment as logo ... " + inputFile.toString() + " / " + segment.getStartTimeUs() + " to " + segment.getEndTimeUs() );
+        } else {
+            Log.e(TAG, "addSegment: Skipping segment ... " + inputFile.toString() + " / " + segment.getStartTimeUs() + " to " + segment.getEndTimeUs() );
+        }
+    }
+
     @Override
     public void addMusicSegment(String inputFilePath, long offset, int audioVolume ) {
         if ( CURRENT_MODE == NORMAL ) throw new IllegalStateException( "to add MusicSegment, mode should be ADD_MUSIC or MUTE_AND_ADD_MUSIC " );
@@ -112,7 +136,7 @@ public class MediaEditorNew implements MediaTranscoder {
 
             long segmentDuration = segment.getEndTimeUs() - segment.getStartTimeUs();
             mSegmentTargetDuration += segmentDuration;
-            
+
             while ( !segment.checkFinished() ) {
                 segmentStepped = segment.stepOnce();
                 if ( !segmentStepped ) sleepWhile( 20 );
@@ -120,8 +144,9 @@ public class MediaEditorNew implements MediaTranscoder {
                 else if ( mMusicSegment != null && segment.isVideoEncodingStarted() ) {
                     musicSegmentStepping( segment.getVideoCurrentWrittenTimeUs() + mSegmentTargetDuration - segment.getEndTimeUs());
                 }
-
                 if (mListener != null) callListener( ProgressListener.PROGRESS );
+                Log.d(TAG, "stepOnce: ");
+
             }
 
             videoSyncBufferTimeUs = (mMuxer.getVideoPresentationTimeUs() - mSegmentTargetDuration);

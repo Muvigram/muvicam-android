@@ -40,7 +40,7 @@ public class ResultDialog extends Dialog {
         editorToHomeYes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                 context.startActivity(HomeActivity.newIntent(context));
+//                 context.startActivity(HomeActivity.newIntent(context));
             }
         });
         editorToHomeNo.setOnClickListener(new View.OnClickListener() {

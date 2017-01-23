@@ -44,9 +44,6 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorView
 
         @Override
         public void onComplete() {
-            if(getActivity() == null) {
-                return;
-            }
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
