@@ -4,9 +4,11 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.estsoft.muvicam.model.Music;
+import com.estsoft.muvicam.ui.home.camera.CameraFragment;
 
 import java.io.IOException;
 
@@ -17,44 +19,87 @@ import timber.log.Timber;
  * Customized music player. This class
  *  1. uses {@link MediaPlayer} to playing music.
  *  2. is designed to
- *    1) set and play music
- *    2) seek to a specific point
- *    3) to publish a current position as a {@link Observable} object.
- *
- * ** Caution **
- * There are some additional dependencies which are badly designed.
- * Additional dependencies //TODO - Resolve following unnecessary dependencies.
- *  1. Model object {@link Music}.
- *  2. silence_15_sec.mp3 file in assets folder.
+ *    1) setup media player synchronously and asynchronously.
+ *    2) set and play music.
+ *    3) seek to a specific point.
+ *    4) to publish a current position as a {@link Observable} object.
  *
  * Created by jaylim on 21/01/2017.
  */
 
 public class MusicPlayer {
 
-  private Context mContext;
-
-  public MusicPlayer(Context context) {
-    mContext = context;
+  public interface OnCompleteSetupListener {
+    void onCompleteSetup(MusicPlayer musicPlayer);
   }
 
-  /* Music player */
-  private Music mMusic = null;
-  private MediaPlayer mPlayer;
-  private int mMusicOffset = 0;
+  private OnCompleteSetupListener mOnCompleteSetupListener;
 
-  public void updateMusic(@Nullable Music music) {
-    // TODO - background
+  public void setOnCompleteSetupListener(OnCompleteSetupListener listener) {
+    mOnCompleteSetupListener = listener;
+  }
+
+  /* Field */
+  private final Context mContext;
+  private final String mDefaultAsset;
+
+  private MediaPlayer mPlayer;
+  private Uri mMusicUri = null;
+  private int mOffset = 0;
+
+  /* Constructor with no default asset */
+  public MusicPlayer(Context context) {
+    this(context, (Uri) null);
+  }
+
+  public MusicPlayer(Context context, Uri musicUri) {
+    this.mContext = context;
+    this.mMusicUri = musicUri;
+    this.mDefaultAsset = null;
+  }
+
+  /* Constructor with default asset */
+  public MusicPlayer(Context context, @NonNull String defaultAsset) {
+    this(context, null, defaultAsset);
+  }
+
+  public MusicPlayer(Context context, Uri musicUri, @NonNull String defaultAsset) {
+    this.mContext = context;
+    this.mMusicUri = musicUri;
+    this.mDefaultAsset = defaultAsset;
+  }
+
+  public void setMusicAsync(@Nullable Uri musicUri) {
     stopPlayer();
-    mMusic = music;
-    mMusicOffset = 0;
+    mMusicUri = musicUri;
+    mOffset = 0;
+    setUpPlayerAsync();
+  }
+
+
+  public void setMusic(@Nullable Uri musicUri) {
+    stopPlayer();
+    mMusicUri = musicUri;
+    mOffset = 0;
     setUpPlayer();
   }
 
-  public void cutMusic(int musicOffset) {
+  public void setOffset(int offset) {
     pausePlayer();
-    mMusicOffset = musicOffset;
-    mPlayer.seekTo(mMusicOffset);
+    mOffset = offset;
+    mPlayer.seekTo(mOffset);
+  }
+
+  public int getAbsolutePosition() {
+    return mPlayer.getCurrentPosition();
+  }
+
+  public int getOffset() {
+    return mOffset;
+  }
+
+  public int getRelativePosition() {
+    return mPlayer.getCurrentPosition() - mOffset;
   }
 
   public void openPlayer() {
@@ -75,20 +120,27 @@ public class MusicPlayer {
   public void setUpPlayer() {
     mPlayer.setOnPreparedListener(mp -> {
       mPlayer = mp;
-      mPlayer.seekTo(mMusicOffset);
+      mPlayer.seekTo(mOffset);
     });
-    try {
-      if (mMusic == null) {
-        AssetFileDescriptor afd = mContext.getResources().getAssets().openFd("silence_15_sec.mp3");
-        mPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-      } else {
-        mPlayer.setDataSource(mContext, mMusic.uri());
-      }
-      mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-      mPlayer.prepareAsync();
-    } catch (IOException e) {
-      Timber.e(e, "prepare() failed");
-    }
+
+    setDataSource();
+    mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+
+    mPlayer.prepareAsync();
+  }
+
+  public void setUpPlayerAsync() {
+    mPlayer.setOnPreparedListener(mp -> {
+      mPlayer = mp;
+      mPlayer.seekTo(mOffset);
+
+      mOnCompleteSetupListener.onCompleteSetup(this);
+    });
+
+    setDataSource();
+    mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+
+    mPlayer.prepareAsync();
   }
 
   public void startPlayer() {
@@ -135,5 +187,20 @@ public class MusicPlayer {
 
   public void stopSubscribePlayer() {
     isStopped = true;
+  }
+
+  private void setDataSource() {
+    try {
+      if (mMusicUri != null) {
+        mPlayer.setDataSource(mContext, mMusicUri);
+      } else if (mDefaultAsset != null) {
+        AssetFileDescriptor afd = mContext.getResources().getAssets().openFd(mDefaultAsset);
+        mPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+      } else {
+        throw new RuntimeException("There is neither music nor default asset.");
+      }
+    } catch (IOException e) {
+      Timber.e(e, "setDataSource failed");
+    }
   }
 }

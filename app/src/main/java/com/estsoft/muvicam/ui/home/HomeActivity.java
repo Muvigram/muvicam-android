@@ -185,9 +185,7 @@ public class HomeActivity extends BaseActivity {
 
   public void selectMusic(Music music) {
     if (music != null) {
-      ((CameraFragment) mPagerAdapter.getItem(PAGE_CAMERA)).updateMusic(music);
-      // TODO - might be deleted before deployment
-      Toast.makeText(this, "Music selected : " + music.uri().toString(), Toast.LENGTH_SHORT).show();
+      ((CameraFragment) mPagerAdapter.getItem(PAGE_CAMERA)).changeMusic(music);
     }
     mViewPager.setCurrentItem(PAGE_CAMERA);
   }

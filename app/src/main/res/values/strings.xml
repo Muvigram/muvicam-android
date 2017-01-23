@@ -10,6 +10,12 @@
     <string name="camera_camera_error">This device doesn\'t support Camera2 API.</string>
 
 
+    <!-- music cut module -->
+    <string name="music_cut_ok_button">OK</string>
+    <string name="music_cut_cancel_button">Cancel</string>
+    <string name="music_cut_error_loading">There was a problem loading the musics.</string>
+
+
     <!-- music package -->
     <string name="music_search_title">Select background music</string>
     <string name="music_search_hint">search music</string>
