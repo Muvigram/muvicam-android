@@ -46,7 +46,7 @@ public class ShareVideoView extends VideoView {
     }
 
     public void setupReplay(int startTimeMs, int endTimeMs, MediaPlayer mp) {
-        this.seekTo( 1000 );
+        this.seekTo( startTimeMs );
         mPlayOffset = startTimeMs;
         mPlayLimit = endTimeMs;
         if ( mPlayer == null ) mPlayer = mp;

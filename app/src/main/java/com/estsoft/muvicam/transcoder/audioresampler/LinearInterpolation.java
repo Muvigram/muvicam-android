@@ -48,7 +48,6 @@ public class LinearInterpolation implements Interpolation {
         int newLength=(int) Math.round(((float)samples.length/oldSampleRate*newSampleRate));
 //        float lengthMultiplier=(float)newLength/samples.length;
         float lengthMultiplier = (float)newSampleRate / (float)oldSampleRate;
-        Log.d(TAG, "interpolate: " + lengthMultiplier);
         short[] interpolatedSamples = new short[newLength];
 
         // interpolate the value by the linear equation y=mx+c
