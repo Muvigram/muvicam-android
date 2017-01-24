@@ -14,14 +14,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.AnticipateInterpolator;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -30,12 +23,11 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
-import com.estsoft.muvicam.anim.SingleBoundInterpolator;
 import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.ui.editor.ResultBarView;
 import com.estsoft.muvicam.ui.editor.VideoPlayerTextureView;
+import com.estsoft.muvicam.ui.common.BackToHomeDialogFragment;
 import com.estsoft.muvicam.ui.share.ShareActivity;
-import com.estsoft.muvicam.util.AnimationUtil;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -344,8 +336,10 @@ public class VideoEditorResultFragment extends Fragment {
         homeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ResultExitDialog exitDialog = new ResultExitDialog(getActivity());
-                exitDialog.show();
+
+                BackToHomeDialogFragment fragment = BackToHomeDialogFragment.newInstance(
+                        getResources().getString(R.string.dialog_back_to_home));
+                fragment.show(getActivity().getSupportFragmentManager(), BackToHomeDialogFragment.TAG);
             }
         });
 

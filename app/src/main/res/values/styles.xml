@@ -5,16 +5,21 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/blue_700</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="alertDialogTheme">@style/MuvicamAlertDialog</item>
+
     </style>
 
-    <style name="MuvicamAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <style name="MuvicamAlertDialog" parent="Theme.AppCompat.Dialog.Alert">
         <!--buttons color-->
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorAccent">@color/blue_700</item>
         <!--title and message color-->
-        <item name="android:textColorPrimary">@color/grey_900</item>
+        <item name="android:textColorPrimary">@color/colorPrimaryDark</item>
         <!--dialog background-->
-        <item name="android:windowBackground">@color/grey_white_1000</item>
+        <item name="android:windowBackground">@color/colorPrimary</item>
+
     </style>
+
 
 </resources>

@@ -14,6 +14,7 @@ import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.injection.component.ActivityComponent;
 import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.ui.base.BaseActivity;
+import com.estsoft.muvicam.ui.common.BackToHomeDialogFragment;
 import com.estsoft.muvicam.ui.home.HomeActivity;
 import com.estsoft.muvicam.ui.share.injection.ShareComponent;
 import com.estsoft.muvicam.util.DialogFactory;
@@ -134,15 +135,10 @@ public class ShareActivity extends BaseActivity {
   @Override
   public void onBackPressed() {
 
-    DialogFactory.createOkCancelDialog( this, R.string.dialog_empty_title, R.string.dialog_discard_video,
-            ( (dialogInterface, i ) -> {
-              if ( i == -1 ) {
-                Intent homeIntent = HomeActivity.newIntent( this );
-                homeIntent.addFlags( Intent.FLAG_ACTIVITY_CLEAR_TASK );
-                homeIntent.addFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
-                startActivity( homeIntent );
-              }
-            })).show();
+    BackToHomeDialogFragment fragment = BackToHomeDialogFragment.newInstance(
+            getResources().getString(R.string.dialog_discard_video));
+    fragment.show( getSupportFragmentManager(), BackToHomeDialogFragment.TAG);
+
 
   }
 }

@@ -1,7 +1,6 @@
 package com.estsoft.muvicam.ui.share;
 
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,10 +15,9 @@ import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.injection.component.ActivityComponent;
-import com.estsoft.muvicam.ui.home.HomeActivity;
 import com.estsoft.muvicam.ui.share.injection.DaggerShareComponent;
 import com.estsoft.muvicam.ui.share.injection.ShareComponent;
-import com.estsoft.muvicam.util.DialogFactory;
+import com.estsoft.muvicam.ui.common.BackToHomeDialogFragment;
 
 import javax.inject.Inject;
 
@@ -68,15 +66,9 @@ public class ShareFragment extends Fragment implements ShareMvpView {
     @OnClick(R.id.share_sns_local_store) public void onLocalstoreClicked() { mPresenter.storeToGallery(); }
     @OnClick(R.id.share_save) public void onSaveClicked() { mPresenter.storeToGallery(); }
     @OnClick(R.id.share_camera_home) public void OnHomeClicked() {
-        DialogFactory.createOkCancelDialog( getContext(), R.string.dialog_empty_title, R.string.dialog_discard_video,
-                ( (dialogInterface, i ) -> {
-                    if ( i == -1 ) {
-                        Intent homeIntent = HomeActivity.newIntent( getContext() );
-                        homeIntent.addFlags( Intent.FLAG_ACTIVITY_CLEAR_TASK );
-                        homeIntent.addFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
-                        startActivity( homeIntent );
-                    }
-                })).show();
+        BackToHomeDialogFragment fragment = BackToHomeDialogFragment.newInstance(
+                getResources().getString(R.string.dialog_discard_video));
+        fragment.show(ShareActivity.get(this).getSupportFragmentManager(), BackToHomeDialogFragment.TAG);
     }
 
     Unbinder mUnbinder;

@@ -7,20 +7,15 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.ui.base.BasePresenter;
 import com.estsoft.muvicam.ui.editor.edit.VideoEditorEditFragment;
 import com.estsoft.muvicam.ui.editor.result.VideoEditorResultFragment;
-import com.estsoft.muvicam.ui.home.HomeActivity;
-import com.estsoft.muvicam.ui.share.ShareActivity;
+import com.estsoft.muvicam.ui.common.BackToHomeDialogFragment;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class EditorActivity extends AppCompatActivity implements VideoEditorResultFragment.DataPassListener {
     Fragment fragment;
@@ -96,4 +91,10 @@ public class EditorActivity extends AppCompatActivity implements VideoEditorResu
         fragmentManager.beginTransaction().replace(R.id.editor_fragment_container, fragment).commit();
     }
 
+    @Override
+    public void onBackPressed() {
+        BackToHomeDialogFragment fragment = BackToHomeDialogFragment.newInstance(
+                getResources().getString(R.string.dialog_back_to_home));
+        fragment.show(getSupportFragmentManager(), BackToHomeDialogFragment.TAG);
+    }
 }
