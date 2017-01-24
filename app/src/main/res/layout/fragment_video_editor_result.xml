@@ -40,13 +40,6 @@
             android:src="@drawable/editor_result_delete"
             android:visibility="invisible" />
 
-        <ProgressBar
-            android:id="@+id/editor_result_progress"
-            style="?android:progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="20dp"
-            android:progressDrawable="@drawable/editor_result_progress"
-            />
 
     </FrameLayout>
 

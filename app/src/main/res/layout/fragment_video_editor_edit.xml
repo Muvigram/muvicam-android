@@ -91,11 +91,11 @@
 
             </RelativeLayout>
 
-            <View
-                android:id="@+id/editor_edit_progress"
-                android:layout_width="3dp"
-                android:layout_height="wrap_content"
-                android:background="#FF0000" />
+            <LinearLayout
+                android:id="@+id/editor_edit_progress_space"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"/>
         </FrameLayout>
     </RelativeLayout>
 

@@ -23,6 +23,7 @@ public class ResultBarView extends View {
     private int nowVideoTime;
     private int totalTime;
     String TAG = "ResultBarView";
+    private boolean isProgressBar;
 
     public ResultBarView(Context context) {
         super(context);
@@ -40,19 +41,24 @@ public class ResultBarView extends View {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    public ResultBarView(Context context,int totalTime, int nowVideoTime) {
+    public ResultBarView(Context context, int totalTime, int nowVideoTime, boolean isProgressBar) {
         super(context);
         Log.d(TAG, "onCreate: rbv rvt" + totalTime);
 
         paint = new Paint();
         this.nowVideoTime = nowVideoTime;
         this.totalTime = totalTime;
+        this.isProgressBar = isProgressBar;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        paint.setColor(ContextCompat.getColor(getContext(), R.color.resultSpace));
+        if (isProgressBar) {
+            paint.setColor(ContextCompat.getColor(getContext(), R.color.selectorVideoSelected));
+        } else {
+            paint.setColor(ContextCompat.getColor(getContext(), R.color.resultSpace));
+        }
         paint.setStyle(Paint.Style.FILL);
         DisplayMetrics outMetrics = new DisplayMetrics();
         ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
@@ -62,12 +68,12 @@ public class ResultBarView extends View {
         Log.d("onDraw", "onDraw: editorvideoWidth" + widthPSec);
         Log.d("onDraw", "onDraw: dpi" + dpi);
 
-        canvas.drawRect((float)Math.ceil(((float) totalTime) / 1000 * widthPSec), 0,(float)Math.ceil(((float) totalTime+nowVideoTime) / 1000 * widthPSec), Math.round(20 * dpi), paint);
-        paint.setColor(ContextCompat.getColor(getContext(), R.color.selectorVideoSelected));
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(dpi);
-        canvas.drawRect((float)Math.ceil(((float) totalTime) / 1000 * widthPSec), 0, (float)Math.ceil(((float) totalTime+nowVideoTime) / 1000 * widthPSec), Math.round(20 * dpi), paint);
-
+        canvas.drawRect((float) Math.round(((float) totalTime) / 1000 * widthPSec), 0, (float) Math.round(((float) totalTime + nowVideoTime) / 1000 * widthPSec), Math.round(20 * dpi), paint);
+        if (!isProgressBar) {
+            paint.setColor(ContextCompat.getColor(getContext(), R.color.selectorVideoSelected));
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(dpi);
+            canvas.drawRect((float) Math.round(((float) totalTime) / 1000 * widthPSec), 0, (float) Math.round(((float) totalTime + nowVideoTime) / 1000 * widthPSec), Math.round(20 * dpi), paint);
+        }
     }
-
 }
