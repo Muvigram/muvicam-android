@@ -46,7 +46,7 @@
             android:layout_width="match_parent"
             android:layout_height="20dp"
             android:progressDrawable="@drawable/editor_result_progress"
-            android:visibility="gone" />
+            />
 
     </FrameLayout>
 

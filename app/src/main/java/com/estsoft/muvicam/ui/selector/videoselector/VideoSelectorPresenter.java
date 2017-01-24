@@ -2,6 +2,7 @@ package com.estsoft.muvicam.ui.selector.videoselector;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -134,11 +135,23 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
         selectorVideoData.setmCallBack(context);
     }
 
-    public void nextButtonClick(View view) {
+    public void nextButtonClick(View view,Activity activity) {
         if (selectorVideoData.getSelectedVideos().size() == 0) {
             Toast.makeText(view.getContext(), "Select at least 1 video", Toast.LENGTH_SHORT).show();
         } else {
-            selectorVideoData.getmCallBack().passData((ArrayList<EditorVideo>) selectorVideoData.getSelectedVideos());
+
+            ArrayList<EditorVideo> results = new ArrayList<>();
+            for (EditorVideo e : selectorVideoData.getSelectedVideos()) {
+                Log.d(TAG, "nextButtonClick: " + e.toString());
+                EditorVideo temp = new EditorVideo();
+                temp.setStart(e.getStart());
+                temp.setEnd(e.getEnd());
+                temp.setVideoPath(e.getVideoPath());
+                temp.setDurationMiliSec(e.getDurationMiliSec());
+                results.add(temp);
+            }
+            selectorVideoData.getmCallBack().passData(results);
+            activity.finish();
         }
     }
 }

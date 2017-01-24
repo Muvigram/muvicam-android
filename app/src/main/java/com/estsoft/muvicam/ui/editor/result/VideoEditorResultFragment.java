@@ -1,5 +1,6 @@
 package com.estsoft.muvicam.ui.editor.result;
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.media.MediaMetadataRetriever;
@@ -13,7 +14,15 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.AnticipateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,10 +30,12 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
+import com.estsoft.muvicam.anim.SingleBoundInterpolator;
 import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.ui.editor.ResultBarView;
 import com.estsoft.muvicam.ui.editor.VideoPlayerTextureView;
 import com.estsoft.muvicam.ui.share.ShareActivity;
+import com.estsoft.muvicam.util.AnimationUtil;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -64,6 +75,7 @@ public class VideoEditorResultFragment extends Fragment {
     int nowVideoNum;
     DataPassListener mCallBack;
     ImageView doneButton, homeButton;
+    ObjectAnimator progressBarAnimation;
 
     VideoEditSelectedNumberAdapter.OnItemClickListener itemClickListener = new VideoEditSelectedNumberAdapter.OnItemClickListener() {
         @Override
@@ -127,13 +139,16 @@ public class VideoEditorResultFragment extends Fragment {
                         resultProgressBar.setVisibility(View.VISIBLE);
                         deleteButton.setVisibility(View.VISIBLE);
                         mediaPlayer.start();
+                        progressBarAnimation.start();
                     }
                 });
                 musicResultPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                                                               @Override
                                                               public void onCompletion(MediaPlayer mediaPlayer) {
-                                                                  editorResultBlackScreen.bringToFront();
+                                                                  //      editorResultBlackScreen.bringToFront();
+                                                                  videoResultTextureView.bringToFront();
                                                                   nowVideoNum = 0;
+
 
                                                               }
                                                           }
@@ -174,7 +189,11 @@ public class VideoEditorResultFragment extends Fragment {
         deleteButton = (ImageView) v.findViewById(R.id.editor_result_delete);
         linearResultSpace = (FrameLayout) v.findViewById(R.id.editor_result_space_linear);
         resultProgressBar = (ProgressBar) v.findViewById(R.id.editor_result_progress);
-        resultProgressBar.setProgress(0);
+        //resultProgressBar.setProgress(0);
+        progressBarAnimation = ObjectAnimator.ofInt(resultProgressBar, "progress", 0, (int) Math.ceil(((double) resultVideosTotalTime) / 150));
+        progressBarAnimation.setDuration(resultVideosTotalTime);
+        progressBarAnimation.setInterpolator(new LinearInterpolator());
+        progressBarAnimation.setFrameDelay(0);
         buttonsGone = (ImageView) v.findViewById(R.id.editor_result_buttons_gone);
         ResultBarView resultBarView;
         Log.d(TAG, "onCreateView: resultVideosTotalTime1" + resultVideosTotalTime);
@@ -295,8 +314,9 @@ public class VideoEditorResultFragment extends Fragment {
                     videoResultPlayer.start();
                 } else {
                     deleteButton.setVisibility(View.GONE);
-                    resultProgressBar.setProgress(0);
-                    resultProgressBar.setVisibility(View.GONE);
+                    //                  resultProgressBar.setProgress(0);
+                    //                  resultProgressBar.setVisibility(View.GONE);
+                    //    videoResultTextureView.bringToFront();
                     editorResultBlackScreen.bringToFront();
                 }
             }
@@ -336,6 +356,7 @@ public class VideoEditorResultFragment extends Fragment {
                     musicResultPlayer.seekTo(musicOffset);
                     videoResultPlayer.start();
                     videoResultTextureView.bringToFront();
+                    resultProgressBar.setVisibility(View.VISIBLE);
 
                 }
             }
@@ -383,131 +404,143 @@ public class VideoEditorResultFragment extends Fragment {
         public void run() {
 
             while (flag) {
-                try {
+                //               try {
 
-                    if (flag && musicResultPlayer.isPlaying()) {
+                if (flag && musicResultPlayer.isPlaying()) {
 
-                        if (nowVideoNum % 2 == 0 && flag && videoResultPlayer.isPlaying()) {
-                            Log.d(TAG, "run first: " + nowVideoNum + " / " + resultVideos.size());
-                            if (videoResultPlayer.getCurrentPosition() >= resultVideos.get(nowVideoNum).getEnd()) {
-                                videoResultPlayer.pause();
-                                videoResultPlayer.stop();
-                                nowVideoNum = nowVideoNum + 1;
-                                if (nowVideoNum < resultVideos.size()) {
-                                    Log.d(TAG, "run sec: " + nowVideoNum + " / " + resultVideos.size());
-                                    videoResultPlayer2.start();
-                                    getActivity().runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            videoResultTextureView2.bringToFront();
-                                        }
-                                    });
-
-                                    Log.d(TAG, "run third: " + nowVideoNum + " / " + resultVideos.size());
-                                    if (nowVideoNum + 1 < resultVideos.size()) {
-                                        videoResultPlayer.setFirst(false);
-                                        prepareVideoPlayer(videoResultPlayer, nowVideoNum + 1, true);
-                                    }
-                                } else {
-
-                                    musicResultPlayer.pause();
-                                    nowVideoNum = 0;
-                                    resultProgressBar.setProgress(0);
-
-                                    getActivity().runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            editorResultBlackScreen.bringToFront();
-                                        }
-                                    });
-
-                                    if (flag && resultVideos.size() > nowVideoNum && !musicResultPlayer.isPlaying()) {
-
-
-                                        if (resultVideos.size() > nowVideoNum + 1) {
-                                            videoResultPlayer2.setFirst(false);
-                                            prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
-                                        }
-                                        videoResultPlayer.setFirst(false);
-                                        prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
-
-                                    }
-                                }
-
-                            } else {
-                                int progress = (musicResultPlayer.getCurrentPosition() - musicOffset) / 150;
-                                resultProgressBar.setProgress(progress);
-                                resultThread.sleep(50);
+                    if (nowVideoNum % 2 == 0 && flag && videoResultPlayer.isPlaying()) {
+                        Log.d(TAG, "run first: " + nowVideoNum + " / " + resultVideos.size());
+                        if (videoResultPlayer.getCurrentPosition() >= resultVideos.get(nowVideoNum).getEnd()) {
+                            videoResultPlayer.pause();
+                            videoResultPlayer.stop();
+                            nowVideoNum = nowVideoNum + 1;
+                            if (nowVideoNum < resultVideos.size()) {
+                                Log.d(TAG, "run sec: " + nowVideoNum + " / " + resultVideos.size());
+                                videoResultPlayer2.start();
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        resultProgressBar.invalidate();
+                                        videoResultTextureView2.bringToFront();
                                     }
                                 });
-                            }
 
-                        } else if (nowVideoNum % 2 == 1 && flag && videoResultPlayer2.isPlaying()) {
+                                Log.d(TAG, "run third: " + nowVideoNum + " / " + resultVideos.size());
+                                if (nowVideoNum + 1 < resultVideos.size()) {
+                                    videoResultPlayer.setFirst(false);
+                                    prepareVideoPlayer(videoResultPlayer, nowVideoNum + 1, true);
+                                }
+                            } else {
 
-                            if (videoResultPlayer2.getCurrentPosition() >= resultVideos.get(nowVideoNum).getEnd()) {
-                                videoResultPlayer2.pause();
-                                videoResultPlayer2.stop();
-                                nowVideoNum = nowVideoNum + 1;
+                                musicResultPlayer.pause();
+                                nowVideoNum = 0;
+                                //                                 resultProgressBar.setProgress(0);
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        resultProgressBar.setVisibility(View.GONE);
+                                    }
+                                });
+//                                    getActivity().runOnUiThread(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+//                                            editorResultBlackScreen.bringToFront();
+//                                        }
+//                                    });
+
+                                if (flag && resultVideos.size() > nowVideoNum && !musicResultPlayer.isPlaying()) {
 
 
-                                if (nowVideoNum < resultVideos.size()) {
-                                    videoResultPlayer.start();
-                                    getActivity().runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            videoResultTextureView.bringToFront();
-                                        }
-                                    });
-                                    if (nowVideoNum + 1 < resultVideos.size()) {
+                                    if (resultVideos.size() > nowVideoNum + 1) {
                                         videoResultPlayer2.setFirst(false);
                                         prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
                                     }
-                                    //else videoplayer1 to start
-                                } else {
-                                    musicResultPlayer.pause();
-                                    nowVideoNum = 0;
-                                    resultProgressBar.setProgress(0);
+                                    videoResultPlayer.setFirst(false);
+                                    prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
 
-                                    getActivity().runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            editorResultBlackScreen.bringToFront();
-                                        }
-                                    });
-                                    if (flag && resultVideos.size() > nowVideoNum && !musicResultPlayer.isPlaying()) {
-                                        if (resultVideos.size() > nowVideoNum + 1) {
-                                            videoResultPlayer2.setFirst(false);
-                                            prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
-                                        }
-                                        videoResultPlayer.setFirst(false);
-                                        prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
-                                    }
                                 }
-                            } else {
-                                int progress = (musicResultPlayer.getCurrentPosition() - musicOffset) / 150;
-                                resultProgressBar.setProgress(progress);
-                                resultThread.sleep(50);
+                            }
+
+                        }
+//                            else {
+//                                int progress = (musicResultPlayer.getCurrentPosition() - musicOffset) / 150;
+//                                resultProgressBar.setProgress(progress);
+//                                resultThread.sleep(50);
+//                                getActivity().runOnUiThread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        resultProgressBar.invalidate();
+//                                    }
+//                                });
+//                            }
+
+                    } else if (nowVideoNum % 2 == 1 && flag && videoResultPlayer2.isPlaying()) {
+
+                        if (videoResultPlayer2.getCurrentPosition() >= resultVideos.get(nowVideoNum).getEnd()) {
+                            videoResultPlayer2.pause();
+                            videoResultPlayer2.stop();
+                            nowVideoNum = nowVideoNum + 1;
+
+
+                            if (nowVideoNum < resultVideos.size()) {
+                                videoResultPlayer.start();
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        resultProgressBar.invalidate();
+                                        videoResultTextureView.bringToFront();
                                     }
                                 });
+                                if (nowVideoNum + 1 < resultVideos.size()) {
+                                    videoResultPlayer2.setFirst(false);
+                                    prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
+                                }
+                                //else videoplayer1 to start
+                            } else {
+                                musicResultPlayer.pause();
+                                nowVideoNum = 0;
+//                                    resultProgressBar.setProgress(0);
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        resultProgressBar.setVisibility(View.GONE);
+                                    }
+                                });
+//                                    getActivity().runOnUiThread(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+//                                            editorResultBlackScreen.bringToFront();
+//                                        }
+//                                    });
+                                if (flag && resultVideos.size() > nowVideoNum && !musicResultPlayer.isPlaying()) {
+                                    if (resultVideos.size() > nowVideoNum + 1) {
+                                        videoResultPlayer2.setFirst(false);
+                                        prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
+                                    }
+                                    videoResultPlayer.setFirst(false);
+                                    prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
+                                }
                             }
                         }
-
+//                            else {
+//                                int progress = (musicResultPlayer.getCurrentPosition() - musicOffset) / 150;
+//                                resultProgressBar.setProgress(progress);
+//                                resultThread.sleep(50);
+//                                getActivity().runOnUiThread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        resultProgressBar.invalidate();
+//                                    }
+//                                });
+//                            }
                     }
-                } catch (InterruptedException e) {
-                    e.getStackTrace();
-                    StringWriter sw = new StringWriter();
-                    PrintWriter pw = new PrintWriter(sw);
-                    e.printStackTrace(pw);
-                    Log.d(TAG, "thread got exception :\n" + sw.toString());
+
                 }
+//                } catch (InterruptedException e) {
+//                    e.getStackTrace();
+//                    StringWriter sw = new StringWriter();
+//                    PrintWriter pw = new PrintWriter(sw);
+//                    e.printStackTrace(pw);
+//                    Log.d(TAG, "thread got exception :\n" + sw.toString());
+//                }
             }
 
             if (videoResultPlayer != null) {

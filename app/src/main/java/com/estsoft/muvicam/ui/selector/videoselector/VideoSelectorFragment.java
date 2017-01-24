@@ -130,7 +130,7 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorView
             @Override
             public void onClick(View view) {
                 // Intent intent = new Intent();
-                ((VideoSelectorPresenter) presenter).nextButtonClick(view);
+                ((VideoSelectorPresenter) presenter).nextButtonClick(view,getActivity());
 
             }
         });

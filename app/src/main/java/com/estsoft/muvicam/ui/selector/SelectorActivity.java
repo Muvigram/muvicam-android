@@ -20,19 +20,23 @@ import java.util.ArrayList;
 // VideoEditorFragment.DataPassListener
 public class SelectorActivity extends BaseActivity implements VideoSelectorFragment. DataPassListener{
     Fragment fragment;
-    private BasePresenter presenter = new VideoSelectorPresenter();
+    private BasePresenter presenter;
 
     public static Intent newIntent(Context packageContext) {
         return new Intent(packageContext, SelectorActivity.class);
     }
 
+    @Override
+    public void onBackPressed() {
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTheme(android.R.style.Theme_NoTitleBar_Fullscreen);
         setContentView(R.layout.activity_selector);
-
+        presenter = new VideoSelectorPresenter();
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragment = fragmentManager.findFragmentById(R.id.selector_fragment_container);
         if (fragment == null) {
