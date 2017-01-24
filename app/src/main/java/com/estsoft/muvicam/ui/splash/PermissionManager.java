@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.home.camera.temp;
+package com.estsoft.muvicam.ui.splash;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -10,9 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 
@@ -27,13 +25,13 @@ import timber.log.Timber;
 public class PermissionManager {
 
   private final String[] mPermissions;
-  private final int mReqeustCode;
+  private final int mRequestCode;
   private final Context mContext;
 
   public PermissionManager(Context context, String[] permissions, int requestCode) {
     mContext = context;
     mPermissions = permissions;
-    mReqeustCode = requestCode;
+    mRequestCode = requestCode;
   }
 
   public String[] getPermissions() {
@@ -41,7 +39,7 @@ public class PermissionManager {
   }
 
   public int getRequestCode() {
-    return mReqeustCode;
+    return mRequestCode;
   }
 
   public boolean hasPermissionsGranted() {
@@ -64,46 +62,19 @@ public class PermissionManager {
     return false;
   }
 
-  public ErrorDialog createErrorDialog(String message) {
-    return ErrorDialog.newInstance(message);
+  public SettingDialog createSettingDialog(String message) {
+    return SettingDialog.newInstance(message);
   }
 
-  public DetailSettingDialog createDetailSettingDialog(String message) {
-    return DetailSettingDialog.newInstance(message);
+  public DetailDialog createDetailDialog(String message) {
+    return DetailDialog.newInstance(message, mPermissions, mRequestCode);
   }
 
-  public ConfirmationDialog createConfirmationDialog(String message) {
-    return ConfirmationDialog.newInstance(message, mPermissions, mReqeustCode);
-  }
-
-  public static class ErrorDialog extends DialogFragment {
-    private static final String ARG_MESSAGE = "error_permissionDeniedMessage";
-
-    public static ErrorDialog newInstance(String message) {
-      ErrorDialog dialog = new ErrorDialog();
-      Bundle args = new Bundle();
-
-      args.putString(ARG_MESSAGE, message);
-      dialog.setArguments(args);
-      return dialog;
-    }
-
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-      Activity activity = getActivity();
-      return new AlertDialog.Builder(activity)
-          .setMessage(getArguments().getString(ARG_MESSAGE))
-          .setPositiveButton(R.string.splash_button_ok, (dialogInterface, i) -> activity.finish())
-          .create();
-    }
-  }
-
-  public static class DetailSettingDialog extends DialogFragment {
+  public static class SettingDialog extends DialogFragment {
     private static final String ARG_MESSAGE = "detail_permissionDeniedMessage";
 
-    public static DetailSettingDialog newInstance(String message) {
-      DetailSettingDialog dialog = new DetailSettingDialog();
+    public static SettingDialog newInstance(String message) {
+      SettingDialog dialog = new SettingDialog();
       Bundle args = new Bundle();
 
       args.putString(ARG_MESSAGE, message);
@@ -117,6 +88,7 @@ public class PermissionManager {
       Activity activity = getActivity();
       return new AlertDialog.Builder(activity)
           .setMessage(getArguments().getString(ARG_MESSAGE))
+          .setNegativeButton(R.string.splash_button_cancel, (dialogInterface, i) -> activity.finish())
           .setPositiveButton(R.string.splash_button_detail_setting, (dialogInterface, i) -> {
             Intent intent = new Intent();
             intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
@@ -128,13 +100,13 @@ public class PermissionManager {
     }
   }
 
-  public static class ConfirmationDialog extends DialogFragment {
+  public static class DetailDialog extends DialogFragment {
     private static final String ARG_MESSAGE = "permissionRequest_explain";
     private static final String ARG_PERMISSIONS = "permissionRequest_permissions";
     private static final String ARG_REQUEST_CODE = "permissionRequest_request_code";
 
-    public static ConfirmationDialog newInstance(String message, String[] permissions, int requestCode) {
-      ConfirmationDialog dialog = new ConfirmationDialog();
+    public static DetailDialog newInstance(String message, String[] permissions, int requestCode) {
+      DetailDialog dialog = new DetailDialog();
 
       Bundle args = new Bundle();
       args.putString(ARG_MESSAGE, message);
