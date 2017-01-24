@@ -60,15 +60,16 @@ public class EditorActivity extends AppCompatActivity implements VideoEditorResu
 
     }
 
+//    @Override
+//    public void onBackPressed() {
+//        //super.onBackPressed();
+//
+//    }
 
     @Override
     public void passDataFToF(int selectedNum, ArrayList<EditorVideo> selectedVideos, ArrayList<EditorVideo> resultEditorVideos, int resultVideosTotalTime, String musicPath, int musicOffset, int musicLength) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragment = fragmentManager.findFragmentById(R.id.editor_fragment_container);
-        if (fragment != null) {
-            //remove previous fragments to reduce memory :  picker Fragment or other edit Fragments
-            fragmentManager.beginTransaction().remove(fragment).commit();
-        }
         Bundle args = new Bundle();
 
         if (selectedNum == 0) {

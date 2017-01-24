@@ -162,6 +162,6 @@ public class EditorVideo implements Parcelable {
 
     @Override
     public String toString() {
-        return "start: "+start+", end:"+end+", path: "+videoPath;
+        return "start: "+start+", end:"+end+", path: "+videoPath+", duration:"+durationMiliSec;
     }
 }

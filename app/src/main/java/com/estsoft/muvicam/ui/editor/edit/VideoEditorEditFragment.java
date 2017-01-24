@@ -3,6 +3,7 @@ package com.estsoft.muvicam.ui.editor.edit;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -441,6 +442,7 @@ public class VideoEditorEditFragment extends Fragment {
                                                         Log.d(TAG, "onTouch: distance" + distance);
                                                         Log.d(TAG, "onTouch: distance" + getThumbnailSizePSec());
 
+                                                        //left position
                                                         if (rX1 > rX2 && distance <= getThumbnailSizePSec()) {
                                                             Log.d(TAG, "seekBarRight: distance less than mindistance");
                                                             position = (int) Math.floor(seekBarLeft.getX() + seekBarLeft.getWidth() + getThumbnailSizePSec());
@@ -461,13 +463,15 @@ public class VideoEditorEditFragment extends Fragment {
                                                         Log.d(TAG, "seekBarGetXRight: " + view.getX());
                                                         Log.d(TAG, "seekBarRightWidth: " + view.getWidth());
 
-                                                        if (rX1 < rX2 && distance >= getThumbnailSizePSec() * remainTime / 1000) {
-                                                            float leftPosition = view.getX() - seekBarLeft.getWidth() - getThumbnailSizePSec() * remainTime / 1000;
+                                                        if (rX1 < rX2 && distance >= getThumbnailSizePSec() * ((float)remainTime / 1000) ){
+                                                            float leftPosition = view.getX() - seekBarLeft.getWidth() - getThumbnailSizePSec() * ((float)remainTime / 1000);
                                                             if (leftPosition < -seekBarLeft.getWidth() + 5 * dpi) {
                                                                 leftPosition = -seekBarLeft.getWidth() + 5 * dpi;
                                                                 Log.d(TAG, "seekBarLeft: distance less than 0: " + position);
+                                                                position = leftPosition+seekBarLeft.getWidth();
                                                             }
                                                             seekBarLeft.setTranslationX(leftPosition);
+                                                            view.setTranslationX(position);
                                                             nowVideo.setStart((int) Math.floor((leftPosition + seekBarLeft.getWidth() - 5 * dpi)) * 1000 / getThumbnailSizePSec());
 
                                                         }
@@ -503,8 +507,10 @@ public class VideoEditorEditFragment extends Fragment {
                                                             if (leftPosition < -seekBarLeft.getWidth() + 5 * dpi) {
                                                                 leftPosition = -seekBarLeft.getWidth() + 5 * dpi;
                                                                 Log.d(TAG, "seekBarLeft: distance less than 0: " + position);
+                                                                position = leftPosition+seekBarLeft.getWidth();
                                                             }
                                                             seekBarLeft.setTranslationX(leftPosition);
+                                                            view.setTranslationX(position);
                                                             nowVideo.setStart((int) Math.floor((leftPosition + seekBarLeft.getWidth() - 5 * dpi)) * 1000 / getThumbnailSizePSec());
                                                         }
 
@@ -528,6 +534,7 @@ public class VideoEditorEditFragment extends Fragment {
                                         }
 
         );
+
         videoEdit.setOnFlingListener(new RecyclerView.OnFlingListener()
 
                                      {
