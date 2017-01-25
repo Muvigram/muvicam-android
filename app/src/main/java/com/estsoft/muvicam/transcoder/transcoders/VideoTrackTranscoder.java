@@ -192,6 +192,7 @@ public class VideoTrackTranscoder implements TrackTranscoder {
         mDecoder.releaseOutputBuffer( index, doRender );
         if ( doRender ) {
             mDecoderOutputSurfaceWrapper.awaitNewImage();
+            // NOTE : true to flip
             mDecoderOutputSurfaceWrapper.drawImage( mFlipping );
 //            if ( mEncodePermitted ) {
             if ( mEncodePermitted && mBufferInfo.presentationTimeUs >= mEncodeStartPresentationTimeUs ) {

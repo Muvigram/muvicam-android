@@ -21,6 +21,7 @@ import com.estsoft.muvicam.transcoder.utils.ThumbnailUtil;
 import com.estsoft.muvicam.ui.base.BasePresenter;
 import com.estsoft.muvicam.ui.common.BackToHomeDialogFragment;
 import com.estsoft.muvicam.ui.selector.SelectorActivity;
+import com.estsoft.muvicam.util.DialogFactory;
 
 import java.util.ArrayList;
 
@@ -139,6 +140,7 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorView
         homeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 BackToHomeDialogFragment fragment = BackToHomeDialogFragment.newInstance(
                         view.getResources().getString(R.string.dialog_back_to_home));
                 fragment.show(getFragmentManager(), BackToHomeDialogFragment.TAG);

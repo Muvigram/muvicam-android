@@ -59,7 +59,6 @@ public final class DialogFactory {
 
 
   // clickListener : ok = -1; cancel = -2;
-  // @jaylim you can change this!
     public static AlertDialog createOkCancelDialog( Context context, String title, String message,
                                                     DialogInterface.OnClickListener clickListener) {
         Log.d("test", "createOkCancelDialog: " + title + " / " + message);

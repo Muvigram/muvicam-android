@@ -85,6 +85,7 @@ public class ShareActivity extends BaseActivity {
   public static ShareActivity get(Fragment fragment) {
     return (ShareActivity)fragment.getActivity();
   }
+
   public ActivityComponent getComponent() { return getActivityComponent(); }
 
   @Override

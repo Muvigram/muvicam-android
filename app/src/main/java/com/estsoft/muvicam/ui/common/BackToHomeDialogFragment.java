@@ -6,14 +6,18 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.estsoft.muvicam.R;
+import com.estsoft.muvicam.ui.base.BaseActivity;
 import com.estsoft.muvicam.ui.home.HomeActivity;
+import com.estsoft.muvicam.ui.share.ShareActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -24,7 +28,7 @@ import butterknife.Unbinder;
  */
 
 public class BackToHomeDialogFragment extends DialogFragment {
-    public static final String TAG = "BackToHomeDialogFragment";
+    public static final String TAG = "BackToHoment";
     private static final String ARG_MSG = "BackToHomeDialogFragment.arg_msg";
 
     public static BackToHomeDialogFragment newInstance( String msg ) {
@@ -68,6 +72,7 @@ public class BackToHomeDialogFragment extends DialogFragment {
             params.width = (int)px;
             dialog.getWindow().setAttributes( params );
         });
+
 
         return dialog;
     }

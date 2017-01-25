@@ -8,6 +8,7 @@
         <item name="colorAccent">@color/colorAccent</item>
 
         <item name="alertDialogTheme">@style/MuvicamAlertDialog</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
 
     </style>
 
@@ -18,6 +19,7 @@
         <item name="android:textColorPrimary">@color/colorPrimaryDark</item>
         <!--dialog background-->
         <item name="android:windowBackground">@color/colorPrimary</item>
+
 
     </style>
 

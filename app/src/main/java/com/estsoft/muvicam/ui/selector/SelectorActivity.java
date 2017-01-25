@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 
 
 import com.estsoft.muvicam.R;
@@ -15,6 +16,7 @@ import com.estsoft.muvicam.ui.library.LibraryActivity;
 import com.estsoft.muvicam.ui.selector.videoselector.VideoSelectorPresenter;
 import com.estsoft.muvicam.ui.selector.videoselector.VideoSelectorFragment;
 import com.estsoft.muvicam.ui.common.BackToHomeDialogFragment;
+import com.estsoft.muvicam.util.DialogFactory;
 
 import java.util.ArrayList;
 
@@ -29,9 +31,12 @@ public class SelectorActivity extends BaseActivity implements VideoSelectorFragm
 
     @Override
     public void onBackPressed() {
+
         BackToHomeDialogFragment fragment = BackToHomeDialogFragment.newInstance(
                 getResources().getString(R.string.dialog_back_to_home));
         fragment.show(getSupportFragmentManager(), BackToHomeDialogFragment.TAG);
+
+
     }
 
     @Override
