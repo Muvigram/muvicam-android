@@ -68,14 +68,14 @@ public class VideoEditorEditFragment extends Fragment {
 //            Log.d(TAG, "onBitmapNext: " + presentationTimeUs);
 //            Log.d(TAG, "onBitmapNextSize: " + resultMyVideos.size());
 //            Log.d(TAG, "onBitmapNextCount: " + videoEditAdapter.getItemCount());
-  //          Log.d(TAG, "onBitmapNext: p" + presentationTimeUs);
+            //          Log.d(TAG, "onBitmapNext: p" + presentationTimeUs);
 
             if (!isLast) {
                 EditorVideo editMyVideo = new EditorVideo(bitmap, (int) presentationTimeUs / 1000, isLast, selectedNum);
                 videoThumbnails.add(editMyVideo);
                 videoEditAdapter.notifyDataSetChanged();
             }
-    //        Log.d(TAG, "onBitmapNext123: " + presentationTimeUs + " /. " + isLast);
+            //        Log.d(TAG, "onBitmapNext123: " + presentationTimeUs + " /. " + isLast);
         }
 
         @Override
@@ -86,7 +86,7 @@ public class VideoEditorEditFragment extends Fragment {
         @Override
         public void onComplete(long endTimeUs) {
             videoThumbnailendTime = (int) endTimeUs / 1000;
-     //       Log.d(TAG, "onComplete: " + videoThumbnailendTime);
+            //       Log.d(TAG, "onComplete: " + videoThumbnailendTime);
             DisplayMetrics outMetrics = new DisplayMetrics();
             ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
             float disPlayWidth = outMetrics.widthPixels;
@@ -97,12 +97,12 @@ public class VideoEditorEditFragment extends Fragment {
             if (videoThumbnailendTime < 15000) {
                 if (remainTotalTime < videoThumbnailendTime) {
                     float length = 5 * dpi + getThumbnailSizePSec() * (remainTotalTime) / 1000;
-       //             Log.d(TAG, "onComplete: <15<thum " + length);
+                    //             Log.d(TAG, "onComplete: <15<thum " + length);
                     seekBarRight.setTranslationX(length);
                     nowVideo.setEnd(remainTotalTime);
                 } else {
                     float length = 5 * dpi + getThumbnailSizePSec() * 3 * (videoThumbnails.size() - 1) + getThumbnailSizePSec() * (videoThumbnailendTime - videoThumbnails.get(videoThumbnails.size() - 1).getPresentationTimeUs()) / 1000;
-          //          Log.d(TAG, "onComplete: <15>thum " + length);
+                    //          Log.d(TAG, "onComplete: <15>thum " + length);
 
                     seekBarRight.setTranslationX(length);
                     nowVideo.setEnd(videoThumbnailendTime);
@@ -111,25 +111,25 @@ public class VideoEditorEditFragment extends Fragment {
             } else {
                 if (remainTotalTime < 15000) {
                     float length = 5 * dpi + getThumbnailSizePSec() * (remainTotalTime) / 1000;
-         //           Log.d(TAG, "onComplete: >=15<thum " + length);
+                    //           Log.d(TAG, "onComplete: >=15<thum " + length);
 
                     seekBarRight.setTranslationX(length);
                     nowVideo.setEnd(remainTotalTime);
                 } else {
                     seekBarRight.setTranslationX(disPlayWidth - 5 * dpi);
-           //         Log.d(TAG, "onComplete: >=15>thum " + (disPlayWidth - 5 * dpi));
+                    //         Log.d(TAG, "onComplete: >=15>thum " + (disPlayWidth - 5 * dpi));
 
                     nowVideo.setEnd(15000);
-          //          Log.d(TAG, "onClick: endtime" + nowVideo.getEnd());
+                    //          Log.d(TAG, "onClick: endtime" + nowVideo.getEnd());
                 }
 
             }
 
             seekBarLeft.setTranslationX(-seekBarLeft.getWidth() + 5 * dpi);
-       //     Log.d(TAG, "onComplete: seekbarL X :" + seekBarLeft.getX());
- // maybe use this?           (Math.round(videoEdit.computeHorizontalScrollOffset() * 15000 / disPlayWidth))
+            //     Log.d(TAG, "onComplete: seekbarL X :" + seekBarLeft.getX());
+            // maybe use this?           (Math.round(videoEdit.computeHorizontalScrollOffset() * 15000 / disPlayWidth))
             nowVideo.setStart(0);
-       //     Log.d(TAG, "onClick: starttime" + nowVideo.getStart());
+            //     Log.d(TAG, "onClick: starttime" + nowVideo.getStart());
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -147,8 +147,8 @@ public class VideoEditorEditFragment extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    VideoEditorEditSeekBar editSeekBar = new VideoEditorEditSeekBar(getContext(), (int)Math.floor(seekBarLeft.getX()+seekBarLeft.getWidth()));
-            //        Log.d(TAG, "run: progressStart" + nowVideo.getStart());
+                    VideoEditorEditSeekBar editSeekBar = new VideoEditorEditSeekBar(getContext(), (int) Math.floor(seekBarLeft.getX() + seekBarLeft.getWidth()));
+                    //        Log.d(TAG, "run: progressStart" + nowVideo.getStart());
                     editSeekBarSpace.addView(editSeekBar);
                     editSeekBars.add(editSeekBar);
                     editSeekBarSpace.invalidate();
@@ -180,6 +180,18 @@ public class VideoEditorEditFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            mCallBack = (VideoEditorResultFragment.DataPassListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement DataPassListener");
+        }
+    }
+
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
@@ -189,7 +201,7 @@ public class VideoEditorEditFragment extends Fragment {
             selectedVideos = args.getParcelableArrayList(VideoEditorResultFragment.EXTRA_VIDEOS);
             resultVideos = args.getParcelableArrayList(VideoEditorResultFragment.EXTRA_RESULT_VIDEOS);
             resultVideosTotalTime = args.getInt(VideoEditorResultFragment.EXTRA_RESULT_VIDEO_TOTAL_TIME, 0);
-        //    Log.d(TAG, "onCreate: edit rvt" + resultVideosTotalTime);
+            //    Log.d(TAG, "onCreate: edit rvt" + resultVideosTotalTime);
             musicPath = args.getString(VideoEditorResultFragment.EXTRA_MUSIC_PATH);
             musicOffset = args.getInt(VideoEditorResultFragment.EXTRA_MUSIC_OFFSET, 0);
             musicLength = args.getInt(VideoEditorResultFragment.EXTRA_MUSIC_LENGTH, 0);
@@ -209,7 +221,7 @@ public class VideoEditorEditFragment extends Fragment {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_video_editor_edit, container, false);
         resultSpaceLinearLayout = (FrameLayout) v.findViewById(R.id.editor_edit_result_space_linear);
-   //     Log.d(TAG, "onCreateView: edit rvt" + resultVideosTotalTime);
+        //     Log.d(TAG, "onCreateView: edit rvt" + resultVideosTotalTime);
         ResultBarView resultBarView;
         int resultTime = 0;
         for (int i = 0; i < resultVideos.size(); i++) {
@@ -242,13 +254,13 @@ public class VideoEditorEditFragment extends Fragment {
 
         editSeekBarSpace = (LinearLayout) v.findViewById(R.id.editor_edit_progress_space);
         thumbnailUtil = new ThumbnailUtil(thumbnailUtilListener, getActivity(), true);
-     //   Log.d(TAG, "onCreateView: " + videoEdit.getWidth());
+        //   Log.d(TAG, "onCreateView: " + videoEdit.getWidth());
         // 3/15 -> 1/5
         musicPlayer = new MediaPlayer();
         videoPlayer = new MuvicamMediaPlayer();
         try {
             videoPlayer.setVolume(0, 0);
-      //      Log.d(TAG, "onCreateView: video " + selectedVideos.get(selectedNum - 1).getVideoPath());
+            //      Log.d(TAG, "onCreateView: video " + selectedVideos.get(selectedNum - 1).getVideoPath());
             FileInputStream fisMusic = new FileInputStream(musicPath);
             FileDescriptor fdMusic = fisMusic.getFD();
 
@@ -257,7 +269,7 @@ public class VideoEditorEditFragment extends Fragment {
             musicPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mediaPlayer) {
-         //           Log.d(TAG, "onCompletion: now1");
+                    //           Log.d(TAG, "onCompletion: now1");
                     videoPlayer.seekTo(nowVideo.getStart());
                     musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
                     musicPlayer.start();
@@ -326,27 +338,27 @@ public class VideoEditorEditFragment extends Fragment {
                                                        }
                                                        delta = X - view.getTranslationX();
                                                        lX1 = motionEvent.getX();
-                                        //               Log.d(TAG, "seekBarLeft: action_down" + delta);
+                                                       //               Log.d(TAG, "seekBarLeft: action_down" + delta);
 
                                                        break;
                                                    case MotionEvent.ACTION_MOVE:
                                                        position = X - delta;
                                                        lX2 = motionEvent.getX();
                                                        if (lX1 < lX2 && distance <= getThumbnailSizePSec()) {
-                                            //               Log.d(TAG, "seekBarLeft: distance less than mindistance");
+                                                           //               Log.d(TAG, "seekBarLeft: distance less than mindistance");
                                                            position = seekBarRight.getX() - getThumbnailSizePSec() - view.getWidth();
-                                           //                Log.d(TAG, "seekBarLeft: distance less than mindistance: " + position);
+                                                           //                Log.d(TAG, "seekBarLeft: distance less than mindistance: " + position);
                                                        }
                                                        if (lX1 > lX2 && position <= -view.getWidth() + 5 * dpi) {
                                                            position = -view.getWidth() + 5 * dpi;
-                                         //                  Log.d(TAG, "seekBarLeft: distance less than 0: " + position);
+                                                           //                  Log.d(TAG, "seekBarLeft: distance less than 0: " + position);
                                                        }
 
                                                        //minwidth
                                                        view.setTranslationX(position);
-                                           //            Log.d(TAG, "seekBarLeft: " + (X - delta));
-                                          //             Log.d(TAG, "seekBarGetXLeft: " + view.getX());
-                                           //            Log.d(TAG, "seekBarLeftWidth: " + view.getWidth());
+                                                       //            Log.d(TAG, "seekBarLeft: " + (X - delta));
+                                                       //             Log.d(TAG, "seekBarGetXLeft: " + view.getX());
+                                                       //            Log.d(TAG, "seekBarLeftWidth: " + view.getWidth());
                                                        nowVideo.setStart((int) Math.ceil((position - 5 * dpi + view.getWidth()) * 1000 / getThumbnailSizePSec()));
 
                                                        if (lX1 > lX2 && distance >= getThumbnailSizePSec() * remainTime / 1000) {
@@ -367,11 +379,11 @@ public class VideoEditorEditFragment extends Fragment {
 
                                                    case MotionEvent.ACTION_UP:
 
-                                         //              Log.d(TAG, "seekBarLeft: distance" + distance);
+                                                       //              Log.d(TAG, "seekBarLeft: distance" + distance);
                                                        if (lX1 < lX2 && distance <= getThumbnailSizePSec()) {
-                                         //                  Log.d(TAG, "seekBarLeft: distance less than mindistance");
+                                                           //                  Log.d(TAG, "seekBarLeft: distance less than mindistance");
                                                            position = seekBarRight.getX() - getThumbnailSizePSec() - view.getWidth();
-                                          //                 Log.d(TAG, "seekBarLeft: distance less than mindistance: " + position);
+                                                           //                 Log.d(TAG, "seekBarLeft: distance less than mindistance: " + position);
                                                        }
 
 
@@ -383,7 +395,7 @@ public class VideoEditorEditFragment extends Fragment {
                                                        view.setTranslationX(position);
                                                        //editProgress.setX(leftPosition);
                                                        nowVideo.setStart((int) Math.ceil((position - 5 * dpi + view.getWidth()) * 1000 / getThumbnailSizePSec()));
-                                           //            Log.d(TAG, "seekBarLeft: starttime: " + nowVideo.getStart());
+                                                       //            Log.d(TAG, "seekBarLeft: starttime: " + nowVideo.getStart());
                                                        if (lX1 > lX2 && distance >= getThumbnailSizePSec() * remainTime / 1000) {
                                                            float rightPosition = view.getX() + view.getWidth() + getThumbnailSizePSec() * remainTime / 1000;
                                                            if (rightPosition > 5 * dpi + getThumbnailSizePSec() * 3 * (videoThumbnails.size() - 1) + getThumbnailSizePSec() * (videoThumbnailendTime - videoThumbnails.get(videoThumbnails.size() - 1).getPresentationTimeUs()) / 1000) {
@@ -395,7 +407,7 @@ public class VideoEditorEditFragment extends Fragment {
                                                        }
                                                        videoEditAdapter.notifyDataSetChanged();
                                                        isSeekBarChanged = true;
-                                           //            Log.d(TAG, "onTouch: start " + nowVideo.getStart());
+                                                       //            Log.d(TAG, "onTouch: start " + nowVideo.getStart());
                                                        trimmerBackground.setStartX(position + view.getWidth());
                                                        trimmerBackground.setEndX(seekBarRight.getX());
                                                        trimmerBackground.invalidate();
@@ -409,7 +421,7 @@ public class VideoEditorEditFragment extends Fragment {
                                                                editSeekBarSpace.removeView(progress);
                                                            }
                                                            editSeekBars.clear();
-                                                           VideoEditorEditSeekBar editSeekBar = new VideoEditorEditSeekBar(getContext(), (int)Math.floor(seekBarLeft.getX()+seekBarLeft.getWidth()));
+                                                           VideoEditorEditSeekBar editSeekBar = new VideoEditorEditSeekBar(getContext(), (int) Math.floor(seekBarLeft.getX() + seekBarLeft.getWidth()));
                                                            editSeekBars.add(editSeekBar);
                                                            editSeekBarSpace.addView(editSeekBar);
                                                            editSeekBarSpace.invalidate();
@@ -447,7 +459,7 @@ public class VideoEditorEditFragment extends Fragment {
                                                         }
                                                         rX1 = motionEvent.getX();
                                                         delta = X - view.getTranslationX();
-                                                //        Log.d(TAG, "seekBarRight: action_down" + delta);
+                                                        //        Log.d(TAG, "seekBarRight: action_down" + delta);
                                                         break;
                                                     case MotionEvent.ACTION_MOVE:
                                                         rX2 = motionEvent.getX();
@@ -647,7 +659,7 @@ public class VideoEditorEditFragment extends Fragment {
                                             @Override
                                             public void onClick(View view) {
                                                 flag = false;
-                           //                     Log.d(TAG, "onCreateView: resultVideosTotalTime6" + resultVideosTotalTime);
+                                                //                     Log.d(TAG, "onCreateView: resultVideosTotalTime6" + resultVideosTotalTime);
                                                 mCallBack.passDataFToF(0, selectedVideos, resultVideos, resultVideosTotalTime, musicPath, musicOffset, musicLength);
                                             }
                                         }
@@ -656,15 +668,11 @@ public class VideoEditorEditFragment extends Fragment {
 
     }
 
+
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        try {
-            mCallBack = (VideoEditorResultFragment.DataPassListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
-                    + " must implement DataPassListener");
-        }
+    public void onPause() {
+        super.onPause();
+        flag = false;
     }
 
     @Override
@@ -674,9 +682,11 @@ public class VideoEditorEditFragment extends Fragment {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        flag = false;
+    public void onResume() {
+        super.onResume();
+        if (!flag) {
+            mCallBack.passDataFToF(selectedNum, selectedVideos, resultVideos, resultVideosTotalTime, musicPath, musicOffset, musicLength);
+        }
     }
 
     public int getResultEndTime(List<EditorVideo> editedVideos) {
@@ -684,7 +694,7 @@ public class VideoEditorEditFragment extends Fragment {
         for (EditorVideo editedVideo : editedVideos) {
             editedVideosEnd += (editedVideo.getEnd() - editedVideo.getStart());
         }
-  //      Log.d(TAG, "getResultEndTime" + editedVideosEnd);
+        //      Log.d(TAG, "getResultEndTime" + editedVideosEnd);
         return editedVideosEnd;
     }
 
@@ -694,7 +704,7 @@ public class VideoEditorEditFragment extends Fragment {
         int widthPSec = outMetrics.widthPixels;
         float dpi = outMetrics.densityDpi / 160;
         float size = (widthPSec - 10 * dpi) / 15;
-  //      Log.d(TAG, "getThumbnailSizePSec: " + size);
+        //      Log.d(TAG, "getThumbnailSizePSec: " + size);
         return (int) Math.floor(size);
     }
 
@@ -722,7 +732,7 @@ public class VideoEditorEditFragment extends Fragment {
                                             editSeekBarSpace.removeView(progress);
                                         }
                                         editSeekBars.clear();
-                                        VideoEditorEditSeekBar editSeekBar = new VideoEditorEditSeekBar(getContext(), (int)Math.floor(seekBarLeft.getX()+seekBarLeft.getWidth()+((float) videoPlayer.getCurrentPosition() - nowVideo.getStart()) / (nowVideo.getEnd() - nowVideo.getStart()) * (seekBarRight.getX() - (seekBarLeft.getX() + seekBarLeft.getWidth()))));
+                                        VideoEditorEditSeekBar editSeekBar = new VideoEditorEditSeekBar(getContext(), (int) Math.floor(seekBarLeft.getX() + seekBarLeft.getWidth() + ((float) videoPlayer.getCurrentPosition() - nowVideo.getStart()) / (nowVideo.getEnd() - nowVideo.getStart()) * (seekBarRight.getX() - (seekBarLeft.getX() + seekBarLeft.getWidth()))));
                                         editSeekBarSpace.addView(editSeekBar);
                                         editSeekBars.add(editSeekBar);
 
@@ -735,47 +745,47 @@ public class VideoEditorEditFragment extends Fragment {
 
                             //                 Log.d(TAG, "run: length 1 / " + (nowVideo.getEnd() - nowVideo.getStart() + 1000));
 //                        Log.d(TAG, "run: length 2 / " + (musicLength - resultVideosTotalTime));
-                        if (nowVideo.getEnd() - nowVideo.getStart() + 1000 >= musicLength - resultVideosTotalTime) {
-                            isMaxLength = true;
-                        } else {
-                            isMaxLength = false;
-                        }
+                            if (nowVideo.getEnd() - nowVideo.getStart() + 1000 >= musicLength - resultVideosTotalTime) {
+                                isMaxLength = true;
+                            } else {
+                                isMaxLength = false;
+                            }
 
 //                        Log.d(TAG, "run: isMaxLength: " + isMaxLength);
 //                        Log.d(TAG, "run: t getC" + videoPlayer.getCurrentPosition());
 //                        Log.d(TAG, "run: t nowE" + nowVideo.getEnd());
-                        if (flag && videoPlayer.getCurrentPosition() >= nowVideo.getEnd() - 100) {
+                            if (flag && videoPlayer.getCurrentPosition() >= nowVideo.getEnd() - 100) {
 
 //                            Log.d(TAG, "run: paused");
 //                            Log.d(TAG, "run: geCur" + videoPlayer.getCurrentPosition());
 //                            Log.d(TAG, "run: geStart" + nowVideo.getStart());
 //                            Log.d(TAG, "run: geEnd" + nowVideo.getEnd());
 
-                          getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
 
-                                    for (VideoEditorEditSeekBar progress : editSeekBars) {
-                                        editSeekBarSpace.removeView(progress);
+                                        for (VideoEditorEditSeekBar progress : editSeekBars) {
+                                            editSeekBarSpace.removeView(progress);
+                                        }
+                                        editSeekBars.clear();
+
+                                        VideoEditorEditSeekBar editSeekBar = new VideoEditorEditSeekBar(getContext(), (int) Math.floor(seekBarLeft.getX() + seekBarLeft.getWidth()));
+                                        editSeekBarSpace.addView(editSeekBar);
+                                        editSeekBars.add(editSeekBar);
+
+                                        editSeekBarSpace.invalidate();
+
+
                                     }
-                                    editSeekBars.clear();
-
-                                    VideoEditorEditSeekBar editSeekBar = new VideoEditorEditSeekBar(getContext(), (int)Math.floor(seekBarLeft.getX()+seekBarLeft.getWidth()));
-                                    editSeekBarSpace.addView(editSeekBar);
-                                    editSeekBars.add(editSeekBar);
-
-                                    editSeekBarSpace.invalidate();
-
-
-                                }
-                            });
-                            if (!isMaxLength || (isMaxLength && musicPlayer.getCurrentPosition() < musicPlayer.getDuration())) {
+                                });
+                                if (!isMaxLength || (isMaxLength && musicPlayer.getCurrentPosition() < musicPlayer.getDuration())) {
 //                                Log.d(TAG, "run: " + " / nowvideo: " + (nowVideo.getEnd() - nowVideo.getStart()));
-                                videoPlayer.seekTo(nowVideo.getStart());
-                                musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
+                                    videoPlayer.seekTo(nowVideo.getStart());
+                                    musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
+                                }
+                                continue;
                             }
-                            continue;
-                        }
                         }
 
 
@@ -802,4 +812,6 @@ public class VideoEditorEditFragment extends Fragment {
             }
         }
     });
+
+
 }
