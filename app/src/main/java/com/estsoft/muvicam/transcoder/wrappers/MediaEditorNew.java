@@ -60,8 +60,8 @@ class MediaEditorNew implements MediaTranscoder {
     }
 
     @Override
-    public void initVideoTarget(int interval, int frameRate, int bitrate, int rotation, int width, int height ) {
-        mTarget.initVideoTarget( interval, frameRate, bitrate, rotation, width, height );
+    public void initVideoTarget(int interval, int frameRate, int bitrate, int rotation, int width, int height, boolean videoFlipping ) {
+        mTarget.initVideoTarget( interval, frameRate, bitrate, rotation, width, height, videoFlipping );
         mMuxer.setOrientation( rotation );
         mMuxer.setVideoParams( frameRate );
     }
