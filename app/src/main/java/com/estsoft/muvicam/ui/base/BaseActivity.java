@@ -12,6 +12,7 @@ import android.view.WindowManager;
 import com.estsoft.muvicam.MuvicamApplication;
 import com.estsoft.muvicam.injection.component.ActivityComponent;
 import com.estsoft.muvicam.injection.module.ActivityModule;
+import com.jakewharton.rxbinding.view.RxView;
 
 import timber.log.Timber;
 
@@ -29,11 +30,11 @@ public abstract class BaseActivity extends AppCompatActivity {
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
     // Set fullscreen mode
     setupFullscreen();
     setUpDecorView();
+
+    super.onCreate(savedInstanceState);
 
     mActivityComponent = MuvicamApplication.get(this)
         .getApplicationComponent()
@@ -61,35 +62,23 @@ public abstract class BaseActivity extends AppCompatActivity {
     );
   }
 
-  public void setFullscreen() {
-    requestWindowFeature(Window.FEATURE_NO_TITLE);
-    getWindow().setFlags(
-        WindowManager.LayoutParams.FLAG_FULLSCREEN,
-        WindowManager.LayoutParams.FLAG_FULLSCREEN
-    );
-  }
-
   View mDecorView;
-  private final static int DEFAULT_UI_SETTING = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-      | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-      | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-      | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-      | View.SYSTEM_UI_FLAG_FULLSCREEN      // hide status bar
-      | View.SYSTEM_UI_FLAG_IMMERSIVE;
-
-  Runnable hideDecorView;
+  private final static int DEFAULT_UI_SETTING =
+      View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+      | View.SYSTEM_UI_FLAG_FULLSCREEN
+      | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 
   public void setUpDecorView() {
     mDecorView = getWindow().getDecorView();
-
-    mDecorView.setOnSystemUiVisibilityChangeListener(visibility -> {
-      Timber.e("onSystemUiVisibilityChange %08x / %08x", visibility, DEFAULT_UI_SETTING);
-      int xor = DEFAULT_UI_SETTING ^ visibility;
-      if (xor != 0 && mBackgroundHandler != null) {
-        mBackgroundHandler.postDelayed(this::hideDecorView, 1500);
-        // TODO - sync with top scroll bar.
-      }
-    });
+    RxView.systemUiVisibilityChanges(mDecorView)
+        .map(visibility -> {
+          Timber.e("onSystemUiVisibilityChange %08x / %08x", visibility, DEFAULT_UI_SETTING);
+          return DEFAULT_UI_SETTING ^ visibility;
+        })
+        .filter(differ -> differ != 0 && mBackgroundHandler != null)
+        .subscribe(differ -> {
+          mBackgroundHandler.postDelayed(this::hideDecorView, 3000);
+        });
   }
 
   public void hideDecorView() {

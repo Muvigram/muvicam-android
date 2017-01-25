@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
+import com.estsoft.muvicam.ui.base.BaseActivity;
 import com.estsoft.muvicam.ui.base.BasePresenter;
 import com.estsoft.muvicam.ui.editor.edit.VideoEditorEditFragment;
 import com.estsoft.muvicam.ui.editor.result.VideoEditorResultFragment;
@@ -17,7 +18,7 @@ import com.estsoft.muvicam.ui.common.BackToHomeDialogFragment;
 
 import java.util.ArrayList;
 
-public class EditorActivity extends AppCompatActivity implements VideoEditorResultFragment.DataPassListener {
+public class EditorActivity extends BaseActivity implements VideoEditorResultFragment.DataPassListener {
     Fragment fragment;
     private BasePresenter presenter;
     String TAG = "EditorActicity";
@@ -42,7 +43,6 @@ public class EditorActivity extends AppCompatActivity implements VideoEditorResu
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(android.R.style.Theme_NoTitleBar_Fullscreen);
         setContentView(R.layout.activity_editor);
         //   getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
 
