@@ -1,5 +1,6 @@
 package com.estsoft.muvicam.ui.selector.videoselector;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,6 +19,7 @@ import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.model.SelectorVideoData;
 import com.estsoft.muvicam.transcoder.utils.ThumbnailUtil;
 import com.estsoft.muvicam.ui.base.BasePresenter;
+import com.estsoft.muvicam.ui.common.BackToHomeDialogFragment;
 import com.estsoft.muvicam.ui.selector.SelectorActivity;
 
 import java.util.ArrayList;
@@ -27,7 +29,7 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorView
     private String TAG = "VideoSelectorFragment";
     private String TAG_Lib = "Lib:";
     private VideoSelectorAdapter videoSelectorAdapter;
-    private TextView nextButton;
+    private TextView nextButton, homeButton;
     private RecyclerView videoPickerRecyclerView;
     BasePresenter presenter;
 
@@ -75,7 +77,7 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorView
     public void onAttach(Context context) {
         super.onAttach(context);
         presenter = ((SelectorActivity) getActivity()).getPresenter();
-        Log.d(TAG, "onAttach: isnull?"+(presenter==null));
+        Log.d(TAG, "onAttach: isnull?" + (presenter == null));
         ((VideoSelectorPresenter) presenter).setSelectorVideoData(SelectorVideoData.getInstance());
         presenter.attachView(this);
 
@@ -103,8 +105,9 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorView
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_selector_video, container, false);
-        videoPickerRecyclerView = (RecyclerView) v.findViewById(R.id.recycler_view_video_picker);
-        nextButton = (TextView) v.findViewById(R.id.next_button);
+        homeButton = (TextView) v.findViewById(R.id.selector_home_button);
+        nextButton = (TextView) v.findViewById(R.id.selector_next_button);
+        videoPickerRecyclerView = (RecyclerView) v.findViewById(R.id.selector_recycler_view_videos);
         videoPickerRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
         videoSelectorAdapter = new VideoSelectorAdapter(getActivity());
         ((VideoSelectorPresenter) presenter).setPickerAdapterModel(videoSelectorAdapter);
@@ -129,12 +132,18 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorView
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Intent intent = new Intent();
-                ((VideoSelectorPresenter) presenter).nextButtonClick(view,getActivity());
-
+                ((VideoSelectorPresenter) presenter).nextButtonClick(view, getActivity());
             }
         });
 
+        homeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                BackToHomeDialogFragment fragment = BackToHomeDialogFragment.newInstance(
+                        view.getResources().getString(R.string.dialog_back_to_home));
+                fragment.show(getFragmentManager(), BackToHomeDialogFragment.TAG);
+            }
+        });
 
     }
 

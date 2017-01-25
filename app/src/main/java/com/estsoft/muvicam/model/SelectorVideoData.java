@@ -87,6 +87,9 @@ public class SelectorVideoData {
     public void removeSelectedVideo(EditorVideo selectedVideo) {
         selectedVideos.remove(selectedVideo);
     }
+    public void removeAllVideos(){
+        selectedVideos.clear();
+    }
 
     public void addSelectedVideo(EditorVideo selectedVideo) {
         selectedVideos.add(selectedVideo);

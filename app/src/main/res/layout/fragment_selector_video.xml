@@ -5,7 +5,7 @@
     android:orientation="vertical">
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_view_video_picker"
+        android:id="@+id/selector_recycler_view_videos"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:background="@color/selectorGridLayout"
@@ -18,7 +18,7 @@
         android:background="@color/selectorTop"
         >
         <TextView
-            android:id="@+id/picker_home_button"
+            android:id="@+id/selector_home_button"
             android:layout_width="wrap_content"
             android:layout_height="45dp"
             android:layout_alignParentLeft="true"
@@ -35,7 +35,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/next_button"
+            android:id="@+id/selector_next_button"
             android:layout_width="wrap_content"
             android:layout_height="45dp"
             android:layout_alignParentRight="true"

@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
+import com.estsoft.muvicam.ui.common.BackToHomeDialogFragment;
 import com.estsoft.muvicam.ui.editor.ResultBarView;
 import com.estsoft.muvicam.ui.editor.VideoPlayerTextureView;
 import com.estsoft.muvicam.ui.share.ShareActivity;
@@ -324,8 +325,9 @@ public class VideoEditorResultFragment extends Fragment {
         homeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ResultExitDialog exitDialog = new ResultExitDialog(getActivity());
-                exitDialog.show();
+                BackToHomeDialogFragment fragment = BackToHomeDialogFragment.newInstance(
+                        view.getResources().getString(R.string.dialog_back_to_home));
+                fragment.show(getFragmentManager(), BackToHomeDialogFragment.TAG);
             }
         });
 
