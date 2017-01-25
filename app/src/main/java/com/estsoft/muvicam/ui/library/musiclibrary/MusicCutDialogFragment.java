@@ -125,7 +125,8 @@ public class MusicCutDialogFragment extends DialogFragment {
 
     // set waveform
     mWaveformView.setSoundFile(mMusic.uri(), UnitConversionUtil.millisecToSec(mOffset));
-    mWaveformView.setListener(mWaveformListener);
+    mWaveformView.setWaveformListener(mWaveformListener);
+    mWaveformView.setOnPreparedListener(this::startMusic);
 
     builder.setView(view)
         .setPositiveButton(android.R.string.ok, (dialog, id) -> {
@@ -155,33 +156,36 @@ public class MusicCutDialogFragment extends DialogFragment {
 
     @Override
     public void waveformTouchEnd() {
-      mOffset = UnitConversionUtil.secToMillisec(mWaveformView.fixOffset());
-      Timber.e("mOffset : %d", mOffset);
-      mMusicPlayer.setOffset(mOffset);
-      RxUtil.unsubscribe(mSubscription);
-
-      mMusicPlayer.startPlayer();
-      mSubscription = mMusicPlayer.startSubscribePlayer()
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribeOn(Schedulers.newThread())
-          .map(UnitConversionUtil::millisecToSec)
-          .filter(currentSec -> {
-            if (mWaveformView.isValidRunningAt(currentSec)) {
-              return true;
-            } else {
-              mMusicPlayer.pausePlayer();
-              mMusicPlayer.stopSubscribePlayer();
-              return false;
-            }
-          })
-          .subscribe(
-              mWaveformView::updateUi,
-              Throwable::printStackTrace,
-              () -> RxUtil.unsubscribe(mSubscription)
-          );
-
+      startMusic();
     }
   };
+
+  private void startMusic() {
+    mOffset = UnitConversionUtil.secToMillisec(mWaveformView.fixOffset());
+    Timber.e("mOffset : %d", mOffset);
+    mMusicPlayer.setOffset(mOffset);
+    RxUtil.unsubscribe(mSubscription);
+
+    mMusicPlayer.startPlayer();
+    mSubscription = mMusicPlayer.startSubscribePlayer()
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(Schedulers.newThread())
+        .map(UnitConversionUtil::millisecToSec)
+        .filter(currentSec -> {
+          if (mWaveformView.isValidRunningAt(currentSec)) {
+            return true;
+          } else {
+            mMusicPlayer.pausePlayer();
+            mMusicPlayer.stopSubscribePlayer();
+            return false;
+          }
+        })
+        .subscribe(
+            mWaveformView::updateUi,
+            Throwable::printStackTrace,
+            () -> RxUtil.unsubscribe(mSubscription)
+        );
+  }
 
 
 }
