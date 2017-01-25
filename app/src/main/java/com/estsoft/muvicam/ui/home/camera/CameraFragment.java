@@ -594,7 +594,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       mStackTrashbin.setImageDrawable(mTrashbinDrawable[CENTER]);
       params.leftMargin = pos - trashbinWidth / 2;
     }
-    
+
     mStackTrashbinContainer.addView(mStackTrashbin, params);
   }
 
