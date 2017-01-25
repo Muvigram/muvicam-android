@@ -443,6 +443,10 @@ public class VideoEditorResultFragment extends Fragment {
                                             videoResultPlayer2.setFirst(false);
                                             prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
                                         }
+                                        if(videoResultPlayer.isPlaying()){
+                                            videoResultPlayer.pause();
+                                            videoResultPlayer.stop();
+                                        }
                                         videoResultPlayer.setFirst(false);
                                         prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
 
@@ -481,6 +485,10 @@ public class VideoEditorResultFragment extends Fragment {
                                         if (resultVideos.size() > nowVideoNum + 1) {
                                             videoResultPlayer2.setFirst(false);
                                             prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
+                                        }
+                                        if(videoResultPlayer.isPlaying()){
+                                            videoResultPlayer.pause();
+                                            videoResultPlayer.stop();
                                         }
                                         videoResultPlayer.setFirst(false);
                                         prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);

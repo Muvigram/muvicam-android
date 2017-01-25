@@ -110,12 +110,7 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
         Log.d(TAG, "onMeasure: " + editorvideoWidth + " / " + editorVideoHeight);
 
         if (rotation != 90) {
-            DisplayMetrics outMetrics = new DisplayMetrics();
-            activity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
-            int newWidth = outMetrics.heightPixels;
-            int newHeight = outMetrics.widthPixels;
-            setMeasuredDimension(newWidth, newHeight);
-
+            setMeasuredDimension(heightMeasureSpec, widthMeasureSpec);
         } else {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
