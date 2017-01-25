@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.SeekBar;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.util.MP3File;
@@ -50,8 +49,6 @@ public class WaveformView extends View {
 
   private boolean mMusicUpdated = false;
 
-  private WaveformListener mListener;
-
   public WaveformView(Context context) {
     this(context, null);
   }
@@ -72,21 +69,19 @@ public class WaveformView extends View {
     mPlayheadPaint.setStyle(Paint.Style.STROKE);
     mPlayheadPaint.setStrokeWidth(2.0f);
     mPlayheadPaint.setColor(getResources().getColor(R.color.red_A700));
+
     mBeforeHeadPaint = new Paint();
     mBeforeHeadPaint.setAntiAlias(false);
     mBeforeHeadPaint.setStyle(Paint.Style.STROKE);
     mBeforeHeadPaint.setStrokeWidth(2.0f);
     mBeforeHeadPaint.setColor(getResources().getColor(R.color.red_A700));
+
     mAfterHeadPaint = new Paint();
     mAfterHeadPaint.setAntiAlias(false);
     mAfterHeadPaint.setStyle(Paint.Style.STROKE);
     mAfterHeadPaint.setStrokeWidth(2.0f);
     mAfterHeadPaint.setColor(getResources().getColor(R.color.backgroundLightGrey));
 
-  }
-
-  public void setListener(WaveformListener listener) {
-    mListener = listener;
   }
 
   // fix offset
@@ -140,7 +135,9 @@ public class WaveformView extends View {
               mMinGain = mSoundFile.getMinGain();
               mAvgGain = (mMaxGain + mMinGain) / 2;
               invalidate();
-            }
+            },
+            Throwable::printStackTrace,
+            () -> mOnPreparedListener.onPrepared()
         );
   }
 
@@ -184,6 +181,20 @@ public class WaveformView extends View {
     }
   }
 
+  // On Prepared Listener
+  private OnPreparedListener mOnPreparedListener;
+
+  public interface OnPreparedListener {
+    void onPrepared();
+  }
+
+  public void setOnPreparedListener(OnPreparedListener onPreparedListener) {
+    mOnPreparedListener = onPreparedListener;
+  }
+
+  // Waveform Listener
+  private WaveformListener mWaveformListener;
+
   public interface WaveformListener {
     void waveformTouchStart(float x);
 
@@ -192,17 +203,21 @@ public class WaveformView extends View {
     void waveformTouchEnd();
   }
 
+  public void setWaveformListener(WaveformListener waveformListener) {
+    mWaveformListener = waveformListener;
+  }
+
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     switch (event.getAction()) {
       case MotionEvent.ACTION_DOWN:
-        mListener.waveformTouchStart(event.getX());
+        mWaveformListener.waveformTouchStart(event.getX());
         break;
       case MotionEvent.ACTION_MOVE:
-        mListener.waveformTouchMove(event.getX());
+        mWaveformListener.waveformTouchMove(event.getX());
         break;
       case MotionEvent.ACTION_UP:
-        mListener.waveformTouchEnd();
+        mWaveformListener.waveformTouchEnd();
         break;
     }
     return true;

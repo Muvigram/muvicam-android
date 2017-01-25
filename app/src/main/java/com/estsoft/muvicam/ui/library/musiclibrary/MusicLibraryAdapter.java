@@ -82,10 +82,7 @@ public class MusicLibraryAdapter extends RecyclerView.Adapter<MusicLibraryAdapte
       }
       mTitle.setText(music.title());
       mArtist.setText(music.artist());
-      mMusicButton.setOnClickListener(v -> {
-        // TODO - cut music
-        mFragment.showMusicCutDialog(music);
-      });
+      mMusicButton.setOnClickListener(v -> mFragment.showMusicCutDialog(music));
     }
 
     public MusicLibraryViewHolder(View itemView) {

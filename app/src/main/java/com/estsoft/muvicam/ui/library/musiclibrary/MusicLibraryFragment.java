@@ -71,7 +71,12 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
 
   @OnClick(R.id.library_music_search_bar_skip)
   public void skipSelectMusic(View v) {
-    LibraryActivity.get(this).completeSelection(null, 0, 15000);
+    // LibraryActivity.get(this).completeSelection(null, 0, 15000);
+    DialogFactory
+        .createSimpleOkErrorDialog(getActivity(),
+        "Skip button",
+        "This feature will be added soon.")
+        .show();
   }
 
   @Inject MusicLibraryAdapter mAdapter;
@@ -166,7 +171,13 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
 
   @Override
   public void showMusicCutDialog(Music music) {
+    getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
     MusicCutDialogFragment dialog = MusicCutDialogFragment.newInstance(music);
+    dialog.setOnPreparedListener(() -> {
+      getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    });
     dialog.show(getFragmentManager(), TAG_MUSIC_CUT_DIALOG);
   }
 

@@ -1,11 +1,8 @@
 package com.estsoft.muvicam.ui.home.camera;
 
-import android.Manifest;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
@@ -28,12 +25,9 @@ import android.os.Message;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AlertDialog;
 import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -247,6 +241,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   @Override
   public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
     setUpStorageDir();
     startBackgroundThread();
     mMusicPlayer = new MusicPlayer(getActivity(), "silence_15_sec.mp3");
@@ -664,10 +659,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   private CameraDevice mCameraDevice;
 
   private void openCamera() {
-    if (!hasPermissionsGranted(VIDEO_PERMISSIONS)) {
-      requestVideoPermissions();
-      return;
-    }
 
     createVideoFile();
     setUpCameraOutputs();
@@ -1176,119 +1167,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     mRecorder.reset();
   }
 
-
-
-
-  // STEP - PERMISSION FOR CAMERA /////////////////////////////////////////////////////////////DONE
-
-  private static final String PERMISSION_DIALOG = "permissionDialog";
-
-  private static final int REQUEST_VIDEO_PERMISSIONS = 1;
-
-  private static final String[] VIDEO_PERMISSIONS = {
-      Manifest.permission.CAMERA,
-      Manifest.permission.RECORD_AUDIO,
-      Manifest.permission.WRITE_EXTERNAL_STORAGE
-  };
-
-  public static class ErrorDialog extends DialogFragment {
-    private static final String ARG_MESSAGE = "permissionDeniedMessage";
-
-    public static ErrorDialog newInstance(String message) {
-      ErrorDialog dialog = new ErrorDialog();
-      Bundle args = new Bundle();
-
-      args.putString(ARG_MESSAGE, message);
-      dialog.setArguments(args);
-      return dialog;
-    }
-
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-      Activity activity = getActivity();
-      return new AlertDialog.Builder(activity)
-          .setMessage(getArguments().getString(ARG_MESSAGE))
-          .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> activity.finish())
-          .create();
-    }
-  }
-
-  public static class ConfirmationDialog extends DialogFragment {
-
-    public static ConfirmationDialog newInstance() {
-      return new ConfirmationDialog();
-    }
-
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-      final Fragment parent = getParentFragment();
-
-      return new AlertDialog.Builder(getActivity())
-          .setMessage(R.string.camera_request_permission)
-          .setPositiveButton(android.R.string.ok, (dialog, i) ->
-              requestPermissions(VIDEO_PERMISSIONS, REQUEST_VIDEO_PERMISSIONS)
-          )
-          .setNegativeButton(android.R.string.cancel, (dialog, i) -> {
-            Activity activity = parent.getActivity();
-            if (activity != null) {
-              activity.finish();
-            }
-          })
-          .create();
-    }
-  }
-
-  private boolean shouldShowRequestPermissionsRationale(String[] permissions) {
-    for (String permission : permissions) {
-      if (shouldShowRequestPermissionRationale(permission)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private void requestVideoPermissions() {
-    if (shouldShowRequestPermissionsRationale(VIDEO_PERMISSIONS)) {
-      ConfirmationDialog.newInstance()
-          .show(getChildFragmentManager(), PERMISSION_DIALOG);
-
-    } else {
-      requestPermissions(VIDEO_PERMISSIONS, REQUEST_VIDEO_PERMISSIONS);
-    }
-  }
-
-  @Override
-  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
-    if (requestCode == REQUEST_VIDEO_PERMISSIONS) {
-      if (grantResults.length == VIDEO_PERMISSIONS.length) {
-        for (int result : grantResults) {
-          if (result != PackageManager.PERMISSION_GRANTED) {
-            ErrorDialog.newInstance(getString(R.string.camera_request_permission))
-                .show(getChildFragmentManager(), PERMISSION_DIALOG);
-          }
-        }
-
-      } else {
-        ErrorDialog.newInstance(getString(R.string.camera_request_permission))
-            .show(getChildFragmentManager(), PERMISSION_DIALOG);
-      }
-    } else {
-      super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-  }
-
-  private boolean hasPermissionsGranted(String[] permissions) {
-    for (String permission : permissions) {
-      if (ActivityCompat.checkSelfPermission(getActivity(), permission)
-          != PackageManager.PERMISSION_GRANTED) {
-        return false;
-      }
-    }
-    return true;
-  }
 
   // STEP - UI MAIN THREAD ////////////////////////////////////////////////////////////////////DONE
 

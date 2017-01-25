@@ -125,7 +125,8 @@ public class MusicCutFragment extends Fragment {
     mTitle.setText(mMusic.title());
     
     mWaveformView.setSoundFile(mMusic.uri(), UnitConversionUtil.millisecToSec(mOffset));
-    mWaveformView.setListener(mWaveformListener);
+    mWaveformView.setWaveformListener(mWaveformListener);
+    mWaveformView.setOnPreparedListener(this::startMusic);
   }
 
   @Override
@@ -166,31 +167,34 @@ public class MusicCutFragment extends Fragment {
 
     @Override
     public void waveformTouchEnd() {
-      mOffset = UnitConversionUtil.secToMillisec(mWaveformView.fixOffset());
-      mMusicPlayer.setOffset(mOffset);
-      RxUtil.unsubscribe(mSubscription);
-
-      mMusicPlayer.startPlayer();
-      mSubscription = mMusicPlayer.startSubscribePlayer()
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribeOn(Schedulers.newThread())
-          .map(UnitConversionUtil::millisecToSec)
-          .filter(sec -> {
-            if (mWaveformView != null && mWaveformView.isValidRunningAt(sec)) {
-              return true;
-            } else {
-              mMusicPlayer.pausePlayer();
-              mMusicPlayer.stopSubscribePlayer();
-              return false;
-            }
-          })
-          .subscribe(
-              mWaveformView::updateUi,
-              Throwable::printStackTrace,
-              () -> RxUtil.unsubscribe(mSubscription)
-          );
-
+      startMusic();
     }
   };
+
+  private void startMusic() {
+    mOffset = UnitConversionUtil.secToMillisec(mWaveformView.fixOffset());
+    mMusicPlayer.setOffset(mOffset);
+    RxUtil.unsubscribe(mSubscription);
+
+    mMusicPlayer.startPlayer();
+    mSubscription = mMusicPlayer.startSubscribePlayer()
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(Schedulers.newThread())
+        .map(UnitConversionUtil::millisecToSec)
+        .filter(sec -> {
+          if (mWaveformView != null && mWaveformView.isValidRunningAt(sec)) {
+            return true;
+          } else {
+            mMusicPlayer.pausePlayer();
+            mMusicPlayer.stopSubscribePlayer();
+            return false;
+          }
+        })
+        .subscribe(
+            mWaveformView::updateUi,
+            Throwable::printStackTrace,
+            () -> RxUtil.unsubscribe(mSubscription)
+        );
+  }
 
 }

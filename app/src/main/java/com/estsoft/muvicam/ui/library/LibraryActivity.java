@@ -60,9 +60,6 @@ public class LibraryActivity extends BaseSingleFragmentActivity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    // set fullscreen
-    setFullscreen();
-
     // inflate single fragment activity
     super.onCreate(savedInstanceState);
 
@@ -70,19 +67,6 @@ public class LibraryActivity extends BaseSingleFragmentActivity {
     mLibraryComponent = DaggerLibraryComponent.builder()
         .activityComponent(getActivityComponent()).build();
     mLibraryComponent.inject(this);
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-  }
-
-  public void setFullscreen() {
-    requestWindowFeature(Window.FEATURE_NO_TITLE);
-    getWindow().setFlags(
-        WindowManager.LayoutParams.FLAG_FULLSCREEN,
-        WindowManager.LayoutParams.FLAG_FULLSCREEN
-    );
   }
 
   /**
@@ -114,6 +98,6 @@ public class LibraryActivity extends BaseSingleFragmentActivity {
         }
       }
     }
-    return super.dispatchTouchEvent( event );
+    return super.dispatchTouchEvent(event);
   }
 }
