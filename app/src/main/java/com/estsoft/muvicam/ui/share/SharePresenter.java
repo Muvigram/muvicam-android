@@ -38,9 +38,14 @@ import rx.Subscription;
 public class SharePresenter extends BasePresenter<ShareMvpView>{
     private static final String TAG = "SharePresenter";
     private final String EXPORT_VIDEO_TYPE = "video/*";
+    private final int REAR_ROTATION = 90;
+    private final int FRONT_ROTATION = 270;
     private final int MILLI_TO_MICRO = 1000;
     private final int MODE_TRANSCODE = -2016;
     private final int MODE_CONCATENATION = -2017;
+
+    private boolean mVideoFlipping = false;
+    private int mVideoRotation = 0;
 
     Context mContext;
     Activity mActivity;
@@ -105,6 +110,9 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
             mVideoStarts = videoStarts;
             mVideoEnds = videoEnds;
         }
+
+        setupVideoRotationAndFlipping( mVideoPaths[0] );
+
     }
 
     /* Business logic here */
@@ -169,6 +177,14 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
         storingToGallery();
     }
 
+    private void setupVideoRotationAndFlipping ( String videoSamplePath ) {
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource( videoSamplePath );
+        mVideoRotation = Integer.parseInt(retriever.extractMetadata( MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION ));
+        if (mVideoRotation == FRONT_ROTATION) mVideoFlipping = true;
+    }
+
+
 
 
     /* for model? */
@@ -226,18 +242,17 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
     private MediaTranscoder getTranscoder() {
         int transcodeMode = mMusicPath.equals("") ? MediaEditorNew.NORMAL : MediaEditorNew.MUTE_AND_ADD_MUSIC;
         MediaTranscoder editor = new MediaEditorNew(mTmpStoredPath, transcodeMode, mTranscodeProgressListener);
-        editor.initVideoTarget( 1, 30, 5000000, 90, 1280, 720 );
-        editor.initAudioTarget( 44100, 2, 128 * 1000 );
-
-        for ( int i = 0; i < mVideoPaths.length; i ++ ) {
-            editor.addSegment( mVideoPaths[i], mVideoStarts[i] * MILLI_TO_MICRO, mVideoEnds[i] * MILLI_TO_MICRO, 100 );
-            Log.d(TAG, "getTranscoder: [" + i + "] ... " + mVideoStarts[i] * MILLI_TO_MICRO + " / " + mVideoEnds[i] * MILLI_TO_MICRO );
+        editor.initVideoTarget(1, 30, 5000000, mVideoRotation, 1280, 720, mVideoFlipping);
+        editor.initAudioTarget(44100, 2, 128 * 1000);
+        for (int i = 0; i < mVideoPaths.length; i++) {
+            editor.addSegment(mVideoPaths[i], mVideoStarts[i] * MILLI_TO_MICRO, mVideoEnds[i] * MILLI_TO_MICRO, 100);
+            Log.d(TAG, "getTranscoder: [" + i + "] ... " + mVideoStarts[i] * MILLI_TO_MICRO + " / " + mVideoEnds[i] * MILLI_TO_MICRO);
         }
 
         editor.addLogoSegment(mLogoVideoFile, -1, -1, 100);
 
         if (transcodeMode == MediaEditorNew.MUTE_AND_ADD_MUSIC) {
-            editor.addMusicSegment( mMusicPath, (long)(mMusicOffset * MILLI_TO_MICRO), 100);
+            editor.addMusicSegment(mMusicPath, (long) (mMusicOffset * MILLI_TO_MICRO), 100);
         }
         return editor;
     }
@@ -268,6 +283,11 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
             Matrix matrix = new Matrix();
             matrix.postRotate(90);
             bitmap = Bitmap.createBitmap( bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        }
+        if (mVideoFlipping) {
+            Matrix flipMatrix = new Matrix();
+            flipMatrix.preScale(-1, 1);
+            bitmap = Bitmap.createBitmap( bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), flipMatrix, false);
         }
         return bitmap;
     }

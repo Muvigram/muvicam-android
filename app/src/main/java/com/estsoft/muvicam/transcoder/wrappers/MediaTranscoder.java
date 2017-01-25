@@ -10,7 +10,7 @@ import java.io.FileDescriptor;
 
 public interface MediaTranscoder {
 
-    void initVideoTarget(int interval, int frameRate, int bitrate, int rotation, int width, int height );
+    void initVideoTarget(int interval, int frameRate, int bitrate, int rotation, int width, int height, boolean videoFlipping );
     void initAudioTarget( int sampleRate, int channelCount, int bitrate );
 
     void addSegment(String inputFilePath, long startTimeUs, long endTimeUs, int audioVolume  );

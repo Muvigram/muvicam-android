@@ -54,7 +54,7 @@ public class MediaEditor {
     }
 
     public void initVideoTarget(int interval, int frameRate, int bitrate, int rotation, int width, int height ) {
-        mTarget.initVideoTarget( interval, frameRate, bitrate, rotation, width, height );
+        mTarget.initVideoTarget( interval, frameRate, bitrate, rotation, width, height, false );
         mMuxer.setOrientation( rotation );
         mMuxer.setVideoParams( frameRate );
     }

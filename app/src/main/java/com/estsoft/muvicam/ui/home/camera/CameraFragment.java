@@ -1,11 +1,8 @@
 package com.estsoft.muvicam.ui.home.camera;
 
-import android.Manifest;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
@@ -28,12 +25,9 @@ import android.os.Message;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AlertDialog;
 import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -247,6 +241,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   @Override
   public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
     setUpStorageDir();
     startBackgroundThread();
     mMusicPlayer = new MusicPlayer(getActivity(), "silence_15_sec.mp3");
@@ -347,28 +342,10 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     super.onDestroy();
   }
 
-  // STEP - MUSIC PLAYER //////////////////////////////////////////////////////////////////////DONE
-  private Music mMusic = null;
-  MusicPlayer mMusicPlayer;
-
-  public void changeMusic(Music music) {
-    mMusicPlayer.setOnCompleteSetupListener(mp -> {
-      mMusicPlayer = mp;
-      requestUiChange(UI_LOGIC_MUSIC_UPDATE_COMPLETE);
-    });
-
-    mMusic = music;
-    mMusicPlayer.setMusicAsync(music.uri());
-  }
-
-  public void changeOffset(int offset) {
-    mMusicPlayer.setOffset(offset);
-  }
-
   // STEP - VIDEO RECORDING BUTTON INTERACTION ////////////////////////////////////NEED REFACTORING
 
   public boolean holdButton(MotionEvent motionEvent) {
-    requestUiChange(UI_LOGIC_DOWN_SHOOT_BUTTON);
+    requestUiChange(UI_LOGIC_HOLD_SHOOT_BUTTON);
     return true;
   }
 
@@ -392,7 +369,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   }
 
   public boolean releaseButton(MotionEvent motionEvent) {
-    requestUiChange(UI_LOGIC_UP_SHOOT_BUTTON);
+    requestUiChange(UI_LOGIC_RELEASE_SHOOT_BUTTON);
     return isDown;
   }
 
@@ -420,6 +397,24 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     delayStopRecording();
   }
 
+  // STEP - MUSIC PLAYER //////////////////////////////////////////////////////////////////////DONE
+
+  private Music mMusic = null;
+  MusicPlayer mMusicPlayer;
+
+  public void changeMusic(Music music) {
+    mMusicPlayer.setOnCompleteSetupListener(mp -> {
+      mMusicPlayer = mp;
+      requestUiChange(UI_LOGIC_MUSIC_UPDATE_COMPLETE);
+    });
+
+    mMusic = music;
+    mMusicPlayer.setMusicAsync(music.uri());
+  }
+
+  public void changeOffset(int offset) {
+    mMusicPlayer.setOffset(offset);
+  }
 
   // STEP - STORAGE DIR ///////////////////////////////////////////////////////////////////////////
 
@@ -461,6 +456,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   public void setStackBarOnListen() {
     mStackBarSubscription = mMusicPlayer.startSubscribePlayer()
+        .doOnSubscribe(() -> mUiThreadHandler.post(this::hideTrashbin))
         .observeOn(AndroidSchedulers.mainThread())
         .subscribeOn(Schedulers.newThread())
         .filter(millisec -> {
@@ -477,13 +473,11 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           }
           return true;
         })
-        .doOnSubscribe(() -> mUiThreadHandler.post(this::hideTrashbin))
         .subscribe(
             mStackBar::updateStackBar,
             Throwable::printStackTrace,
             () -> {
               mStackBar.recordOffset();
-              updateTrashbin();
               RxUtil.unsubscribe(mStackBarSubscription);
             }
         );
@@ -500,6 +494,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 //          mVideoStack.peek().toString(), mOffsetStack.peek());
     }
     if (!mVideoStack.isEmpty()) {
+      mUiThreadHandler.post(() -> updateTrashbin());
       requestUiChange(UI_LOGIC_DURING_SHOOTING);
     }
 
@@ -515,6 +510,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       Timber.e("Pop the file file the stack %s [ms : %d]\n", oldVideo, oldOffset);
     }
     if (mVideoStack.isEmpty()) {
+      mUiThreadHandler.post(() -> updateTrashbin());
       requestUiChange(UI_LOGIC_BEFORE_SHOOTING);
     }
   }
@@ -598,6 +594,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       mStackTrashbin.setImageDrawable(mTrashbinDrawable[CENTER]);
       params.leftMargin = pos - trashbinWidth / 2;
     }
+    
     mStackTrashbinContainer.addView(mStackTrashbin, params);
   }
 
@@ -664,10 +661,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   private CameraDevice mCameraDevice;
 
   private void openCamera() {
-    if (!hasPermissionsGranted(VIDEO_PERMISSIONS)) {
-      requestVideoPermissions();
-      return;
-    }
 
     createVideoFile();
     setUpCameraOutputs();
@@ -927,11 +920,12 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   private void startRecording() {
     isSessionPreviewReady = false;
     requestUiChange(UI_LOGIC_HIDE_PERIPHERAL_BUTTONS);
+    requestUiChange(UI_LOGIC_LOCK_SHOOT_BUTTON);
     createRecordSession();
   }
 
   private void delayStopRecording() {
-    new Thread() {
+    Thread stopMusic = new Thread() {
       @Override
       public void run() {
         super.run();
@@ -943,12 +937,13 @@ public class CameraFragment extends Fragment implements CameraMvpView {
         } finally {
           mMusicPlayer.pausePlayer();
           requestUiChange(UI_LOGIC_SHOW_PERIPHERAL_BUTTONS);
+          requestUiChange(UI_LOGIC_HOLD_SHOOT_BUTTON);
           isRecording = false;
         }
       }
-    }.start();
+    };
 
-    new Thread() {
+    Thread stopRecording = new Thread() {
       @Override
       public void run() {
         super.run();
@@ -958,11 +953,15 @@ public class CameraFragment extends Fragment implements CameraMvpView {
         } catch (InterruptedException e) {
           e.printStackTrace();
         } finally {
+          requestUiChange(UI_LOGIC_RELEASE_SHOOT_BUTTON);
           stopRecorder();
           startPreviewing();
         }
       }
-    }.start();
+    };
+
+    stopMusic.start();
+    stopRecording.start();
   }
 
   private int calculateDelay() {
@@ -977,9 +976,10 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   private void stopRecording() {
     mMusicPlayer.pausePlayer();
+    requestUiChange(UI_LOGIC_SHOW_PERIPHERAL_BUTTONS);
+    requestUiChange(UI_LOGIC_RELEASE_SHOOT_BUTTON);
     stopRecorder();
     startPreviewing();
-    requestUiChange(UI_LOGIC_SHOW_PERIPHERAL_BUTTONS);
   }
 
   // STEP - CREATE SESSION ////////////////////////////////////////////////////////////////////////
@@ -1177,119 +1177,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   }
 
 
-
-
-  // STEP - PERMISSION FOR CAMERA /////////////////////////////////////////////////////////////DONE
-
-  private static final String PERMISSION_DIALOG = "permissionDialog";
-
-  private static final int REQUEST_VIDEO_PERMISSIONS = 1;
-
-  private static final String[] VIDEO_PERMISSIONS = {
-      Manifest.permission.CAMERA,
-      Manifest.permission.RECORD_AUDIO,
-      Manifest.permission.WRITE_EXTERNAL_STORAGE
-  };
-
-  public static class ErrorDialog extends DialogFragment {
-    private static final String ARG_MESSAGE = "permissionDeniedMessage";
-
-    public static ErrorDialog newInstance(String message) {
-      ErrorDialog dialog = new ErrorDialog();
-      Bundle args = new Bundle();
-
-      args.putString(ARG_MESSAGE, message);
-      dialog.setArguments(args);
-      return dialog;
-    }
-
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-      Activity activity = getActivity();
-      return new AlertDialog.Builder(activity)
-          .setMessage(getArguments().getString(ARG_MESSAGE))
-          .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> activity.finish())
-          .create();
-    }
-  }
-
-  public static class ConfirmationDialog extends DialogFragment {
-
-    public static ConfirmationDialog newInstance() {
-      return new ConfirmationDialog();
-    }
-
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-      final Fragment parent = getParentFragment();
-
-      return new AlertDialog.Builder(getActivity())
-          .setMessage(R.string.camera_request_permission)
-          .setPositiveButton(android.R.string.ok, (dialog, i) ->
-              requestPermissions(VIDEO_PERMISSIONS, REQUEST_VIDEO_PERMISSIONS)
-          )
-          .setNegativeButton(android.R.string.cancel, (dialog, i) -> {
-            Activity activity = parent.getActivity();
-            if (activity != null) {
-              activity.finish();
-            }
-          })
-          .create();
-    }
-  }
-
-  private boolean shouldShowRequestPermissionsRationale(String[] permissions) {
-    for (String permission : permissions) {
-      if (shouldShowRequestPermissionRationale(permission)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private void requestVideoPermissions() {
-    if (shouldShowRequestPermissionsRationale(VIDEO_PERMISSIONS)) {
-      ConfirmationDialog.newInstance()
-          .show(getChildFragmentManager(), PERMISSION_DIALOG);
-
-    } else {
-      requestPermissions(VIDEO_PERMISSIONS, REQUEST_VIDEO_PERMISSIONS);
-    }
-  }
-
-  @Override
-  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
-    if (requestCode == REQUEST_VIDEO_PERMISSIONS) {
-      if (grantResults.length == VIDEO_PERMISSIONS.length) {
-        for (int result : grantResults) {
-          if (result != PackageManager.PERMISSION_GRANTED) {
-            ErrorDialog.newInstance(getString(R.string.camera_request_permission))
-                .show(getChildFragmentManager(), PERMISSION_DIALOG);
-          }
-        }
-
-      } else {
-        ErrorDialog.newInstance(getString(R.string.camera_request_permission))
-            .show(getChildFragmentManager(), PERMISSION_DIALOG);
-      }
-    } else {
-      super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-  }
-
-  private boolean hasPermissionsGranted(String[] permissions) {
-    for (String permission : permissions) {
-      if (ActivityCompat.checkSelfPermission(getActivity(), permission)
-          != PackageManager.PERMISSION_GRANTED) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   // STEP - UI MAIN THREAD ////////////////////////////////////////////////////////////////////DONE
 
   /* FUNC - UI LOGIC */
@@ -1306,11 +1193,12 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   public static final int UI_LOGIC_BEFORE_SHOOTING = 0x006;
   public static final int UI_LOGIC_DURING_SHOOTING = 0x007;
 
-  public static final int UI_LOGIC_DOWN_SHOOT_BUTTON = 0x008;
-  public static final int UI_LOGIC_UP_SHOOT_BUTTON = 0x009;
+  public static final int UI_LOGIC_RELEASE_SHOOT_BUTTON = 0x008;
+  public static final int UI_LOGIC_HOLD_SHOOT_BUTTON = 0x009;
+  public static final int UI_LOGIC_LOCK_SHOOT_BUTTON = 0x010;
 
-  public static final int UI_LOGIC_DURING_CUT_MUSIC = 0x010;
-  public static final int UI_LOGIC_FINISH_CUT_MUSIC = 0x011;
+  public static final int UI_LOGIC_DURING_CUT_MUSIC = 0x011;
+  public static final int UI_LOGIC_FINISH_CUT_MUSIC = 0x012;
 
   @Retention(RetentionPolicy.SOURCE)
   @IntDef({UI_LOGIC_RESTORE_UI_CONFIGURATION,
@@ -1318,7 +1206,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       UI_LOGIC_SHOW_ALL_BUTTONS, UI_LOGIC_HIDE_ALL_BUTTONS,
       UI_LOGIC_MUSIC_UPDATE_COMPLETE,
       UI_LOGIC_BEFORE_SHOOTING, UI_LOGIC_DURING_SHOOTING,
-      UI_LOGIC_DOWN_SHOOT_BUTTON, UI_LOGIC_UP_SHOOT_BUTTON,
+      UI_LOGIC_RELEASE_SHOOT_BUTTON, UI_LOGIC_HOLD_SHOOT_BUTTON, UI_LOGIC_LOCK_SHOOT_BUTTON,
       UI_LOGIC_DURING_CUT_MUSIC, UI_LOGIC_FINISH_CUT_MUSIC})
   public @interface UiLogic {
   }
@@ -1435,17 +1323,19 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           mMusicButton.setVisibility(View.INVISIBLE);
           mLibraryButton.setVisibility(View.INVISIBLE);
           break;
-        case UI_LOGIC_DOWN_SHOOT_BUTTON:
-          mShootButton.setImageResource(R.drawable.camera_shoot_button_hold_70dp);
-          mShootButton.startAnimation(getAnimation(getActivity(), R.anim.clicking_101));
-          break;
-        case UI_LOGIC_UP_SHOOT_BUTTON:
+        case UI_LOGIC_RELEASE_SHOOT_BUTTON:
           mShootButton.setImageResource(R.drawable.camera_shoot_button_release_70dp);
           mShootButton.startAnimation(getAnimation(getActivity(), R.anim.clicking_101));
           break;
+        case UI_LOGIC_HOLD_SHOOT_BUTTON:
+          mShootButton.setImageResource(R.drawable.camera_shoot_button_hold_70dp);
+          mShootButton.startAnimation(getAnimation(getActivity(), R.anim.clicking_101));
+          break;
+        case UI_LOGIC_LOCK_SHOOT_BUTTON:
+          mShootButton.setImageResource(R.drawable.camera_shoot_button_shooting_70dp);
+          break;
         case UI_LOGIC_MUSIC_UPDATE_COMPLETE:
           mMusicButton.setAlbumArt(mMusic);
-          Timber.e("ERRRORROOOR");
           mMusicButton.startAnimation(getAnimation(getActivity(), R.anim.rotating));
           if (mMusic != null) {
             mCutButton.setImageResource(R.drawable.camera_cut_button_active_30dp);

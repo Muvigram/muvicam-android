@@ -91,8 +91,6 @@ public class ShareActivity extends BaseActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_share);
-    getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
 
     FragmentManager fragmentManager = getSupportFragmentManager();
     Fragment fragment = fragmentManager.findFragmentById( R.id.fragment_activity_share );
