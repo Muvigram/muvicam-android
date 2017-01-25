@@ -96,7 +96,7 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
         if (muvicamMediaPlayer != null) muvicamMediaPlayer.release();
         if (editorResultMediaPlayer != null) editorResultMediaPlayer.release();
-        return false;
+        return true;
     }
 
     @Override
@@ -106,9 +106,6 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        Log.d(TAG, "onMeasure: " + widthMeasureSpec + " / " + heightMeasureSpec);
-        Log.d(TAG, "onMeasure: " + editorvideoWidth + " / " + editorVideoHeight);
-
         if (rotation != 90) {
             setMeasuredDimension(heightMeasureSpec, widthMeasureSpec);
         } else {
