@@ -26,7 +26,7 @@ public class EditorActivity extends AppCompatActivity implements VideoEditorResu
     private final static String EXTRA_MUSIC_OFFSET = "EditorActivity.musicOffset";
     private final static String EXTRA_MUSIC_LENGTH = "EditorActivity.musicLength";
 
-    //context, 선택된 editorArray, 음악 path, 음악 offset, 음악 길이
+    //context, selected editorArray, music path, muscic offset, music length
     public static Intent newIntent(Context packageContext, ArrayList<EditorVideo> selectedVideos,
                                    String musicPath, int musicOffset, int musicLength) {
         Intent intent = new Intent(packageContext, EditorActivity.class);

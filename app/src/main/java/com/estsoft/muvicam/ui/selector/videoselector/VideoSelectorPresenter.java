@@ -2,6 +2,7 @@ package com.estsoft.muvicam.ui.selector.videoselector;
 
 import android.app.Activity;
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -51,10 +52,6 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
         super.attachView(mvpView);
     }
 
-    @Override
-    public void detachView() {
-        super.detachView();
-    }
 
     public void setSelectorVideoData(SelectorVideoData selectorVideoData) {
         this.selectorVideoData = selectorVideoData;
@@ -85,6 +82,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
     //position : touched position
     @Override
     public void onItemClick(View view, int position) {
+        Log.d(TAG, "onItemClick: "+countSelected+" / "+position);
         RelativeLayout layoutSelected = (RelativeLayout) view.findViewById(R.id.layout_selected);
         FrameLayout hide = (FrameLayout) view.findViewById(R.id.video_hided);
         TextView selectedNum = (TextView) view.findViewById(R.id.video_num);
@@ -104,7 +102,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
             } else {
                 if (countSelected > 4) {
                     //more than 5 things
-                    Toast.makeText(view.getContext(), "select less than 6 ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(view.getContext(), view.getResources().getString(R.string.selector_next_more_than_six_warning), Toast.LENGTH_SHORT).show();
                 } else {
 //                    Log.d(TAG, "audio" + adapterModel.getItem(position - 3).getAudioPath());
                     adapterModel.getItem(position - 3).setSelected(true);
@@ -121,6 +119,15 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
         }
     }
 
+    @Override
+    public void detachView() {
+        super.detachView();
+        adapterModel.clearItem();
+      //  selectorVideoData.removeAllVideos();
+        countSelected = 0;
+        adapterView.notifyAdapter();
+    }
+
     // position : list of position
     public void progress(ThumbnailUtil.VideoMetaData data) {
         selectorVideoData.progressGetThumbnail(data);
@@ -135,9 +142,9 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
         selectorVideoData.setmCallBack(context);
     }
 
-    public void nextButtonClick(View view,Activity activity) {
+    public void nextButtonClick(View view, Activity activity) {
         if (selectorVideoData.getSelectedVideos().size() == 0) {
-            Toast.makeText(view.getContext(), "Select at least 1 video", Toast.LENGTH_SHORT).show();
+            Toast.makeText(view.getContext(), view.getResources().getString(R.string.selector_next_less_than_one_warning), Toast.LENGTH_SHORT).show();
         } else {
 
             ArrayList<EditorVideo> results = new ArrayList<>();

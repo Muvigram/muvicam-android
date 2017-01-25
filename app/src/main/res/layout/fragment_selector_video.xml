@@ -24,13 +24,13 @@
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="15dp"
             android:gravity="center_vertical"
-            android:text="Home"
+            android:text="@string/selector_home"
             android:textColor="@color/selectorButton" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="45dp"
             android:gravity="center"
-            android:text="My Videos"
+            android:text="@string/selector_title"
             android:textColor="@color/Black"
             android:textStyle="bold" />
 
@@ -41,7 +41,7 @@
             android:layout_alignParentRight="true"
             android:layout_marginRight="15dp"
             android:gravity="center_vertical"
-            android:text="Next"
+            android:text="@string/selector_next"
             android:textColor="@color/selectorButton" />
     </RelativeLayout>
 

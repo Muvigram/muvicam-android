@@ -91,7 +91,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="Not Supported video"
+            android:text="@string/selector_not_supported"
             android:textColor="@color/selectorHideText" />
     </FrameLayout>
 </FrameLayout>

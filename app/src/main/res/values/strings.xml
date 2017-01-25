@@ -74,4 +74,16 @@
     <string name="instagram_package">com.instagram.android</string>
     <string name="export_hashtag">#Muvicam</string>
 
+
+    <!-- video selector -->
+    <string name="selector_home">Home</string>
+    <string name="selector_title">My Videos</string>
+    <string name="selector_next">Next</string>
+    <string name="selector_not_supported">Not Supported video</string>
+    <string name="selector_next_more_than_six_warning">Select less than 6</string>
+    <string name="selector_next_less_than_one_warning">Select at least 1 video</string>
+
+    <!-- video editor edit -->
+    <!-- video editor result -->
+    <string name="editor_result_done_warning">Edit at least 1 video</string>
 </resources>

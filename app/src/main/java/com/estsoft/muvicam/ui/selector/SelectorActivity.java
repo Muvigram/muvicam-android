@@ -47,8 +47,11 @@ public class SelectorActivity extends BaseActivity implements VideoSelectorFragm
             Bundle bundle = new Bundle();
             // here put passible things
             fragment.setArguments(bundle);
-            fragmentManager.beginTransaction().add(R.id.selector_fragment_container, fragment).commit();
+
         }
+
+        fragmentManager.beginTransaction().replace(R.id.selector_fragment_container, fragment).commit();
+
     }
 
     // 0 : result fragment

@@ -317,7 +317,7 @@ public class VideoEditorResultFragment extends Fragment {
                     getActivity().startActivity(ShareActivity.newIntent(getContext(), videoPaths, videoStartTimes, videoEndTimes, musicPath, musicOffset, resultVideosTotalTime, true));
                     getActivity().finish();
                 } else {
-                    Toast.makeText(getContext(), "Edit at least 1 video", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(),getResources().getString(R.string.editor_result_done_warning), Toast.LENGTH_SHORT).show();
                 }
             }
         });

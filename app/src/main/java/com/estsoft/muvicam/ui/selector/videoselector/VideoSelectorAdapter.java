@@ -143,7 +143,10 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
 
     @Override
     public void clearItem() {
-        if (thumbnailImageViews != null) thumbnailImageViews.clear();
+        if (thumbnailImageViews != null) {
+            thumbnailImageViews.clear();
+            notifyAdapter();
+        }
     }
 
     @Override
