@@ -2,15 +2,10 @@ package com.estsoft.muvicam.ui.library.musiclibrary;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
-import android.content.res.AssetFileDescriptor;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -24,12 +19,10 @@ import com.estsoft.muvicam.util.MusicPlayer;
 import com.estsoft.muvicam.util.RxUtil;
 import com.estsoft.muvicam.util.UnitConversionUtil;
 
-import java.io.IOException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -74,6 +67,12 @@ public class MusicCutDialogFragment extends DialogFragment {
     super.onCreate(savedInstanceState);
     mMusicPlayer = new MusicPlayer(getActivity(), "silence_15_sec.mp3");
     mMusicPlayer.openPlayer();
+  }
+
+  @Override
+  public void onResume() {
+    super.onResume();
+    mOnPreparedListener.onPrepared();
   }
 
   @Override
@@ -125,7 +124,8 @@ public class MusicCutDialogFragment extends DialogFragment {
 
     // set waveform
     mWaveformView.setSoundFile(mMusic.uri(), UnitConversionUtil.millisecToSec(mOffset));
-    mWaveformView.setListener(mWaveformListener);
+    mWaveformView.setWaveformListener(mWaveformListener);
+    mWaveformView.setOnPreparedListener(this::startMusic);
 
     builder.setView(view)
         .setPositiveButton(android.R.string.ok, (dialog, id) -> {
@@ -136,6 +136,7 @@ public class MusicCutDialogFragment extends DialogFragment {
     return builder.create();
   }
 
+  //subscription
   Subscription mSubscription;
 
   public WaveformView.WaveformListener mWaveformListener = new WaveformView.WaveformListener() {
@@ -155,33 +156,45 @@ public class MusicCutDialogFragment extends DialogFragment {
 
     @Override
     public void waveformTouchEnd() {
-      mOffset = UnitConversionUtil.secToMillisec(mWaveformView.fixOffset());
-      Timber.e("mOffset : %d", mOffset);
-      mMusicPlayer.setOffset(mOffset);
-      RxUtil.unsubscribe(mSubscription);
-
-      mMusicPlayer.startPlayer();
-      mSubscription = mMusicPlayer.startSubscribePlayer()
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribeOn(Schedulers.newThread())
-          .map(UnitConversionUtil::millisecToSec)
-          .filter(currentSec -> {
-            if (mWaveformView.isValidRunningAt(currentSec)) {
-              return true;
-            } else {
-              mMusicPlayer.pausePlayer();
-              mMusicPlayer.stopSubscribePlayer();
-              return false;
-            }
-          })
-          .subscribe(
-              mWaveformView::updateUi,
-              Throwable::printStackTrace,
-              () -> RxUtil.unsubscribe(mSubscription)
-          );
-
+      startMusic();
     }
   };
 
+  private void startMusic() {
+    mOffset = UnitConversionUtil.secToMillisec(mWaveformView.fixOffset());
+    Timber.e("mOffset : %d", mOffset);
+    mMusicPlayer.setOffset(mOffset);
+    RxUtil.unsubscribe(mSubscription);
 
+    mMusicPlayer.startPlayer();
+    mSubscription = mMusicPlayer.startSubscribePlayer()
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(Schedulers.newThread())
+        .map(UnitConversionUtil::millisecToSec)
+        .filter(currentSec -> {
+          if (mWaveformView.isValidRunningAt(currentSec)) {
+            return true;
+          } else {
+            mMusicPlayer.pausePlayer();
+            mMusicPlayer.stopSubscribePlayer();
+            return false;
+          }
+        })
+        .subscribe(
+            mWaveformView::updateUi,
+            Throwable::printStackTrace,
+            () -> RxUtil.unsubscribe(mSubscription)
+        );
+  }
+
+  // On Prepared Listener
+  private OnPreparedListener mOnPreparedListener;
+
+  public interface OnPreparedListener {
+    void onPrepared();
+  }
+
+  public void setOnPreparedListener(OnPreparedListener onPreparedListener) {
+    mOnPreparedListener = onPreparedListener;
+  }
 }

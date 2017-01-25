@@ -1,12 +1,26 @@
 <resources>
     <string name="app_name">Muvicam</string>
 
+    <!-- splash package -->
+    <string name="splash_request_permission_detail">
+        This application needs permission for camera, audio, and storage access.
+    </string>
+    <string name="splash_request_permission_denied">
+        There was a problem verifying your permissions.
+        Do you want to go to "Application Settings"?
+    </string>
+    <string name="splash_request_permission_error">
+        There was a problem verifying your permissions.
+    </string>
+    <string name="splash_button_detail_setting">Setting</string>
+    <string name="splash_button_ok">OK</string>
+    <string name="splash_button_cancel">Cancel</string>
+
     <!-- camera package -->
     <string name="camera_shoot_button_desc">Start shooting a video.</string>
     <string name="camera_music_button_desc">Select a background music.</string>
     <string name="camera_library_button_desc">Choose videos from library.</string>
     <string name="camera_selfie_mode_button_desc">Shift into selfie or scene mode.</string>
-    <string name="camera_request_permission">This sample needs permission for camera, audio, and storage access.</string>
     <string name="camera_camera_error">This device doesn\'t support Camera2 API.</string>
 
 

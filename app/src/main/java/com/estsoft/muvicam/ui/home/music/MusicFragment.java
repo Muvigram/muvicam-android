@@ -96,26 +96,11 @@ public class MusicFragment extends Fragment implements MusicMvpView {
     mPresenter.attachView(this);
   }
 
-  private static final String PERMISSION_DIALOG = "permissionDialog";
-  private static final int REQUEST_VIDEO_PERMISSIONS = 1;
-
   @Override
   public void onActivityCreated(@Nullable Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
     mRecyclerView.setAdapter(mAdapter);
     mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-    String permission = Manifest.permission.READ_EXTERNAL_STORAGE;
-    if (ActivityCompat.checkSelfPermission(getActivity(), permission)
-        != PackageManager.PERMISSION_GRANTED) {
-      if (shouldShowRequestPermissionRationale(permission)) {
-        CameraFragment.ConfirmationDialog.newInstance()
-            .show(getChildFragmentManager(), PERMISSION_DIALOG);
-      } else {
-        requestPermissions(new String[] {permission}, REQUEST_VIDEO_PERMISSIONS);
-      }
-      // return; TODO - ???
-    }
 
     mPresenter.loadMusics(null);
   }

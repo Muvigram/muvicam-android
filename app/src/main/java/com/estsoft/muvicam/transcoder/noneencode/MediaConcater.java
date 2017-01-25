@@ -268,7 +268,7 @@ public class MediaConcater implements MediaTranscoder {
     };
 
     @Override
-    public void initVideoTarget(int interval, int frameRate, int bitrate, int rotation, int width, int height) {
+    public void initVideoTarget(int interval, int frameRate, int bitrate, int rotation, int width, int height, boolean videoFlipping) {
     }
 
     @Override

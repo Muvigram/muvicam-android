@@ -29,6 +29,7 @@ public class VideoTrackTranscoder implements TrackTranscoder {
     private final MediaFormat mOutputFormat;
     private final BufferListener mBufferListener;
     private final int mTrackIndex;
+    private final boolean mFlipping;
     private MediaFormat mActualOutputFormat;
     private MediaCodec mEncoder;
     private MediaCodec mDecoder;
@@ -48,12 +49,13 @@ public class VideoTrackTranscoder implements TrackTranscoder {
     private boolean forceExtractingStop;
     private boolean mEncodePermitted;
 
-    public VideoTrackTranscoder(MediaExtractor extractor, MediaFormat outFormat, BufferListener bufferListener, int trackIndex ) {
+    public VideoTrackTranscoder(MediaExtractor extractor, MediaFormat outFormat, BufferListener bufferListener, int trackIndex, boolean flipping ) {
         this.mExtractor = extractor;
         this.mOutputFormat = outFormat;
         this.mBufferListener = bufferListener;
         this.mTrackIndex = trackIndex;
         this.mBufferInfo = new MediaCodec.BufferInfo();
+        this.mFlipping = flipping;
     }
 
     @Override
@@ -190,7 +192,7 @@ public class VideoTrackTranscoder implements TrackTranscoder {
         mDecoder.releaseOutputBuffer( index, doRender );
         if ( doRender ) {
             mDecoderOutputSurfaceWrapper.awaitNewImage();
-            mDecoderOutputSurfaceWrapper.drawImage( false );
+            mDecoderOutputSurfaceWrapper.drawImage( mFlipping );
 //            if ( mEncodePermitted ) {
             if ( mEncodePermitted && mBufferInfo.presentationTimeUs >= mEncodeStartPresentationTimeUs ) {
                 mEncoderInputSurfaceWrapper.setPresentationTime(mBufferInfo.presentationTimeUs * 1000);

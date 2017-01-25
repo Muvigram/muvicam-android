@@ -268,7 +268,7 @@ public class MediaSegmentNew {
 
         mVideoInputFormat = TranscodeUtils.getFirstTrack( mExtractor, TranscodeUtils.MODE_VIDEO );
         mVideoTrackIndex = TranscodeUtils.getFirstTrackIndex( mExtractor, TranscodeUtils.MODE_VIDEO );
-        mVideoTranscoder = new VideoTrackTranscoder( mExtractor, mTarget.videoOutputFormat, mBufferListener, mVideoTrackIndex );
+        mVideoTranscoder = new VideoTrackTranscoder( mExtractor, mTarget.videoOutputFormat, mBufferListener, mVideoTrackIndex, mTarget.isVideoFlipping() );
         mVideoTranscoder.setup();
     }
 
