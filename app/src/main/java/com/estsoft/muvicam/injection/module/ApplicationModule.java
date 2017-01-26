@@ -7,6 +7,9 @@ import dagger.Module;
 import dagger.Provides;
 import com.estsoft.muvicam.data.local.MusicService;
 import com.estsoft.muvicam.injection.qualifier.ApplicationContext;
+import com.estsoft.muvicam.util.RxEventBus;
+
+import javax.inject.Singleton;
 
 /**
  * Created by jaylim on 12/12/2016.
@@ -33,7 +36,12 @@ public class ApplicationModule {
   }
 
   /* Explicit Functionality */
-
+  @Provides
+  @Singleton
+  @ApplicationContext
+  public RxEventBus provideGlobalEventBus() {
+    return new RxEventBus();
+  }
 
   /* Implicit Functionality */
   @Provides

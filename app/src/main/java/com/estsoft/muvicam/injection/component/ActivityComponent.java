@@ -11,6 +11,7 @@ import com.estsoft.muvicam.injection.module.ActivityModule;
 import com.estsoft.muvicam.injection.qualifier.ActivityContext;
 import com.estsoft.muvicam.injection.qualifier.ApplicationContext;
 import com.estsoft.muvicam.injection.scope.ActivityScope;
+import com.estsoft.muvicam.util.RxEventBus;
 
 /**
  * Created by jaylim on 12/12/2016.
@@ -26,9 +27,14 @@ public interface ActivityComponent {
   DataManager dataManager();
 
   /* Dependency objects provided from modules and dependencies */
+
+  // Application context
+  @ApplicationContext RxEventBus globalBus();
   @ApplicationContext Context applicationContext();
   Application application();
 
+  // Activity context
+  @ActivityContext RxEventBus localBus();
   @ActivityContext Context activityContext();
   Activity activity();
 
