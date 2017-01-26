@@ -137,7 +137,7 @@ public class WaveformView extends View {
               invalidate();
             },
             Throwable::printStackTrace,
-            () -> mOnPreparedListener.onPrepared()
+            this::doOnPrepared
         );
   }
 
@@ -190,6 +190,17 @@ public class WaveformView extends View {
 
   public void setOnPreparedListener(OnPreparedListener onPreparedListener) {
     mOnPreparedListener = onPreparedListener;
+  }
+
+  private boolean isOnPrepared = false;
+
+  public boolean isOnPrepared() {
+    return isOnPrepared;
+  }
+
+  public void doOnPrepared() {
+    mOnPreparedListener.onPrepared();
+    isOnPrepared = true;
   }
 
   // Waveform Listener
