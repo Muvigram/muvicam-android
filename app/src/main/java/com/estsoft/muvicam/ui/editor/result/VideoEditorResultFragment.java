@@ -63,13 +63,13 @@ public class VideoEditorResultFragment extends Fragment {
     int nowVideoNum;
     DataPassListener mCallBack;
     ImageView doneButton, homeButton;
-    ArrayList<ResultBarView> resultProgressBars = new ArrayList<>();
+    ResultBarView resultProgressBar;
 
 
     VideoEditSelectedNumberAdapter.OnItemClickListener itemClickListener = new VideoEditSelectedNumberAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(View view, int position) {
-
+            view.setClickable(false);
             Log.d(TAG, "onCreateView: resultVideosTotalTime6" + resultVideosTotalTime);
 
             flag = false;
@@ -164,7 +164,7 @@ public class VideoEditorResultFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if(!flag){
+        if (!flag) {
             mCallBack.passDataFToF(0, selectedVideos, resultVideos, resultVideosTotalTime, musicPath, musicOffset, musicLength);
         }
     }
@@ -213,6 +213,9 @@ public class VideoEditorResultFragment extends Fragment {
             selectedVideoButtons.setVisibility(View.GONE);
             buttonsGone.setVisibility(View.VISIBLE);
         }
+        resultProgressBar = new ResultBarView(getContext(),0,0,true);
+        linearResultSpace.addView(resultProgressBar);
+        linearResultSpace.invalidate();
         return v;
     }
 
@@ -326,7 +329,7 @@ public class VideoEditorResultFragment extends Fragment {
                     getActivity().startActivity(ShareActivity.newIntent(getContext(), videoPaths, videoStartTimes, videoEndTimes, musicPath, musicOffset, resultVideosTotalTime, true));
                     getActivity().finish();
                 } else {
-                    Toast.makeText(getContext(),getResources().getString(R.string.editor_result_done_warning), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getResources().getString(R.string.editor_result_done_warning), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -402,20 +405,15 @@ public class VideoEditorResultFragment extends Fragment {
                             @Override
                             public void run() {
                                 if (flag) {
-                                    ResultBarView resultProgressBar;
-
-                                    for (ResultBarView rv : resultProgressBars) {
-                                        linearResultSpace.removeView(rv);
-                                    }
-                                    resultProgressBars.clear();
-                                    if (musicResultPlayer.getCurrentPosition() - musicOffset > resultVideosTotalTime) {
-                                         resultProgressBar = new ResultBarView(getContext(), 0, resultVideosTotalTime, true);
+                                    if (musicResultPlayer.getCurrentPosition() - musicOffset >= resultVideosTotalTime) {
+                                        resultProgressBar.setTotalTime(0);
+                                        resultProgressBar.setNowVideoTime(resultVideosTotalTime);
                                     } else {
-                                         resultProgressBar = new ResultBarView(getContext(), 0, musicResultPlayer.getCurrentPosition() - musicOffset, true);
+                                        resultProgressBar.setTotalTime(0);
+                                        resultProgressBar.setNowVideoTime(musicResultPlayer.getCurrentPosition() - musicOffset);
                                     }
-                                    resultProgressBars.add(resultProgressBar);
-                                    linearResultSpace.addView(resultProgressBar);
-                                    linearResultSpace.invalidate();
+
+                                    resultProgressBar.invalidate();
                                 }
                             }
                         });
@@ -451,7 +449,7 @@ public class VideoEditorResultFragment extends Fragment {
                                             videoResultPlayer2.setFirst(false);
                                             prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
                                         }
-                                        if(videoResultPlayer.isPlaying()){
+                                        if (videoResultPlayer.isPlaying()) {
                                             videoResultPlayer.pause();
                                             videoResultPlayer.stop();
                                         }
@@ -494,7 +492,7 @@ public class VideoEditorResultFragment extends Fragment {
                                             videoResultPlayer2.setFirst(false);
                                             prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
                                         }
-                                        if(videoResultPlayer.isPlaying()){
+                                        if (videoResultPlayer.isPlaying()) {
                                             videoResultPlayer.pause();
                                             videoResultPlayer.stop();
                                         }
@@ -512,11 +510,9 @@ public class VideoEditorResultFragment extends Fragment {
                             public void run() {
                                 if (flag) {
                                     //remove progress bar
-                                    for (ResultBarView progressBar : resultProgressBars) {
-                                        linearResultSpace.removeView(progressBar);
-                                    }
-                                    resultProgressBars.clear();
-                                    linearResultSpace.invalidate();
+                                    resultProgressBar.setNowVideoTime(0);
+                                    resultProgressBar.setTotalTime(0);
+                                    resultProgressBar.invalidate();
                                 }
                             }
                         });
