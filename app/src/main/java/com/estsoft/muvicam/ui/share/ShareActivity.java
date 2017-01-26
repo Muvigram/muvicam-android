@@ -55,7 +55,7 @@ public class ShareActivity extends BaseActivity {
     intent.putExtra(EXTRA_MUSIC_LENGTH, musicLength);
     intent.putExtra(EXTRA_FROM_CAMERA, fromEditor);
 
-    return intent;
+    return intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
   }
 
@@ -69,7 +69,7 @@ public class ShareActivity extends BaseActivity {
     intent.putExtra(EXTRA_MUSIC_LENGTH, musicLength);
     intent.putExtra(EXTRA_FROM_CAMERA, false);
 
-    return intent;
+    return intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
   }
 
   private String[] mVideoPaths;

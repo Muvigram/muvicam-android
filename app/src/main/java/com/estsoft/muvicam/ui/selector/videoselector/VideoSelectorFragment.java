@@ -135,7 +135,7 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorView
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((VideoSelectorPresenter) presenter).nextButtonClick(view, getActivity());
+                ((VideoSelectorPresenter) presenter).nextButtonClick(view);
             }
         });
 

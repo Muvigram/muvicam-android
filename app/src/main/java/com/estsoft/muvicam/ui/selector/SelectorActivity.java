@@ -26,17 +26,15 @@ public class SelectorActivity extends BaseActivity implements VideoSelectorFragm
     private BasePresenter presenter;
 
     public static Intent newIntent(Context packageContext) {
-        return new Intent(packageContext, SelectorActivity.class);
+        Intent intent = new Intent(packageContext, SelectorActivity.class);
+        return intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
     }
 
     @Override
     public void onBackPressed() {
-
         BackToHomeDialogFragment fragment = BackToHomeDialogFragment.newInstance(
                 getResources().getString(R.string.dialog_back_to_home));
         fragment.show(getSupportFragmentManager(), BackToHomeDialogFragment.TAG);
-
-
     }
 
     @Override
@@ -52,11 +50,8 @@ public class SelectorActivity extends BaseActivity implements VideoSelectorFragm
             Bundle bundle = new Bundle();
             // here put passible things
             fragment.setArguments(bundle);
-
         }
-
         fragmentManager.beginTransaction().replace(R.id.selector_fragment_container, fragment).commit();
-
     }
 
     // 0 : result fragment

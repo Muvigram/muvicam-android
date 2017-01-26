@@ -86,8 +86,6 @@ public class BackToHomeDialogFragment extends DialogFragment {
     private void onPositive() {
 
         Intent homeIntent = HomeActivity.newIntent( getContext() );
-        homeIntent.addFlags( Intent.FLAG_ACTIVITY_CLEAR_TASK );
-        homeIntent.addFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
         startActivity( homeIntent );
     }
 
