@@ -76,4 +76,21 @@ public class ResultBarView extends View {
             canvas.drawRect((float) Math.round(((float) totalTime) / 1000 * widthPSec), 0, (float) Math.round(((float) totalTime + nowVideoTime) / 1000 * widthPSec), Math.round(20 * dpi), paint);
         }
     }
+
+
+    public int getNowVideoTime() {
+        return nowVideoTime;
+    }
+
+    public void setNowVideoTime(int nowVideoTime) {
+        this.nowVideoTime = nowVideoTime;
+    }
+
+    public int getTotalTime() {
+        return totalTime;
+    }
+
+    public void setTotalTime(int totalTime) {
+        this.totalTime = totalTime;
+    }
 }
