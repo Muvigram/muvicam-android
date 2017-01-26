@@ -156,7 +156,7 @@ public class VideoTrackTranscoder implements TrackTranscoder {
         int index = mDecoder.dequeueInputBuffer( timeoutUs );
         if ( index < 0 ) return DRAIN_STATE_NONE;
         if ( track < 0 || forceExtractingStop) {
-            Log.d(TAG, "permitEncode: forceStop! VIDEO " + mExtractedPresentationTimeUs + " / " + mExtractor.getSampleTrackIndex());
+            Log.d(TAG, "permitEncode: release! VIDEO " + mExtractedPresentationTimeUs + " / " + mExtractor.getSampleTrackIndex());
             if (VERBOSE) Log.d(TAG, "permitEncode: END OF EXTRACTING " + mExtractedPresentationTimeUs);
             sawExtractorEOS = true;
             mDecoder.queueInputBuffer( index, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM );

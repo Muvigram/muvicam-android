@@ -180,7 +180,7 @@ public class MediaSegment {
             case MediaEditor.NORMAL : mVideoTranscoder.forceStop(); mAudioTranscoder.forceStop(); return;
             default :
                 throw new IllegalStateException( "not video or audio mode selected! " );
-//                mVideoTranscoder.forceStop(); mAudioTranscoder.forceStop(); return;
+//                mVideoTranscoder.release(); mAudioTranscoder.release(); return;
         }
     }
     private long getVideoIFrameInterval() {
@@ -240,7 +240,7 @@ public class MediaSegment {
 //            // NOTE there's some trouble extractor's advance going back!?
 //            if ( mExtractor.getSampleTime() > mEndTimeUs || mTranscdoerStoppedSignal ) {
 //                mTranscdoerStoppedSignal = true;
-//                forceStop();
+//                release();
 //                mExtractor.advance();
 //            }
 //

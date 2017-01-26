@@ -35,6 +35,8 @@ public class ThumbnailUtil {
     private boolean isStarted;
     private boolean isIFrameMode;
 
+    private boolean threadKiller;
+
     private BitmapHandlerImpl mBitmapListener;
     private UserBitmapListener userBitmapListener;
 
@@ -44,8 +46,9 @@ public class ThumbnailUtil {
         this.mAct = act;
         Log.d(TAG, "ThumbnailUtil: " + mAct.toString());
     }
-    public ThumbnailUtil() {
 
+    public synchronized void release() {
+        threadKiller = true;
     }
 
 
@@ -80,7 +83,7 @@ public class ThumbnailUtil {
     }
 
     private void runPipeline(){
-        while (!mDecoder.isFinished()) {
+        while (!mDecoder.isFinished() && !threadKiller) {
             boolean stepped = mDecoder.stepPipeline();
             if (!stepped) {
                 try {
@@ -114,13 +117,15 @@ public class ThumbnailUtil {
 
         @Override
         public void onBitmapSupply(Bitmap bitmap, long presentationTime, boolean isEnd ) {
-            mAct.runOnUiThread(() -> {
-                    userBitmapListener.onBitmapNext( bitmap, presentationTime, isEnd );
-            });
+            if (threadKiller) return;
+                mAct.runOnUiThread(() -> {
+                    userBitmapListener.onBitmapNext(bitmap, presentationTime, isEnd);
+                });
         }
 
         @Override
         public void onComplete( long totalUs ) {
+            if (threadKiller) return;
             if (VERBOSE) Log.d(TAG, "onComplete: End of Task");
             userBitmapListener.onComplete( totalUs );
             mDecoder.release();

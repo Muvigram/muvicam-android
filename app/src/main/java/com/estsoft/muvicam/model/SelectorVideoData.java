@@ -12,7 +12,6 @@ import java.util.List;
  */
 
 public class SelectorVideoData {
-    private static SelectorVideoData selectorVideoData;
     private List<EditorVideo> selectedVideos = new ArrayList<>();
     private ArrayList<EditorVideo> allVideos = new ArrayList<>();
 

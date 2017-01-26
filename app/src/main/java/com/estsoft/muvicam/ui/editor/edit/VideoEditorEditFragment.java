@@ -636,6 +636,7 @@ public class VideoEditorEditFragment extends Fragment {
 
     @Override
     public void onDetach() {
+        thumbnailUtil.release();
         super.onDetach();
 
     }

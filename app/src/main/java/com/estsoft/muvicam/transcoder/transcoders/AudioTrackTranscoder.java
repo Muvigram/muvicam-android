@@ -140,7 +140,7 @@ public class AudioTrackTranscoder implements TrackTranscoder {
         final int index = mDecoder.dequeueInputBuffer( timeoutUs );
         if ( index < 0 ) return DRAIN_STATE_NONE;
         if ( track < 0 || forceExtractingStop) {
-            Log.d(TAG, "permitEncode: forceStop! AUDIO " + mExtractedPresentationTimeUs + " / " + mExtractor.getSampleTrackIndex());
+            Log.d(TAG, "permitEncode: release! AUDIO " + mExtractedPresentationTimeUs + " / " + mExtractor.getSampleTrackIndex());
             if (VERBOSE) Log.d(TAG, "drainExtractor: END OF EXTRACTING");
             sawExtractorEOS = true;
             mDecoder.queueInputBuffer( index, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM );
