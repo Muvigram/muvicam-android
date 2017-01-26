@@ -134,7 +134,7 @@ public class MediaSegmentNew {
         // HINT when one transcoder is ended
 //        if ( !mAudioForceStoped && mVideoTranscoder.isExtractingFinished() && mAudioCurrentExtractedUs > mVideoCurrentExtractedUs ) {
 //            Log.d(TAG, "stepOnce : AUDIO ???? ");
-//            mAudioTranscoder.forceStop();
+//            mAudioTranscoder.release();
 //            mAudioForceStoped = true;
 //        }
         boolean stepped = mVideoTranscoder.stepPipeline();
@@ -150,7 +150,7 @@ public class MediaSegmentNew {
         // HINT when one transcoder is ended
 //        if ( !mVideoForceStoped && mAudioTranscoder.isExtractingFinished() && mVideoCurrentExtractedUs > mAudioCurrentExtractedUs ) {
 //            Log.d(TAG, "stepOnce : VIDEO ???? ");
-//            mVideoTranscoder.forceStop();
+//            mVideoTranscoder.release();
 //            mVideoForceStoped = true;
 //        }
         boolean stepped = mAudioTranscoder.stepPipeline();

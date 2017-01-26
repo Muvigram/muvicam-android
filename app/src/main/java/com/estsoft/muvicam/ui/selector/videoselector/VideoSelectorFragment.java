@@ -115,7 +115,7 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorView
         videoSelectorAdapter = new VideoSelectorAdapter(getActivity());
         ((VideoSelectorPresenter) presenter).setPickerAdapterModel(videoSelectorAdapter);
         ((VideoSelectorPresenter) presenter).setPickerAdapterView(videoSelectorAdapter);
-        ((VideoSelectorPresenter) presenter).addItems(new ArrayList<EditorVideo>());
+//        ((VideoSelectorPresenter) presenter).addItems(new ArrayList<EditorVideo>());
         videoPickerRecyclerView.setAdapter(videoSelectorAdapter);
 
         getThumbnailObjectThread.setPriority(Thread.MAX_PRIORITY);

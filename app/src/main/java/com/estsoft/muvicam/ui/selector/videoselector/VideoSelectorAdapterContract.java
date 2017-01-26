@@ -21,5 +21,6 @@ public interface VideoSelectorAdapterContract {
         EditorVideo getItem(int position);
         ArrayList<EditorVideo> getItems();
         void addItems(List<EditorVideo> items);
+        void notifyDataListChanged();
     }
 }

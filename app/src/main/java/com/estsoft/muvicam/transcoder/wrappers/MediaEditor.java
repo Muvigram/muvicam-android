@@ -96,7 +96,7 @@ public class MediaEditor {
 //                if (segment.getExtractor().getSampleTime() > segment.getEndTimeUs()
 //                        || segment.isTranscdoerStoppedSignal() ) {
 //                    segment.setTranscdoerStoppedSignal( true );
-//                    segment.forceStop();
+//                    segment.release();
 //                    segment.getExtractor().advance();
 //                }
 

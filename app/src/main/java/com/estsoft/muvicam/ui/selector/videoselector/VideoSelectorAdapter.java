@@ -174,4 +174,9 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
         this.thumbnailImageViews = items;
         notifyAdapter();
     }
+
+    @Override
+    public void notifyDataListChanged() {
+        notifyAdapter();
+    }
 }

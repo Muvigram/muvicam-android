@@ -84,7 +84,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
                                @Override
                                public void onNext(VideoMetaDataScanner.VideoMetaData data) {
                                    selectorVideoData.progressGetThumbnail(data);
-                                   adapterModel.addItems( selectorVideoData.getAllVideos() );
+                                   adapterModel.notifyDataListChanged();
                                }
                            }
                 );
@@ -93,7 +93,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
 
     public void setPickerAdapterModel(VideoSelectorAdapterContract.Model adapterModel) {
         this.adapterModel = adapterModel;
-
+        adapterModel.addItems( selectorVideoData.getAllVideos() );
     }
 
     public void setPickerAdapterView(VideoSelectorAdapterContract.View adapterView) {
@@ -156,7 +156,6 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
     public void progress(VideoMetaDataScanner.VideoMetaData data) {
         selectorVideoData.progressGetThumbnail(data);
     }
-
 
     public void addItems(List<EditorVideo> videos) {
         adapterModel.addItems(videos);
