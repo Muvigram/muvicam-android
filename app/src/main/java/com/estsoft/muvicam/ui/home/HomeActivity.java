@@ -49,8 +49,7 @@ public class HomeActivity extends BaseActivity {
 
   public static Intent newIntent(Context packageContext) {
     Intent intent = new Intent(packageContext, HomeActivity.class);
-    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-    return intent;
+    return intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
   }
 
   public static HomeActivity get(Fragment fragment) {

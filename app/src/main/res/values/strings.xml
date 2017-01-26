@@ -49,7 +49,7 @@
     <string name="dialog_action_cancel">Cancel</string>
     <string name="dialog_error_title">Sorry</string>
     <string name="dialog_discard_video">Discard this video.\nMake sure saved or shared.</string>
-    <string name="dialog_back_to_home">Are you sure discard this session?</string>
+    <string name="dialog_back_to_home">Are you sure you want to discard this session?</string>
     <string name="dialog_test">test</string>
     <string name="dialog_empty_title">empty-title</string>
 
