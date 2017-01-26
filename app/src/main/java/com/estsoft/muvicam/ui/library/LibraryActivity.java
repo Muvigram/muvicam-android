@@ -2,33 +2,34 @@ package com.estsoft.muvicam.ui.library;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Rect;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.view.MotionEvent;
+import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 
 
+import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.injection.component.DaggerLibraryComponent;
 import com.estsoft.muvicam.injection.component.LibraryComponent;
 import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.ui.base.BaseSingleFragmentActivity;
 import com.estsoft.muvicam.ui.editor.EditorActivity;
 import com.estsoft.muvicam.ui.library.musiclibrary.MusicLibraryFragment;
+import com.estsoft.muvicam.ui.library.videolibrary.VideoLibraryFragment;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class LibraryActivity extends BaseSingleFragmentActivity {
 
   private static final String EXTRA_VIDEOS = "library.LibraryActivity.editorVideos";
 
-  public static Intent newIntent(Context packageContext) {
+  public static Intent getIntent(Context packageContext) {
     return new Intent(packageContext, LibraryActivity.class);
   }
 
@@ -55,11 +56,14 @@ public class LibraryActivity extends BaseSingleFragmentActivity {
 
   @Override
   protected Fragment createDefaultFragment() {
-    return new MusicLibraryFragment();
+    return new VideoLibraryFragment();
   }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    // set fullscreen
+    setFullscreen();
+
     // inflate single fragment activity
     super.onCreate(savedInstanceState);
 
@@ -67,6 +71,45 @@ public class LibraryActivity extends BaseSingleFragmentActivity {
     mLibraryComponent = DaggerLibraryComponent.builder()
         .activityComponent(getActivityComponent()).build();
     mLibraryComponent.inject(this);
+  }
+
+  public void goToNext(@NonNull List<EditorVideo> videos) {
+    FragmentManager fragmentManager = getSupportFragmentManager();
+    Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
+    if (fragment != null) {
+      fragmentManager.beginTransaction()
+          .remove(fragment)
+          .commit();
+    }
+    setVideos(videos);
+    fragment = MusicLibraryFragment.newInstance();
+    fragmentManager.beginTransaction()
+        .replace(R.id.fragment_container, fragment)
+        .commit();
+  }
+
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+  }
+
+  public void setFullscreen() {
+    requestWindowFeature(Window.FEATURE_NO_TITLE);
+    getWindow().setFlags(
+        WindowManager.LayoutParams.FLAG_FULLSCREEN,
+        WindowManager.LayoutParams.FLAG_FULLSCREEN
+    );
+  }
+
+  private List<EditorVideo> mVideos = new ArrayList<>();
+
+  /**
+   * Set videos selected from library.
+   * @param videos A list of videos selected from local library.
+   */
+  public void setVideos(List<EditorVideo> videos) {
+    mVideos = videos;
   }
 
   /**

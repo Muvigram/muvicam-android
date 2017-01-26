@@ -11,11 +11,9 @@ import android.view.TextureView;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.ui.editor.edit.MuvicamMediaPlayer;
 import com.estsoft.muvicam.ui.editor.result.EditorResultMediaPlayer;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class VideoPlayerTextureView extends TextureView implements TextureView.SurfaceTextureListener {

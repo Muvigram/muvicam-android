@@ -1,17 +1,12 @@
 package com.estsoft.muvicam.ui.editor.edit;
 
-import android.graphics.Point;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.estsoft.muvicam.R;
-import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.ui.selector.videoselector.ThumbnailImageView;
 
 import java.util.ArrayList;
