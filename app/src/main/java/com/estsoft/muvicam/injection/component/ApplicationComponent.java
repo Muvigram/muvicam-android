@@ -22,7 +22,6 @@ public interface ApplicationComponent {
   ActivityComponent plus(ActivityModule activityModule);
 
   /* Dependency objects extended by constructor injections */
-  // TODO - DataManager
 
   /* Dependency objects provided from modules and dependencies */
   @ApplicationContext Context context();

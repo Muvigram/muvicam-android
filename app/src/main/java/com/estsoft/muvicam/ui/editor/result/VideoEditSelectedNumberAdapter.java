@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.estsoft.muvicam.R;
+import com.estsoft.muvicam.model.EditorVideo;
 
 import java.util.List;
 

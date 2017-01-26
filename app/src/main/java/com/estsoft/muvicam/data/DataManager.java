@@ -6,7 +6,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.estsoft.muvicam.data.local.MusicService;
+import com.estsoft.muvicam.data.local.VideoService;
 import com.estsoft.muvicam.model.Music;
+import com.estsoft.muvicam.model.Video;
 
 import java.util.List;
 import java.util.Locale;
@@ -22,10 +24,12 @@ import rx.Observable;
 public class DataManager {
 
   private MusicService mMusicService;
+  private VideoService mVideoService;
 
   @Inject
-  public DataManager(MusicService musicService) {
+  public DataManager(MusicService musicService, VideoService videoService) {
     mMusicService = musicService;
+    mVideoService = videoService;
   }
 
   // TODO - Which one is fast?
@@ -37,6 +41,11 @@ public class DataManager {
     return mMusicService.getMusics()
         .filter(music -> filterOutMusics(music, tokens)) // Filtering
         .buffer(500, TimeUnit.MILLISECONDS);
+  }
+
+
+  public Observable<List<Video>> getVideos() {
+    return mVideoService.getVideos().buffer(200, TimeUnit.MILLISECONDS);
   }
 
   private static boolean filterOutMusics(Music music, String[] tokens) {

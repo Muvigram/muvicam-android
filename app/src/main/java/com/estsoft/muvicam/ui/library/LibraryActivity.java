@@ -33,7 +33,7 @@ public class LibraryActivity extends BaseSingleFragmentActivity {
 
   private static final String EXTRA_VIDEOS = "library.LibraryActivity.editorVideos";
 
-  public static Intent getIntent(Context packageContext) {
+  public static Intent newIntent(Context packageContext) {
     return new Intent(packageContext, LibraryActivity.class);
   }
 

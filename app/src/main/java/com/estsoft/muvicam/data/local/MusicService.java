@@ -53,7 +53,6 @@ public class MusicService {
     }
 
     return CursorObservable.create(musicCursor, true)
-        //.onBackpressureBuffer(128) // TODO - for "MissingBackPressureException"
         .filter(this::isValid)
         .map(cursor -> Music.builder()
             .setUri(getUri(cursor))

@@ -3,17 +3,20 @@ package com.estsoft.muvicam.model;
 import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 public class EditorVideo implements Parcelable {
+    private static int index = 0;
+    private static final String TAG = "EditorVideo";
 
     private String videoPath;
-    private long durationMiliSec;
+    private int durationMiliSec;
     private int start;
     private int end;
 
     // will be changed real videothumbnail from sdcard;
     private Bitmap thumbnailBitmap;
-    private long presentationTimeUs;
+    private int presentationTimeUs;
     private boolean resolutionAcceptable;
     private boolean isSelected;
     private boolean isLast;
@@ -22,11 +25,14 @@ public class EditorVideo implements Parcelable {
 
 
     public EditorVideo() {
+        index ++;
+        Log.d(TAG, "EditorVideo: " + index);
         isSelected = false;
         numSelected = -1;
         resolutionAcceptable = false;
         start = 0;
         end = 0;
+
     }
 
     public EditorVideo(Parcel in) {
@@ -34,7 +40,7 @@ public class EditorVideo implements Parcelable {
 
     }
 
-    public EditorVideo(Bitmap thumbnailBitmap, long presentationTimeUs, boolean isLast, int numSelected) {
+    public EditorVideo(Bitmap thumbnailBitmap, int presentationTimeUs, boolean isLast, int numSelected) {
         this.thumbnailBitmap = thumbnailBitmap;
         this.presentationTimeUs = presentationTimeUs;
         this.isLast = isLast;
@@ -74,14 +80,62 @@ public class EditorVideo implements Parcelable {
         this.videoPath = videoPath;
     }
 
-    public long getDurationMiliSec() {
+    public int getDurationMiliSec() {
         return durationMiliSec;
     }
 
-    public void setDurationMiliSec(long durationMiliSec) {
+    public void setDurationMiliSec(int durationMiliSec) {
         this.durationMiliSec = durationMiliSec;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(videoPath);
+
+        parcel.writeInt(start);
+        parcel.writeInt(end);
+        parcel.writeInt(durationMiliSec);
+    }
+
+    public void readFromParcel(Parcel in) {
+        videoPath = in.readString();
+    start = in.readInt();
+    end = in.readInt();
+        durationMiliSec = in.readInt();
+}
+
+    public boolean getIsLast() {
+        return isLast;
+    }
+
+    public void setIsLast(boolean isLast) {
+        this.isLast = isLast;
+    }
+
+    public int getPresentationTimeUs() {
+        return presentationTimeUs;
+    }
+
+    public void setPresentationTimeUs(int presentationTimeUs) {
+        this.presentationTimeUs = presentationTimeUs;
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator<EditorVideo>(){
+        @Override
+        public EditorVideo[] newArray(int i) {
+            return new EditorVideo[i];
+        }
+
+        @Override
+        public EditorVideo createFromParcel(Parcel parcel) {
+            return new EditorVideo(parcel);
+        }
+    };
 
 
     public boolean isLast() {
@@ -117,34 +171,7 @@ public class EditorVideo implements Parcelable {
     }
 
     @Override
-    public int describeContents() {
-        return 0;
+    public String toString() {
+        return "start: "+start+", end:"+end+", path: "+videoPath+", duration:"+durationMiliSec;
     }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(videoPath);
-        parcel.writeLong(durationMiliSec);
-        parcel.writeInt(start);
-        parcel.writeInt(end);
-    }
-
-    public void readFromParcel(Parcel in) {
-        videoPath = in.readString();
-        durationMiliSec = in.readLong();
-        start = in.readInt();
-        end = in.readInt();
-    }
-
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator<EditorVideo>(){
-        @Override
-        public EditorVideo[] newArray(int i) {
-            return new EditorVideo[i];
-        }
-
-        @Override
-        public EditorVideo createFromParcel(Parcel parcel) {
-            return new EditorVideo(parcel);
-        }
-    };
 }
