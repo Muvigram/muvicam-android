@@ -69,7 +69,7 @@ public class VideoEditorResultFragment extends Fragment {
     VideoEditSelectedNumberAdapter.OnItemClickListener itemClickListener = new VideoEditSelectedNumberAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(View view, int position) {
-            view.setClickable(false);
+            selectedVideoButtons.setClickable(false);
             Log.d(TAG, "onCreateView: resultVideosTotalTime6" + resultVideosTotalTime);
 
             flag = false;
@@ -156,9 +156,9 @@ public class VideoEditorResultFragment extends Fragment {
                 e.printStackTrace();
             }
 
+            resultThread.start();
         }
 
-        resultThread.start();
     }
 
     @Override
