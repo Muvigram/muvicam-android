@@ -7,8 +7,7 @@
     <FrameLayout
         android:id="@+id/editor_edit_frame_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/White" />
+        android:layout_height="match_parent"/>
 
     <RelativeLayout
         android:layout_width="match_parent"

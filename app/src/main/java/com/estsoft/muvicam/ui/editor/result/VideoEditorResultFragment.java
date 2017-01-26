@@ -162,6 +162,14 @@ public class VideoEditorResultFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if(!flag){
+            mCallBack.passDataFToF(0, selectedVideos, resultVideos, resultVideosTotalTime, musicPath, musicOffset, musicLength);
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -443,6 +451,10 @@ public class VideoEditorResultFragment extends Fragment {
                                             videoResultPlayer2.setFirst(false);
                                             prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
                                         }
+                                        if(videoResultPlayer.isPlaying()){
+                                            videoResultPlayer.pause();
+                                            videoResultPlayer.stop();
+                                        }
                                         videoResultPlayer.setFirst(false);
                                         prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
 
@@ -481,6 +493,10 @@ public class VideoEditorResultFragment extends Fragment {
                                         if (resultVideos.size() > nowVideoNum + 1) {
                                             videoResultPlayer2.setFirst(false);
                                             prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
+                                        }
+                                        if(videoResultPlayer.isPlaying()){
+                                            videoResultPlayer.pause();
+                                            videoResultPlayer.stop();
                                         }
                                         videoResultPlayer.setFirst(false);
                                         prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
