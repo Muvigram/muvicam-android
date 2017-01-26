@@ -1,13 +1,33 @@
 <resources>
     <string name="app_name">Muvicam</string>
 
+    <!-- splash package -->
+    <string name="splash_request_permission_detail">
+        This application needs permission for camera, audio, and storage access.
+    </string>
+    <string name="splash_request_permission_denied">
+        There was a problem verifying your permissions.
+        Do you want to go to "Application Settings"?
+    </string>
+    <string name="splash_request_permission_error">
+        There was a problem verifying your permissions.
+    </string>
+    <string name="splash_button_detail_setting">Setting</string>
+    <string name="splash_button_ok">OK</string>
+    <string name="splash_button_cancel">Cancel</string>
+
     <!-- camera package -->
     <string name="camera_shoot_button_desc">Start shooting a video.</string>
     <string name="camera_music_button_desc">Select a background music.</string>
     <string name="camera_library_button_desc">Choose videos from library.</string>
     <string name="camera_selfie_mode_button_desc">Shift into selfie or scene mode.</string>
-    <string name="camera_request_permission">This sample needs permission for camera, audio, and storage access.</string>
     <string name="camera_camera_error">This device doesn\'t support Camera2 API.</string>
+
+
+    <!-- music cut module -->
+    <string name="music_cut_ok_button">OK</string>
+    <string name="music_cut_cancel_button">Cancel</string>
+    <string name="music_cut_error_loading">There was a problem loading the musics.</string>
 
 
     <!-- music package -->
@@ -28,6 +48,10 @@
     <string name="dialog_action_ok">OK</string>
     <string name="dialog_action_cancel">Cancel</string>
     <string name="dialog_error_title">Sorry</string>
+    <string name="dialog_discard_video">Discard this video.\nMake sure saved or shared.</string>
+    <string name="dialog_back_to_home">Are you sure discard this session?</string>
+    <string name="dialog_test">test</string>
+    <string name="dialog_empty_title">empty-title</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -56,6 +80,24 @@
 
     <string name="library_video_empty_videos">There arn\'t any videos</string>
     <string name="library_video_error_loading">There was a problem loading the videos.</string>
+    <string name="dialog_music_title">Cut Music</string>
+
+    <!-- video export app packages -->
+    <string name="facebook_package">com.facebook.katana</string>
+    <string name="twitter_package">com.twitter.android</string>
+    <string name="instagram_package">com.instagram.android</string>
+    <string name="export_hashtag">#Muvicam</string>
 
 
+    <!-- video selector -->
+    <string name="selector_home">Home</string>
+    <string name="selector_title">My Videos</string>
+    <string name="selector_next">Next</string>
+    <string name="selector_not_supported">Not Supported video</string>
+    <string name="selector_next_more_than_six_warning">Select less than 6</string>
+    <string name="selector_next_less_than_one_warning">Select at least 1 video</string>
+
+    <!-- video editor edit -->
+    <!-- video editor result -->
+    <string name="editor_result_done_warning">Edit at least 1 video</string>
 </resources>

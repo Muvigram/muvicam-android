@@ -1,11 +1,8 @@
 package com.estsoft.muvicam.ui.home.camera;
 
-import android.Manifest;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
@@ -17,8 +14,6 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,12 +25,9 @@ import android.os.Message;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AlertDialog;
 import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -50,10 +42,11 @@ import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Music;
-import com.estsoft.muvicam.ui.library.LibraryActivity;
 import com.estsoft.muvicam.ui.home.HomeActivity;
+import com.estsoft.muvicam.ui.selector.SelectorActivity;
 import com.estsoft.muvicam.ui.share.ShareActivity;
 import com.estsoft.muvicam.util.FileUtil;
+import com.estsoft.muvicam.util.MusicPlayer;
 import com.estsoft.muvicam.util.RxUtil;
 import com.jakewharton.rxbinding.view.RxView;
 
@@ -99,7 +92,106 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     return (CameraFragment) fragment.getParentFragment();
   }
 
-  public void sendAllInformation() {
+  private Unbinder mUnbinder;
+
+  @BindView(R.id.camera_shoot_button)             ImageButton mShootButton;
+  @BindView(R.id.camera_music_button)             AlbumArtButton mMusicButton;
+  @BindView(R.id.camera_library_button)           LibraryThumbnailButton mLibraryButton;
+  @BindView(R.id.camera_selfie_button)            ImageButton mSelfieButton;
+  @BindView(R.id.camera_cut_button)               ImageButton mCutButton;
+  @BindView(R.id.camera_ok_button)                ImageButton mOkButton;
+  @BindView(R.id.camera_texture_view)             ResizableTextureView mTextureView;
+  @BindView(R.id.camera_container_music_cut)      FrameLayout mMusicCutContainer;
+  @BindView(R.id.camera_base_line)                View mBaseLineView;
+  @BindView(R.id.camera_stack_bar)                StackBar mStackBar;
+  @BindView(R.id.camera_stack_trashbin_container) FrameLayout mStackTrashbinContainer;
+
+  @OnClick(R.id.camera_cut_button)
+  public void _musicCut(View v) {
+    if (mMusic == null || !mVideoStack.isEmpty()) {
+      return;
+    }
+
+    FragmentManager cfm = getChildFragmentManager();
+    Fragment fragment = cfm.findFragmentById(R.id.camera_container_music_cut);
+
+    if (fragment == null) {
+      fragment = MusicCutFragment.newInstance(mMusic, mMusicPlayer.getOffset());
+      final FragmentTransaction transaction = cfm.beginTransaction()
+          .add(R.id.camera_container_music_cut, fragment);
+
+      v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
+        @Override
+        public void onAnimationEnd(Animation animation) {
+          transaction.commit();
+          requestUiChange(UI_LOGIC_DURING_CUT_MUSIC);
+        }
+      }));
+    }
+  }
+
+  @OnClick(R.id.camera_selfie_button)
+  public void _shiftSelfieMode(View v) {
+    if (!mVideoStack.isEmpty()) {
+      return;
+    }
+
+    v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
+      @Override
+      public void onAnimationEnd(Animation animation) {
+        closeCamera();
+        closeRecorder();
+        mSelfieMode = !mSelfieMode;
+        openRecorder();
+        openCamera();
+      }
+    }));
+  }
+
+  @OnClick(R.id.camera_ok_button)
+  public void _completeVideo(View v) {
+    if (mVideoStack.isEmpty() || mMusicPlayer.getRelativePosition() < 5000) {
+      return;
+    }
+    v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
+      @Override
+      public void onAnimationEnd(Animation animation) {
+        // saveAllFilesInStack();
+        sendAllInformation();
+        if (mVideoStack.isEmpty()) {
+          requestUiChange(UI_LOGIC_BEFORE_SHOOTING);
+        }
+      }
+    }));
+  }
+
+  @OnClick(R.id.camera_library_button)
+  public void _goToLibrary(View v) {
+    v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
+      @Override
+      public void onAnimationEnd(Animation animation) {
+        getActivity().startActivity(SelectorActivity.newIntent(getActivity()));
+      }
+    }));
+  }
+
+  // OnClick
+  public void _deleteRecentVideo(View v) {
+    if (mVideoStack.isEmpty()) {
+      return;
+    }
+    v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
+      @Override
+      public void onAnimationEnd(Animation animation) {
+        hideTrashbin();
+        popVideoFile();
+        mMusicPlayer.rewindPlayer(mStackBar.deleteRecentRecord() + mMusicPlayer.getOffset());
+        updateTrashbin();
+      }
+    }));
+  }
+
+  public void sendAllInformation() { // TODO -refactoring
 
     String[] videoPaths = new String[mVideoStack.size()];
     int i = 0;
@@ -134,110 +226,10 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     String mMusicPath = mMusic == null ? "" : mMusic.uri().toString();
 
     Intent intent = ShareActivity.newIntent(getContext(), videoPaths, videoOffsets,
-        mMusicPath, mMusicOffset, mPlayer.getCurrentPosition() - mMusicOffset);
+        mMusicPath, mMusicPlayer.getOffset(), mMusicPlayer.getRelativePosition());
 
     getActivity().startActivity(intent);
   }
-
-  private Unbinder mUnbinder;
-
-  @BindView(R.id.camera_shoot_button)             ImageButton mShootButton;
-  @BindView(R.id.camera_music_button)             AlbumArtButton mMusicButton;
-  @BindView(R.id.camera_library_button)           LibraryThumbnailButton mLibraryButton;
-  @BindView(R.id.camera_selfie_button)            ImageButton mSelfieButton;
-  @BindView(R.id.camera_cut_button)               ImageButton mCutButton;
-  @BindView(R.id.camera_ok_button)                ImageButton mOkButton;
-  @BindView(R.id.camera_texture_view)             ResizableTextureView mTextureView;
-  @BindView(R.id.camera_container_music_cut)      FrameLayout mMusicCutContainer;
-  @BindView(R.id.camera_base_line)                View mBaseLineView;
-  @BindView(R.id.camera_stack_bar)                StackBar mStackBar;
-  @BindView(R.id.camera_stack_trashbin_container) FrameLayout mStackTrashbinContainer;
-
-  @OnClick(R.id.camera_cut_button)
-  public void _musicCut(View v) {
-    if (mMusic == null || !mVideoStack.isEmpty()) {
-      return;
-    }
-
-    FragmentManager cfm = getChildFragmentManager();
-    Fragment fragment = cfm.findFragmentById(R.id.camera_container_music_cut);
-
-    if (fragment == null) {
-      fragment = MusicCutFragment.newInstance(mMusic.uri(), mMusicOffset);
-      final FragmentTransaction transaction = cfm.beginTransaction()
-          .add(R.id.camera_container_music_cut, fragment);
-
-      v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
-        @Override
-        public void onAnimationEnd(Animation animation) {
-          transaction.commit();
-          requestUiChange(UI_LOGIC_DURING_CUT_MUSIC);
-        }
-      }));
-    }
-  }
-
-  @OnClick(R.id.camera_selfie_button)
-  public void _shiftSelfieMode(View v) {
-    if (!mVideoStack.isEmpty()) {
-      return;
-    }
-
-    v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
-      @Override
-      public void onAnimationEnd(Animation animation) {
-        closeCamera();
-        closeRecorder();
-        mSelfieMode = !mSelfieMode;
-        openRecorder();
-        openCamera();
-      }
-    }));
-  }
-
-  @OnClick(R.id.camera_ok_button)
-  public void _completeVideo(View v) {
-    if (mVideoStack.isEmpty() || mPlayer.getCurrentPosition() - mMusicOffset < 5000) {
-      return;
-    }
-    v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
-      @Override
-      public void onAnimationEnd(Animation animation) {
-        // saveAllFilesInStack();
-        sendAllInformation();
-        if (mVideoStack.isEmpty()) {
-          requestUiChange(UI_LOGIC_BEFORE_SHOOTING);
-        }
-      }
-    }));
-  }
-
-  @OnClick(R.id.camera_library_button)
-  public void _goToLibrary(View v) {
-    v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
-      @Override
-      public void onAnimationEnd(Animation animation) {
-        getActivity().startActivity(LibraryActivity.getIntent(getActivity()));
-      }
-    }));
-  }
-
-  // OnClick
-  public void _deleteRecentVideo(View v) {
-    if (mVideoStack.isEmpty()) {
-      return;
-    }
-    v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
-      @Override
-      public void onAnimationEnd(Animation animation) {
-        hideTrashbin();
-        popVideoFile();
-        rewindPlayer(mStackBar.deleteRecentRecord() + mMusicOffset);
-        updateTrashbin();
-      }
-    }));
-  }
-
 
   // STEP - VIEW BINDING //////////////////////////////////////////////////////////////////////////
 
@@ -249,10 +241,12 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   @Override
   public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
     setUpStorageDir();
     startBackgroundThread();
-    openPlayer();   // player
-    setUpPlayer();  //
+    mMusicPlayer = new MusicPlayer(getActivity(), "silence_15_sec.mp3");
+    mMusicPlayer.openPlayer();   // player
+    mMusicPlayer.setUpPlayer();  //
   }
 
   @Nullable
@@ -285,18 +279,12 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     return view;
   }
 
-  private int calculateDelay() {
-    Timber.e("CUR : %d, STD : %d\n", mPlayer.getCurrentPosition(), mMusicOffset + mVideoOffset + 1000);
-    if (mPlayer.getCurrentPosition() - mMusicOffset < 14000)
-      return mPlayer.getCurrentPosition() < mMusicOffset + mVideoOffset + 1000 ?
-          mMusicOffset + mVideoOffset + 1000 - mPlayer.getCurrentPosition() : 0;
-    else
-      return 1000;
-  }
+
 
   @Override
   public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
+
     mLibraryButton.updateThumbnailButton();
     mStackBar.setTimeBound(15000, 5000);
   }
@@ -349,7 +337,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @Override
   public void onDestroy() {
-    closePlayer();  // player
+    mMusicPlayer.closePlayer();  // player
     stopBackgroundThread(); // TODO
     super.onDestroy();
   }
@@ -357,7 +345,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   // STEP - VIDEO RECORDING BUTTON INTERACTION ////////////////////////////////////NEED REFACTORING
 
   public boolean holdButton(MotionEvent motionEvent) {
-    requestUiChange(UI_LOGIC_DOWN_SHOOT_BUTTON);
+    requestUiChange(UI_LOGIC_HOLD_SHOOT_BUTTON);
     return true;
   }
 
@@ -381,7 +369,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   }
 
   public boolean releaseButton(MotionEvent motionEvent) {
-    requestUiChange(UI_LOGIC_UP_SHOOT_BUTTON);
+    requestUiChange(UI_LOGIC_RELEASE_SHOOT_BUTTON);
     return isDown;
   }
 
@@ -409,6 +397,24 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     delayStopRecording();
   }
 
+  // STEP - MUSIC PLAYER //////////////////////////////////////////////////////////////////////DONE
+
+  private Music mMusic = null;
+  MusicPlayer mMusicPlayer;
+
+  public void changeMusic(Music music) {
+    mMusicPlayer.setOnCompleteSetupListener(mp -> {
+      mMusicPlayer = mp;
+      requestUiChange(UI_LOGIC_MUSIC_UPDATE_COMPLETE);
+    });
+
+    mMusic = music;
+    mMusicPlayer.setMusicAsync(music.uri());
+  }
+
+  public void changeOffset(int offset) {
+    mMusicPlayer.setOffset(offset);
+  }
 
   // STEP - STORAGE DIR ///////////////////////////////////////////////////////////////////////////
 
@@ -443,22 +449,23 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   }
 
   private void updateVideoOffset() {
-    mVideoOffset = mPlayer.getCurrentPosition() - mMusicOffset;
+    mVideoOffset = mMusicPlayer.getRelativePosition();
   }
 
   Subscription mStackBarSubscription;
 
   public void setStackBarOnListen() {
-    mStackBarSubscription = startSubscribePlayer()
+    mStackBarSubscription = mMusicPlayer.startSubscribePlayer()
+        .doOnSubscribe(() -> mUiThreadHandler.post(this::hideTrashbin))
         .observeOn(AndroidSchedulers.mainThread())
         .subscribeOn(Schedulers.newThread())
         .filter(millisec -> {
           if (!isRecording) {
-            stopSubscribePlayer();
+            mMusicPlayer.stopSubscribePlayer();
           }
           return isRecording;
         })
-        .map(millisec -> (millisec - mMusicOffset))
+        .map(millisec -> (millisec - mMusicPlayer.getOffset()))
         .filter(millisec -> {
           if (millisec >= 15000) {
             stopRecording();
@@ -466,13 +473,11 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           }
           return true;
         })
-        .doOnSubscribe(() -> mUiThreadHandler.post(this::hideTrashbin))
         .subscribe(
             mStackBar::updateStackBar,
             Throwable::printStackTrace,
             () -> {
               mStackBar.recordOffset();
-              updateTrashbin();
               RxUtil.unsubscribe(mStackBarSubscription);
             }
         );
@@ -489,6 +494,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 //          mVideoStack.peek().toString(), mOffsetStack.peek());
     }
     if (!mVideoStack.isEmpty()) {
+      mUiThreadHandler.post(() -> updateTrashbin());
       requestUiChange(UI_LOGIC_DURING_SHOOTING);
     }
 
@@ -504,6 +510,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       Timber.e("Pop the file file the stack %s [ms : %d]\n", oldVideo, oldOffset);
     }
     if (mVideoStack.isEmpty()) {
+      mUiThreadHandler.post(() -> updateTrashbin());
       requestUiChange(UI_LOGIC_BEFORE_SHOOTING);
     }
   }
@@ -587,6 +594,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       mStackTrashbin.setImageDrawable(mTrashbinDrawable[CENTER]);
       params.leftMargin = pos - trashbinWidth / 2;
     }
+
     mStackTrashbinContainer.addView(mStackTrashbin, params);
   }
 
@@ -653,10 +661,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   private CameraDevice mCameraDevice;
 
   private void openCamera() {
-    if (!hasPermissionsGranted(VIDEO_PERMISSIONS)) {
-      requestVideoPermissions();
-      return;
-    }
 
     createVideoFile();
     setUpCameraOutputs();
@@ -916,11 +920,12 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   private void startRecording() {
     isSessionPreviewReady = false;
     requestUiChange(UI_LOGIC_HIDE_PERIPHERAL_BUTTONS);
+    requestUiChange(UI_LOGIC_LOCK_SHOOT_BUTTON);
     createRecordSession();
   }
 
   private void delayStopRecording() {
-    new Thread() {
+    Thread stopMusic = new Thread() {
       @Override
       public void run() {
         super.run();
@@ -930,14 +935,15 @@ public class CameraFragment extends Fragment implements CameraMvpView {
         } catch (InterruptedException e) {
           e.printStackTrace();
         } finally {
-          pausePlayer();
+          mMusicPlayer.pausePlayer();
           requestUiChange(UI_LOGIC_SHOW_PERIPHERAL_BUTTONS);
+          requestUiChange(UI_LOGIC_HOLD_SHOOT_BUTTON);
           isRecording = false;
         }
       }
-    }.start();
+    };
 
-    new Thread() {
+    Thread stopRecording = new Thread() {
       @Override
       public void run() {
         super.run();
@@ -947,18 +953,33 @@ public class CameraFragment extends Fragment implements CameraMvpView {
         } catch (InterruptedException e) {
           e.printStackTrace();
         } finally {
+          requestUiChange(UI_LOGIC_RELEASE_SHOOT_BUTTON);
           stopRecorder();
           startPreviewing();
         }
       }
-    }.start();
+    };
+
+    stopMusic.start();
+    stopRecording.start();
+  }
+
+  private int calculateDelay() {
+    Timber.e("CUR : %d, STD : %d\n", mMusicPlayer.getRelativePosition(), mVideoOffset + 1000);
+    if (mMusicPlayer.getRelativePosition() < 14000) {
+      return mMusicPlayer.getRelativePosition() < (mVideoOffset + 1000) ?
+          (mVideoOffset + 1000) - mMusicPlayer.getRelativePosition() : 0;
+    } else {
+      return 1000;
+    }
   }
 
   private void stopRecording() {
-    pausePlayer();
+    mMusicPlayer.pausePlayer();
+    requestUiChange(UI_LOGIC_SHOW_PERIPHERAL_BUTTONS);
+    requestUiChange(UI_LOGIC_RELEASE_SHOOT_BUTTON);
     stopRecorder();
     startPreviewing();
-    requestUiChange(UI_LOGIC_SHOW_PERIPHERAL_BUTTONS);
   }
 
   // STEP - CREATE SESSION ////////////////////////////////////////////////////////////////////////
@@ -987,7 +1008,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   private void createRecordSession() {
     try {
-      Timber.e("createRecordSession %b\n", (Looper.myLooper() == Looper.getMainLooper()));
       // Surface texture
       SurfaceTexture texture = mTextureView.getSurfaceTexture();
       assert texture != null;
@@ -1070,7 +1090,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
       // media recorder
       startRecorder();
-      startPlayer();
+      mMusicPlayer.startPlayer();
     }
 
     @Override
@@ -1156,218 +1176,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     mRecorder.reset();
   }
 
-  // STEP - MUSIC PLAYER //////////////////////////////////////////////////////////////////////DONE
-
-  private Music mMusic = null;
-  private int mMusicOffset = 0;
-
-  public void updateMusic(@Nullable Music music) {
-    // TODO - background
-    stopPlayer();
-    mMusic = music;
-    mMusicOffset = 0;
-    setUpPlayer();
-  }
-
-  public void cutMusic(int musicOffset) {
-    pausePlayer();
-    mMusicOffset = musicOffset;
-    mPlayer.seekTo(mMusicOffset);
-  }
-
-  private MediaPlayer mPlayer;
-
-  public void openPlayer() {
-    if (mPlayer == null) { // Construct new player and set listener
-      mPlayer = new MediaPlayer();
-    } else { // Reset player so that becomes
-      mPlayer.reset();
-    }
-  }
-
-  public void closePlayer() {
-    mPlayer.release();
-    if (mPlayer != null) {
-      mPlayer = null;
-    }
-  }
-
-  public void setUpPlayer() {
-    mPlayer.setOnPreparedListener(mp -> {
-      mPlayer = mp;
-      mPlayer.seekTo(mMusicOffset);
-      requestUiChange(UI_LOGIC_MUSIC_UPDATE_COMPLETE);
-    });
-    try {
-      if (mMusic == null) {
-        mPlayer.setDataSource(getResources().getAssets()
-            .openFd("silence_15_sec.mp3").getFileDescriptor());
-      } else {
-        mPlayer.setDataSource(getContext(), mMusic.uri());
-      }
-      mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-      mPlayer.prepareAsync();
-    } catch (IOException e) {
-      Timber.e("prepare() failed");
-    }
-  }
-
-  public void startPlayer() {
-    if (mPlayer != null && !mPlayer.isPlaying()) {
-      mPlayer.start();
-    }
-  }
-
-  public void pausePlayer() {
-    if (mPlayer != null && mPlayer.isPlaying()) {
-      mPlayer.pause();
-    }
-  }
-
-  public void stopPlayer() {
-    if (mPlayer != null) {
-      mPlayer.stop();
-      mPlayer.reset();
-    }
-  }
-
-  public void rewindPlayer(int millisec) {
-    pausePlayer();
-    mPlayer.seekTo(millisec);
-  }
-
-  private boolean isStopped = false;
-
-  public Observable<Integer> startSubscribePlayer() {
-    isStopped = false;
-    return Observable.create(subscriber -> {
-      while (!isStopped) {
-        subscriber.onNext(mPlayer.getCurrentPosition());
-        try {
-          Thread.sleep(50);
-        } catch (InterruptedException e) {
-          subscriber.onError(e);
-          e.printStackTrace();
-        }
-      }
-      subscriber.onCompleted();
-    });
-  }
-
-  public void stopSubscribePlayer() {
-    isStopped = true;
-  }
-
-  // STEP - PERMISSION FOR CAMERA /////////////////////////////////////////////////////////////DONE
-
-  private static final String PERMISSION_DIALOG = "permissionDialog";
-
-  private static final int REQUEST_VIDEO_PERMISSIONS = 1;
-
-  private static final String[] VIDEO_PERMISSIONS = {
-      Manifest.permission.CAMERA,
-      Manifest.permission.RECORD_AUDIO,
-      Manifest.permission.WRITE_EXTERNAL_STORAGE
-  };
-
-  public static class ErrorDialog extends DialogFragment {
-    private static final String ARG_MESSAGE = "permissionDeniedMessage";
-
-    public static ErrorDialog newInstance(String message) {
-      ErrorDialog dialog = new ErrorDialog();
-      Bundle args = new Bundle();
-
-      args.putString(ARG_MESSAGE, message);
-      dialog.setArguments(args);
-      return dialog;
-    }
-
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-      Activity activity = getActivity();
-      return new AlertDialog.Builder(activity)
-          .setMessage(getArguments().getString(ARG_MESSAGE))
-          .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> activity.finish())
-          .create();
-    }
-  }
-
-  public static class ConfirmationDialog extends DialogFragment {
-
-    public static ConfirmationDialog newInstance() {
-      return new ConfirmationDialog();
-    }
-
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-      final Fragment parent = getParentFragment();
-
-      return new AlertDialog.Builder(getActivity())
-          .setMessage(R.string.camera_request_permission)
-          .setPositiveButton(android.R.string.ok, (dialog, i) ->
-              requestPermissions(VIDEO_PERMISSIONS, REQUEST_VIDEO_PERMISSIONS)
-          )
-          .setNegativeButton(android.R.string.cancel, (dialog, i) -> {
-            Activity activity = parent.getActivity();
-            if (activity != null) {
-              activity.finish();
-            }
-          })
-          .create();
-    }
-  }
-
-  private boolean shouldShowRequestPermissionsRationale(String[] permissions) {
-    for (String permission : permissions) {
-      if (shouldShowRequestPermissionRationale(permission)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private void requestVideoPermissions() {
-    if (shouldShowRequestPermissionsRationale(VIDEO_PERMISSIONS)) {
-      ConfirmationDialog.newInstance()
-          .show(getChildFragmentManager(), PERMISSION_DIALOG);
-
-    } else {
-      requestPermissions(VIDEO_PERMISSIONS, REQUEST_VIDEO_PERMISSIONS);
-    }
-  }
-
-  @Override
-  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
-    if (requestCode == REQUEST_VIDEO_PERMISSIONS) {
-      if (grantResults.length == VIDEO_PERMISSIONS.length) {
-        for (int result : grantResults) {
-          if (result != PackageManager.PERMISSION_GRANTED) {
-            ErrorDialog.newInstance(getString(R.string.camera_request_permission))
-                .show(getChildFragmentManager(), PERMISSION_DIALOG);
-          }
-        }
-
-      } else {
-        ErrorDialog.newInstance(getString(R.string.camera_request_permission))
-            .show(getChildFragmentManager(), PERMISSION_DIALOG);
-      }
-    } else {
-      super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-  }
-
-  private boolean hasPermissionsGranted(String[] permissions) {
-    for (String permission : permissions) {
-      if (ActivityCompat.checkSelfPermission(getActivity(), permission)
-          != PackageManager.PERMISSION_GRANTED) {
-        return false;
-      }
-    }
-    return true;
-  }
 
   // STEP - UI MAIN THREAD ////////////////////////////////////////////////////////////////////DONE
 
@@ -1385,11 +1193,12 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   public static final int UI_LOGIC_BEFORE_SHOOTING = 0x006;
   public static final int UI_LOGIC_DURING_SHOOTING = 0x007;
 
-  public static final int UI_LOGIC_DOWN_SHOOT_BUTTON = 0x008;
-  public static final int UI_LOGIC_UP_SHOOT_BUTTON = 0x009;
+  public static final int UI_LOGIC_RELEASE_SHOOT_BUTTON = 0x008;
+  public static final int UI_LOGIC_HOLD_SHOOT_BUTTON = 0x009;
+  public static final int UI_LOGIC_LOCK_SHOOT_BUTTON = 0x010;
 
-  public static final int UI_LOGIC_DURING_CUT_MUSIC = 0x010;
-  public static final int UI_LOGIC_FINISH_CUT_MUSIC = 0x011;
+  public static final int UI_LOGIC_DURING_CUT_MUSIC = 0x011;
+  public static final int UI_LOGIC_FINISH_CUT_MUSIC = 0x012;
 
   @Retention(RetentionPolicy.SOURCE)
   @IntDef({UI_LOGIC_RESTORE_UI_CONFIGURATION,
@@ -1397,7 +1206,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       UI_LOGIC_SHOW_ALL_BUTTONS, UI_LOGIC_HIDE_ALL_BUTTONS,
       UI_LOGIC_MUSIC_UPDATE_COMPLETE,
       UI_LOGIC_BEFORE_SHOOTING, UI_LOGIC_DURING_SHOOTING,
-      UI_LOGIC_DOWN_SHOOT_BUTTON, UI_LOGIC_UP_SHOOT_BUTTON,
+      UI_LOGIC_RELEASE_SHOOT_BUTTON, UI_LOGIC_HOLD_SHOOT_BUTTON, UI_LOGIC_LOCK_SHOOT_BUTTON,
       UI_LOGIC_DURING_CUT_MUSIC, UI_LOGIC_FINISH_CUT_MUSIC})
   public @interface UiLogic {
   }
@@ -1473,7 +1282,8 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           duringShootingVideo = true;
           mCutButton.setImageResource(R.drawable.camera_cut_button_inactive_30dp);
           mSelfieButton.setImageResource(R.drawable.camera_selfie_button_inactive_30dp);
-          if (mPlayer.getCurrentPosition() - mMusicOffset < 5000)
+          mSelfieButton.setImageResource(R.drawable.camera_selfie_button_inactive_30dp);
+          if (mMusicPlayer.getRelativePosition() < 5000)
             mOkButton.setImageResource(R.drawable.camera_ok_button_inactive_30dp);
           else
             mOkButton.setImageResource(R.drawable.camera_ok_button_active_30dp);
@@ -1513,13 +1323,16 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           mMusicButton.setVisibility(View.INVISIBLE);
           mLibraryButton.setVisibility(View.INVISIBLE);
           break;
-        case UI_LOGIC_DOWN_SHOOT_BUTTON:
+        case UI_LOGIC_RELEASE_SHOOT_BUTTON:
+          mShootButton.setImageResource(R.drawable.camera_shoot_button_release_70dp);
+          mShootButton.startAnimation(getAnimation(getActivity(), R.anim.clicking_101));
+          break;
+        case UI_LOGIC_HOLD_SHOOT_BUTTON:
           mShootButton.setImageResource(R.drawable.camera_shoot_button_hold_70dp);
           mShootButton.startAnimation(getAnimation(getActivity(), R.anim.clicking_101));
           break;
-        case UI_LOGIC_UP_SHOOT_BUTTON:
-          mShootButton.setImageResource(R.drawable.camera_shoot_button_release_70dp);
-          mShootButton.startAnimation(getAnimation(getActivity(), R.anim.clicking_101));
+        case UI_LOGIC_LOCK_SHOOT_BUTTON:
+          mShootButton.setImageResource(R.drawable.camera_shoot_button_shooting_70dp);
           break;
         case UI_LOGIC_MUSIC_UPDATE_COMPLETE:
           mMusicButton.setAlbumArt(mMusic);

@@ -1,5 +1,6 @@
 package com.estsoft.muvicam.transcoder.noneencode;
 
+import android.content.res.AssetFileDescriptor;
 import android.media.MediaCodec;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
@@ -8,6 +9,7 @@ import android.util.Log;
 import com.estsoft.muvicam.transcoder.transcoders.BufferListener;
 import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -28,6 +30,7 @@ public class MediaConcatSegment {
     private MediaCodec.BufferInfo mVideoBufferInfo = new MediaCodec.BufferInfo();
     private MediaCodec.BufferInfo mAudioBufferInfo = new MediaCodec.BufferInfo();
     private String mInputFilePath;
+    private AssetFileDescriptor mInputFile;
     private long mStartTimeUs;
     private long mActualFirstExtractedTimeUs;
     private long mEndTimeUs;
@@ -38,6 +41,24 @@ public class MediaConcatSegment {
     private boolean isFinished;
 
     public long getmShorestDurationUs() { return mShorestDurationUs; }
+
+    public MediaConcatSegment(BufferListener bufferListener, AssetFileDescriptor inputFile,
+                              long startTimeUs, long endTimeUs, int audioVolume, int mode) {
+        this.mBufferListener = bufferListener;
+        this.mInputFile = inputFile;
+        this.mExtractor = new MediaExtractor();
+        Log.d(TAG, "SharePresenter: " + mInputFile.toString());
+        try {
+            mExtractor.setDataSource( mInputFile.getFileDescriptor(), mInputFile.getStartOffset(), mInputFile.getLength() );
+        } catch (IOException e ) {
+            throw new RuntimeException( e );
+        }
+        mShorestDurationUs = getShortestDuration();
+        this.mStartTimeUs = startTimeUs < 0 ? 0 : startTimeUs > mShorestDurationUs ? mShorestDurationUs : startTimeUs;
+        this.mEndTimeUs = endTimeUs < 0 ? mShorestDurationUs : endTimeUs > mShorestDurationUs ? mShorestDurationUs : endTimeUs;
+        this.mAudioVolume = audioVolume;
+        this.currentMode = mode;
+    }
 
     public MediaConcatSegment(BufferListener bufferListener, String inputFilePath,
                               long startTimeUs, long endTimeUs, int audioVolume, int mode) {

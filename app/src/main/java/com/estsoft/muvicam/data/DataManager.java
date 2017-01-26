@@ -6,11 +6,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.estsoft.muvicam.data.local.MusicService;
-import com.estsoft.muvicam.data.local.VideoService;
 import com.estsoft.muvicam.model.Music;
-import com.estsoft.muvicam.model.Video;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
@@ -23,12 +22,10 @@ import rx.Observable;
 public class DataManager {
 
   private MusicService mMusicService;
-  private VideoService mVideoService;
 
   @Inject
-  public DataManager(MusicService musicService, VideoService videoService) {
+  public DataManager(MusicService musicService) {
     mMusicService = musicService;
-    mVideoService = videoService;
   }
 
   // TODO - Which one is fast?
@@ -42,16 +39,11 @@ public class DataManager {
         .buffer(500, TimeUnit.MILLISECONDS);
   }
 
-
-  public Observable<List<Video>> getVideos() {
-    return mVideoService.getVideos().buffer(200, TimeUnit.MILLISECONDS);
-  }
-
   private static boolean filterOutMusics(Music music, String[] tokens) {
-    String title = music.title();
-    String artist = music.artist();
+    String title = music.title().toLowerCase(Locale.US);
+    String artist = music.artist().toLowerCase(Locale.US);
     for (int i = 0; i < tokens.length; i++) {
-      String token = tokens[i];
+      String token = tokens[i].toLowerCase(Locale.US);
       if (title.contains(token) || artist.contains(token)) {
         return true;
       }

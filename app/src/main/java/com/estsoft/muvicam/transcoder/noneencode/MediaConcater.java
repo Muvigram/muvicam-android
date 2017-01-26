@@ -1,5 +1,6 @@
 package com.estsoft.muvicam.transcoder.noneencode;
 
+import android.content.res.AssetFileDescriptor;
 import android.media.MediaCodec;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
@@ -8,8 +9,10 @@ import android.util.Log;
 
 import com.estsoft.muvicam.transcoder.transcoders.BufferListener;
 import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
+import com.estsoft.muvicam.transcoder.wrappers.MediaTranscoder;
 import com.estsoft.muvicam.transcoder.wrappers.ProgressListener;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -19,7 +22,7 @@ import java.util.List;
  * Created by estsoft on 2017-01-03.
  */
 
-public class MediaConcater {
+public class MediaConcater implements MediaTranscoder {
     private static final String TAG = "MediaConcater";
     public static final String AAC_MIME_TYPE = "audio/mp4a-latm";
     public static final int NORMAL = -98;
@@ -54,6 +57,7 @@ public class MediaConcater {
 
 
     //NOTE startTimeUs is checked for I-Frame Sync before this
+    @Override
     public void addSegment(String inputFilePath, long startTimeUs, long endTimeUs, int audioVolume ) {
         int mode = MediaConcatSegment.NORMAL;
         if ( currentMode == MUTE_AND_ADD_MUSIC ) mode = MediaConcatSegment.VIDEO_ONLY;
@@ -67,10 +71,41 @@ public class MediaConcater {
         if ( currentMode == NORMAL ) setAudioTrackToMuxer( inputFilePath );
     }
 
+    @Override
+    public void addLogoSegment(AssetFileDescriptor inputFile, long startTimeUs, long endTimeUs, int audioVolume) {
+        int mode = MediaConcatSegment.NORMAL;
+        if ( currentMode == MUTE_AND_ADD_MUSIC ) mode = MediaConcatSegment.VIDEO_ONLY;
+        MediaConcatSegment segment = new MediaConcatSegment( mBufferListener, inputFile, startTimeUs,
+                endTimeUs, audioVolume, mode );
+        mSegments.add( segment );
+        mTotalEstimatedDuration += segment.getEndTimeUs() - segment.getStartTimeUs();
+        Log.e(TAG, "addSegment: segment max duration ... " + segment.getmShorestDurationUs() );
+        Log.e(TAG, "addSegment: total EstimatedDuration ... " + mTotalEstimatedDuration );
+        setVideoTrackToMuxer( inputFile );
+        if ( currentMode == NORMAL ) setAudioTrackToMuxer( inputFile );
+    }
+
+    @Override
     public void addMusicSegment(String inputFilePath, long offsetUs, int audioVolume ) {
         if ( currentMode == NORMAL ) throw new IllegalStateException( "to add MusicSegment, mode should be ADD_MUSIC or MUTE_AND_ADD_MUSIC " );
         mMusicSegment = new MediaConcatAudioSegment(mBufferListener, inputFilePath, offsetUs, audioVolume);
 //        setTranscodeAudioTrackToMuxer( mMusicSegment.getAudioFormat() );
+    }
+
+    private void setVideoTrackToMuxer( AssetFileDescriptor inputFile ) {
+        if ( mOutVideoFormat == null ) {
+            MediaExtractor extractor = new MediaExtractor();
+            try { extractor.setDataSource( inputFile.getFileDescriptor(), inputFile.getStartOffset(), inputFile.getLength() ); }
+            catch ( IOException e ) { throw new RuntimeException( e ); }
+            mOutVideoFormat = TranscodeUtils.getFirstTrack( extractor, TranscodeUtils.MODE_VIDEO );
+            mMuxerVideoIndex = mMuxer.addTrack( mOutVideoFormat );
+            mMuxer.setOrientationHint( 90 );
+            extractor.release();
+        }
+        if (!mMuxerStarted && mOutVideoFormat != null && mOutAudioFormat != null) {
+            mMuxerStarted = true;
+            mMuxer.start();
+        }
     }
 
     private void setVideoTrackToMuxer( String inputFilePath ) {
@@ -81,6 +116,7 @@ public class MediaConcater {
             mOutVideoFormat = TranscodeUtils.getFirstTrack( extractor, TranscodeUtils.MODE_VIDEO );
             mMuxerVideoIndex = mMuxer.addTrack( mOutVideoFormat );
             mMuxer.setOrientationHint( 90 );
+            extractor.release();
         }
         if (!mMuxerStarted && mOutVideoFormat != null && mOutAudioFormat != null) {
             mMuxerStarted = true;
@@ -90,10 +126,25 @@ public class MediaConcater {
     private void setAudioTrackToMuxer( String inputFilePath ) {
         if ( mOutAudioFormat == null ) {
             MediaExtractor extractor = new MediaExtractor();
-            try { extractor.setDataSource(inputFilePath); }
+            try { extractor.setDataSource( inputFilePath ); }
             catch ( IOException e ) { throw new RuntimeException( e ); }
             mOutAudioFormat = TranscodeUtils.getFirstTrack( extractor, TranscodeUtils.MODE_AUDIO );
             mMuxerAudioIndex = mMuxer.addTrack( mOutAudioFormat );
+            extractor.release();
+        }
+        if (!mMuxerStarted && mOutVideoFormat != null && mOutAudioFormat != null) {
+            mMuxerStarted = true;
+            mMuxer.start();
+        }
+    }
+    private void setAudioTrackToMuxer( AssetFileDescriptor inputFile ) {
+        if ( mOutAudioFormat == null ) {
+            MediaExtractor extractor = new MediaExtractor();
+            try { extractor.setDataSource( inputFile.getFileDescriptor(), inputFile.getStartOffset(), inputFile.getLength() ); }
+            catch ( IOException e ) { throw new RuntimeException( e ); }
+            mOutAudioFormat = TranscodeUtils.getFirstTrack( extractor, TranscodeUtils.MODE_AUDIO );
+            mMuxerAudioIndex = mMuxer.addTrack( mOutAudioFormat );
+            extractor.release();
         }
         if (!mMuxerStarted && mOutVideoFormat != null && mOutAudioFormat != null) {
             mMuxerStarted = true;
@@ -110,8 +161,8 @@ public class MediaConcater {
         }
     }
 
-
-    public void start() {
+    @Override
+    public void startWork() {
         if (mListener != null) callListener( ProgressListener.START );
         if (mMusicSegment != null) mMusicSegment.prepare();
 
@@ -216,6 +267,11 @@ public class MediaConcater {
         }
     };
 
+    @Override
+    public void initVideoTarget(int interval, int frameRate, int bitrate, int rotation, int width, int height, boolean videoFlipping) {
+    }
 
-
+    @Override
+    public void initAudioTarget(int sampleRate, int channelCount, int bitrate) {
+    }
 }

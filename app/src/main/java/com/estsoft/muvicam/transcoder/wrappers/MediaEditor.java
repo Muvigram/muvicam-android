@@ -26,7 +26,6 @@ public class MediaEditor {
     public static final int NORMAL = -12;
     public static int CURRENT_MODE = NORMAL;
 
-    // TODO confirm Frame seeking mode!
     public static final boolean pFrameSeek = true;
 
     private final MuxerWrapper mMuxer;
@@ -55,7 +54,7 @@ public class MediaEditor {
     }
 
     public void initVideoTarget(int interval, int frameRate, int bitrate, int rotation, int width, int height ) {
-        mTarget.initVideoTarget( interval, frameRate, bitrate, rotation, width, height );
+        mTarget.initVideoTarget( interval, frameRate, bitrate, rotation, width, height, false );
         mMuxer.setOrientation( rotation );
         mMuxer.setVideoParams( frameRate );
     }

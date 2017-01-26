@@ -15,4 +15,6 @@ public interface MusicLibraryMvpView extends MvpView {
   void showMusicsEmpty();
 
   void showError();
+
+  void showMusicCutDialog(Music music);
 }

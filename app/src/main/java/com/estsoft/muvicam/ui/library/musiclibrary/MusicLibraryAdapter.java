@@ -1,5 +1,6 @@
 package com.estsoft.muvicam.ui.library.musiclibrary;
 
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,10 +32,14 @@ import butterknife.ButterKnife;
 public class MusicLibraryAdapter extends RecyclerView.Adapter<MusicLibraryAdapter.MusicLibraryViewHolder> {
 
   private List<Music> mMusics;
-
+  private MusicLibraryFragment mFragment;
   @Inject
   public MusicLibraryAdapter() {
     mMusics = new ArrayList<>();
+  }
+
+  public void register(MusicLibraryFragment fragment) {
+    mFragment = fragment;
   }
 
   public void setMusics(List<Music> musics) {
@@ -77,10 +82,7 @@ public class MusicLibraryAdapter extends RecyclerView.Adapter<MusicLibraryAdapte
       }
       mTitle.setText(music.title());
       mArtist.setText(music.artist());
-      mMusicButton.setOnClickListener(v -> {
-        // TODO - cut music
-        LibraryActivity.get(mMusicButton).completeSelection(music.uri().toString(), 0, 15);
-      });
+      mMusicButton.setOnClickListener(v -> mFragment.showMusicCutDialog(music));
     }
 
     public MusicLibraryViewHolder(View itemView) {

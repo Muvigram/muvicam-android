@@ -19,10 +19,12 @@ import java.nio.ByteBuffer;
 
 public class VideoTrackDecoder implements TrackTranscoder {
     private static final String TAG = "VideoTrackDecoder";
-    private static final boolean VERBOSE = false;
+    private static final boolean VERBOSE = true;
     private static final int DRAIN_STATE_NONE = 0;
     private static final int DRAIN_STATE_SHOULD_RETRY_IMMEDIATELY = 1;
     private static final int DRAIN_STATE_CONSUMED = 2;
+
+    private boolean I_FRAME_EXTRACTING = true;
 
     private final MediaExtractor mExtractor;
     private final int mTrackIndex;
@@ -41,8 +43,6 @@ public class VideoTrackDecoder implements TrackTranscoder {
     private boolean forceStop;
 
     private BitmapListener mBitmapListener;
-
-    private boolean I_FRAME_EXTRACTING = false;
 
     private int mWidth;
     private int mHeight;
@@ -140,8 +140,9 @@ public class VideoTrackDecoder implements TrackTranscoder {
         int index = mDecoder.dequeueInputBuffer( timeoutUs );
         if ( index < 0 ) return DRAIN_STATE_NONE;
         // need to confirm
-        if ( mExtractor.getSampleTime() < 0 || lastOneFlag > 1 || forceStop ) {
+        if ( mExtractor.getSampleTime() < 0 || lastOneFlag >= 1 || forceStop ) {
             sawExtractorEOS = true;
+            if (VERBOSE) Log.d(TAG, "drainExtractor: Extractor ended " + extractedCount);
             mDecoder.queueInputBuffer( index, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM );
             return DRAIN_STATE_NONE;
         }
@@ -152,6 +153,7 @@ public class VideoTrackDecoder implements TrackTranscoder {
         mCurrentPositionUs += mFrameIntervalUs;
         if (mCurrentPositionUs >= mTotalDuration) {
             mCurrentPositionUs = mTotalDuration;
+            Log.d(TAG, "drainExtractor: " + mCurrentPositionUs + " / " + mTotalDuration);
             lastOneFlag ++;
         }
         if ( I_FRAME_EXTRACTING ) {
@@ -192,7 +194,7 @@ public class VideoTrackDecoder implements TrackTranscoder {
             decodedCount ++;
             mDecoderOutputSurfaceWrapper.awaitNewImage();
             mDecoderOutputSurfaceWrapper.drawImage( false );
-            if (VERBOSE) Log.d(TAG, "drainDecoder: drained Position ... " + mBufferInfo.presentationTimeUs + " / " + (extractedCount <= decodedCount));
+            if (VERBOSE) Log.d(TAG, "drainDecoder: drained Position ... " + mBufferInfo.presentationTimeUs + " / e:" + extractedCount + " / d:" + decodedCount);
             ByteBuffer buffer = ByteBuffer.allocateDirect( 4 * mWidth * mHeight );
             buffer.rewind();
             GLES20.glReadPixels( 0, 0, mWidth, mHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, buffer);
@@ -202,10 +204,13 @@ public class VideoTrackDecoder implements TrackTranscoder {
             bmp.copyPixelsFromBuffer(buffer);
             flipBitmap = Bitmap.createBitmap(bmp, 0, 0, mWidth, mHeight, flipMatrix, false);
 
-            mBitmapListener.onBitmapSupply( flipBitmap, mBufferInfo.presentationTimeUs , (extractedCount <= decodedCount) );
+            mBitmapListener.onBitmapSupply( flipBitmap, mBufferInfo.presentationTimeUs , false );
         }
         if ( sawDecoderEOS ) {
-            mBitmapListener.onComplete();
+            sawDecoderEOS = true;
+            mBitmapListener.onBitmapSupply( null, mTotalDuration, true);
+//            Log.d(TAG, "drainDecoder: " + mBufferInfo.presentationTimeUs + " / " + mTotalDuration);
+            mBitmapListener.onComplete( mTotalDuration );
         }
         return DRAIN_STATE_CONSUMED;
     }
@@ -213,7 +218,7 @@ public class VideoTrackDecoder implements TrackTranscoder {
 
     public interface BitmapListener {
         void onBitmapSupply(Bitmap bitmap, long presentationTime, boolean isEnd);
-        void onComplete();
+        void onComplete( long totalUs );
     }
 
     @Override

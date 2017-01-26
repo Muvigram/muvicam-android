@@ -190,7 +190,6 @@ public class AudioTrackTranscoder implements TrackTranscoder {
             case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED :
                 if (mActualOutputFormat != null) throw new RuntimeException("Video output format changed twice.");
                 mActualOutputFormat = mEncoder.getOutputFormat();
-                // TODO - resampling and confirm
                 mBufferListener.onOutputFormat( BufferListener.BufferType.AUDIO, mActualOutputFormat );
 //                mMuxerWrapper.setOutputFormat( MuxerWrapper.SampleType.AUDIO, mActualOutputFormat );
                 TranscodeUtils.printInformationOf( mActualOutputFormat );

@@ -3,8 +3,11 @@ package com.estsoft.muvicam.util;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.view.ContextThemeWrapper;
+import android.util.Log;
 
 import com.estsoft.muvicam.R;
 
@@ -53,6 +56,36 @@ public final class DialogFactory {
                                                     @StringRes int messageResource) {
     return createProgressDialog(context, context.getString(messageResource));
   }
+
+
+  // clickListener : ok = -1; cancel = -2;
+    public static AlertDialog createOkCancelDialog( Context context, String title, String message,
+                                                    DialogInterface.OnClickListener clickListener) {
+        Log.d("test", "createOkCancelDialog: " + title + " / " + message);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage(message);
+        builder.setPositiveButton(context.getString(R.string.dialog_action_ok), clickListener);
+        builder.setNegativeButton(context.getString(R.string.dialog_action_cancel), clickListener);
+
+        AlertDialog alertDialog = builder.create();
+        if (title != null
+                && !title.equals("")
+                && !title.equals(context.getString(R.string.dialog_empty_title)))
+            alertDialog.setTitle( title );
+
+    return alertDialog;
+  }
+
+    public static AlertDialog createOkCancelDialog( Context context,
+                                                  @StringRes int titleResource,
+                                                  @StringRes int messageResource,
+                                                  DialogInterface.OnClickListener clickListener) {
+    return createOkCancelDialog(context,
+            context.getString(titleResource),
+            context.getString(messageResource),
+            clickListener);
+    }
+
 
 }
 

@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.injection.qualifier;
+package com.estsoft.muvicam.injection.scope;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

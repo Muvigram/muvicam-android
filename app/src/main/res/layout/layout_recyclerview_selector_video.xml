@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="1dp"
+    android:paddingLeft="1dp"
+    android:paddingRight="1dp"
+    android:paddingTop="1dp">
+
+    <ImageView
+        android:id="@+id/video_thumbnail_space"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop" />
+
+    <RelativeLayout
+        android:id="@+id/layout_thumbnail"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <com.estsoft.muvicam.ui.selector.videoselector.ThumbnailImageView
+            android:id="@+id/video_thumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop" />
+
+        <com.estsoft.muvicam.ui.selector.videoselector.ThumbnailImageView
+            android:id="@+id/to_show_time"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:scaleType="fitXY" />
+
+        <TextView
+            android:id="@+id/video_running_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:paddingBottom="3dp"
+            android:paddingRight="7dp"
+            android:text="00:00"
+            android:textColor="@color/White" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_selected"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <View
+            android:id="@+id/video_selected"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/selectorVideoSelected"
+
+            />
+
+        <TextView
+            android:id="@+id/video_num"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="3dp"
+            android:layout_marginTop="3dp"
+            android:background="@color/selectorButton"
+            android:paddingBottom="1dp"
+            android:paddingLeft="6dp"
+            android:paddingRight="6dp"
+            android:paddingTop="1dp"
+            android:text="5"
+            android:textColor="@color/White" />
+    </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/video_hided"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/selectorHide" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/selector_not_supported"
+            android:textColor="@color/selectorHideText" />
+    </FrameLayout>
+</FrameLayout>

@@ -26,6 +26,7 @@ public class MediaTarget {
     MediaFormat videoOutputFormat;
     private final String videoCodec = MediaFormatExtraInfo.MIMETYPE_VIDEO_AVC;
     private final int colorFormat = MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface;
+    private boolean videoFlipping;
 
     MediaFormat audioOutputFormat;
     private final String audioCodec = MediaFormatExtraInfo.MIMETYPE_AUDIO_AAC;
@@ -58,12 +59,13 @@ public class MediaTarget {
 //        muxerWrapper = new MuxerWrapper( muxer, muxerMode );
 //    }
 
-    public void initVideoTarget(int interval, int frameRate, int bitrate, int rotation, int width, int height ) {
+    public void initVideoTarget(int interval, int frameRate, int bitrate, int rotation, int width, int height, boolean videoFlipping ) {
         videoOutputFormat = MediaFormat.createVideoFormat( videoCodec, width, height );
         videoOutputFormat.setInteger( MediaFormat.KEY_I_FRAME_INTERVAL, interval );
         videoOutputFormat.setInteger( MediaFormat.KEY_FRAME_RATE, frameRate );
         videoOutputFormat.setInteger( MediaFormat.KEY_BIT_RATE, bitrate );
         videoOutputFormat.setInteger( MediaFormat.KEY_COLOR_FORMAT, colorFormat );
+        this.videoFlipping = videoFlipping;
         // NOTE Coded will select a profile on its own
 //        videoOutputFormat.setInteger( MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AVCProfileBaseline );
 //        setCsdForVideo( videoOutputFormat );
@@ -113,20 +115,7 @@ public class MediaTarget {
         TranscodeUtils.printInformationOf( audioOutputFormat );
     }
 
-//    public void prepare() {
-//        // TODO CSD configuration
-//        muxerWrapper.setOutputFormat( MuxerWrapper.SampleType.VIDEO, videoOutputFormat );
-//        muxerWrapper.setOutputFormat( MuxerWrapper.SampleType.AUDIO, audioOutputFormat );
-//    }
-//
-//    public void stop() {
-//        if ( !muxerWrapper.isStopped() ) muxerWrapper.stop();
-//    }
-//
-//    public void release () {
-//        if ( !muxerWrapper.isStopped() ) muxerWrapper.stop();
-//        muxerWrapper.release();
-//    }
-
-
+    public boolean isVideoFlipping() {
+        return videoFlipping;
+    }
 }

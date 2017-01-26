@@ -2,10 +2,101 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
->
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    android:background="@color/Black">
+
+    <FrameLayout
+        android:id="@+id/editor_edit_frame_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="edit fragment" />
+        android:background="@color/White" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:id="@+id/editor_edit_result_space_linear"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:layout_alignParentTop="true"
+            android:background="@color/selectorVideoSelected"
+            android:orientation="horizontal" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/editor_edit_frame_thumbnails"
+            android:layout_alignParentRight="true"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/editor_edit_cancel"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="3dp"
+                android:src="@drawable/editor_edit_cancel" />
+
+            <ImageView
+                android:id="@+id/editor_edit_insert"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="3dp"
+                android:src="@drawable/editor_edit_insert" />
+        </LinearLayout>
+
+
+        <FrameLayout
+            android:id="@+id/editor_edit_frame_thumbnails"
+            android:layout_width="match_parent"
+            android:layout_height="77dp"
+            android:layout_alignParentBottom="true"
+            android:background="@color/editorThumbnailBackground">
+
+            <FrameLayout
+                android:id="@+id/editor_edit_thumbnail_background"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/editor_edit_recycler_thumbnails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="1dp"
+                android:layout_marginTop="1dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:background="@color/editorRecyclerViewBackground"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/editor_seekbar_left"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/editor_edit_seekbar_left"
+                    android:visibility="invisible" />
+
+
+                <ImageView
+                    android:id="@+id/editor_seekbar_right"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/editor_edit_seekbar_right"
+                    android:visibility="invisible" />
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/editor_edit_progress_space"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"/>
+        </FrameLayout>
+    </RelativeLayout>
+
 </FrameLayout>

@@ -29,6 +29,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnFocusChange;
+import butterknife.OnItemClick;
 import butterknife.OnTextChanged;
 import butterknife.Unbinder;
 
@@ -42,10 +43,10 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
 
   Unbinder mUnbinder;
 
-  @BindView(R.id.library_music_search_bar_skip) TextView mSkipButton;
-  @BindView(R.id.library_music_search_bar_back) TextView mBackButton;
+  // @BindView(R.id.library_music_search_bar_skip) TextView mSkipButton;
+  // @BindView(R.id.library_music_search_bar_back) TextView mBackButton;
   @BindView(R.id.library_music_search_bar_edit_text) EditText mSearchTextBar;
-  @BindView(R.id.library_music_search_bar) RecyclerView mRecyclerView;
+  @BindView(R.id.library_music_search_recyclerview) RecyclerView mRecyclerView;
 
   @OnFocusChange(R.id.library_music_search_bar_edit_text)
   public void searchBarOnFocus(View v, boolean hasFocus) {
@@ -58,12 +59,24 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
 
   @OnTextChanged(R.id.library_music_search_bar_edit_text)
   public void searchBarSearchRequested(CharSequence text) {
+    if (text.equals(""))
+      mSearchTextBar.clearFocus();
     mPresenter.loadMusics(text);
+  }
+
+  @OnClick(R.id.library_music_search_bar_back)
+  public void backToPrevious(View v) {
+    LibraryActivity.get(this).onBackPressed();
   }
 
   @OnClick(R.id.library_music_search_bar_skip)
   public void skipSelectMusic(View v) {
-    LibraryActivity.get(this).completeSelection(null, 0, 15);
+    // LibraryActivity.get(this).completeSelection(null, 0, 15000);
+    DialogFactory
+        .createSimpleOkErrorDialog(getActivity(),
+        "Skip button",
+        "This feature will be added soon.")
+        .show();
   }
 
   @Inject MusicLibraryAdapter mAdapter;
@@ -91,6 +104,11 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
         .getComponent().plus(new MusicLibraryModule());
     mMusicLibraryComponent.inject(this);
     mPresenter.attachView(this);
+  }
+
+  @Inject
+  public void registerFragment() {
+    mAdapter.register(this);
   }
 
   @Override
@@ -148,8 +166,27 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
     ).show();
   }
 
+  private final static String TAG_MUSIC_CUT_DIALOG =
+      "musiclibrary.MusicLibraryFragment.music_cut_dialog";
+
+  @Override
+  public void showMusicCutDialog(Music music) {
+    getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
+    MusicCutDialogFragment dialog = MusicCutDialogFragment.newInstance(music);
+    dialog.setOnPreparedListener(() -> {
+      getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    });
+    dialog.show(getFragmentManager(), TAG_MUSIC_CUT_DIALOG);
+  }
+
   public void preventKeyboardPopup() {
     this.getActivity().getWindow().setSoftInputMode(
-        WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+  }
+
+  public MusicLibraryPresenter getPresenter() {
+    return mPresenter;
   }
 }

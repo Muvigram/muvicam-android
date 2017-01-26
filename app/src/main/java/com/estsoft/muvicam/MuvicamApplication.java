@@ -6,6 +6,7 @@ import android.content.Context;
 import com.estsoft.muvicam.injection.component.ApplicationComponent;
 import com.estsoft.muvicam.injection.component.DaggerApplicationComponent;
 import com.estsoft.muvicam.injection.module.ApplicationModule;
+
 import timber.log.Timber;
 
 /**
@@ -28,6 +29,7 @@ public class MuvicamApplication extends Application {
 
     // Timber
     Timber.plant(new Timber.DebugTree());
+
   }
 
   public ApplicationComponent getApplicationComponent() {

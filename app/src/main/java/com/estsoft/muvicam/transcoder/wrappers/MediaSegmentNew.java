@@ -1,5 +1,6 @@
 package com.estsoft.muvicam.transcoder.wrappers;
 
+import android.content.res.AssetFileDescriptor;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
@@ -29,7 +30,8 @@ public class MediaSegmentNew {
     private final MediaTarget mTarget;
     private final MediaExtractor mExtractor;
     private final BufferListener mBufferListener;
-    private final String mInputFilePath;
+    private String mInputFilePath;
+    private AssetFileDescriptor mInputFile;
     private final long mStartTimeUs;
     private final long mEndTimeUs;
     private final int mAudioVolume;
@@ -52,6 +54,26 @@ public class MediaSegmentNew {
     private boolean mAudioEncodingStarted;
     private boolean mAudioForceStoped;
 
+    public MediaSegmentNew(MediaTarget target, AssetFileDescriptor inputFile, BufferListener bufferListener,
+                           long startTimeUs, long endTimeUs, int audioVolume, int transcodeMode ) {
+        this.mTarget = target;
+        this.mInputFile = inputFile;
+        this.mBufferListener = bufferListener;
+        this.mAudioVolume = audioVolume;
+        this.mExtractor = new MediaExtractor();
+        try {
+            mExtractor.setDataSource( mInputFile.getFileDescriptor(), mInputFile.getStartOffset(), mInputFile.getLength() );
+        } catch ( IOException e ) {
+            throw new RuntimeException( e );
+        }
+        long shortestDuration = getShortestDuration();
+        this.mStartTimeUs = startTimeUs < 0 ? 0 : startTimeUs > shortestDuration ? shortestDuration : startTimeUs;
+        this.mEndTimeUs = endTimeUs < 0 ? shortestDuration : endTimeUs > shortestDuration ? shortestDuration : endTimeUs;
+        Log.e(TAG, "MediaSegmentNew: " + mStartTimeUs + " / " + mEndTimeUs  + " / " + shortestDuration);
+        this.CURRENT_MODE = transcodeMode;
+    }
+
+
     public MediaSegmentNew(MediaTarget target, String mediaFilePath, BufferListener bufferListener,
                            long startTimeUs, long endTimeUs, int audioVolume, int transcodeMode ) {
         this.mTarget = target;
@@ -69,6 +91,7 @@ public class MediaSegmentNew {
         this.mEndTimeUs = endTimeUs < 0 ? shortestDuration : endTimeUs > shortestDuration ? shortestDuration : endTimeUs;
         Log.e(TAG, "MediaSegmentNew: " + mStartTimeUs + " / " + mEndTimeUs  + " / " + shortestDuration);
         this.CURRENT_MODE = transcodeMode;
+        Log.d(TAG, "MediaSegmentNew: " + CURRENT_MODE);
     }
 
     public void prepare( ) {
@@ -220,8 +243,11 @@ public class MediaSegmentNew {
         while (mExtractor.getSampleTrackIndex() != mVideoTrackIndex ) {
             mExtractor.seekTo( current, MediaExtractor.SEEK_TO_NEXT_SYNC);
             current += step;
+            // out of duration or no 2 more I-Frame
+            if ( mExtractor.getSampleTime() < 0 ) break;
         }
         second = mExtractor.getSampleTime();
+        if (second < 0 ) second = getShortestDuration();
         mExtractor.seekTo( 0 , MediaExtractor.SEEK_TO_CLOSEST_SYNC );
         return second - first;
     }
@@ -232,15 +258,20 @@ public class MediaSegmentNew {
     private void setupVideoTranscoder() {
 
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource( mInputFilePath );
+        if (mInputFilePath == null ) {
+            retriever.setDataSource( mInputFile.getFileDescriptor(), mInputFile.getStartOffset(), mInputFile.getLength() );
+        } else {
+            retriever.setDataSource(mInputFilePath);
+        }
         mOrginRotaion = Integer.parseInt( retriever.extractMetadata( MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION ));
         mMediaDurationMs = Long.parseLong( retriever.extractMetadata( MediaMetadataRetriever.METADATA_KEY_DURATION ));
 
         mVideoInputFormat = TranscodeUtils.getFirstTrack( mExtractor, TranscodeUtils.MODE_VIDEO );
         mVideoTrackIndex = TranscodeUtils.getFirstTrackIndex( mExtractor, TranscodeUtils.MODE_VIDEO );
-        mVideoTranscoder = new VideoTrackTranscoder( mExtractor, mTarget.videoOutputFormat, mBufferListener, mVideoTrackIndex );
+        mVideoTranscoder = new VideoTrackTranscoder( mExtractor, mTarget.videoOutputFormat, mBufferListener, mVideoTrackIndex, mTarget.isVideoFlipping() );
         mVideoTranscoder.setup();
     }
+
     private void setupAudioTranscoder() {
         mAudioInputFormat = TranscodeUtils.getFirstTrack( mExtractor, TranscodeUtils.MODE_AUDIO );
         mAudioTrackIndex = TranscodeUtils.getFirstTrackIndex( mExtractor, TranscodeUtils.MODE_AUDIO );

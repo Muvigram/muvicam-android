@@ -33,6 +33,23 @@
     -->
 
     <!-- Editor PickerColor-->
+    <color name="Black">#000000</color>
+    <color name="White">#FFFFFF</color>
+    <color name="Empty">#00FFFFFF</color>
+    <color name="selectorTop">#F2F2F2F2</color>
+    <color name="selectorButton">#0077CC</color>
+    <color name="selectorGridLayout">#FFFFFF</color>
+    <color name="selectorVideoSelected">#59FFFFFF</color>
+    <color name="selectorHide">#99000000</color>
+    <color name="selectorHideText">#99FFFFFF</color>
+
+    <color name="resultSpace">#FF546A</color>
+    <color name="editorTrimmer">#FFAE4A</color>
+    <color name="editorThumbnailBackground">#66FFFFFF</color>
+    <color name="editorRecyclerViewBackground">#59000000</color>
+    <!--
+    ///*** Example for localized color scheme. ***///
+    -->
     <color name="library_video_item_unsupported">#99000000</color>
     <color name="library_video_item_selected">#59FFFFFF</color>
 

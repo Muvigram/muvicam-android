@@ -1,5 +1,6 @@
 package com.estsoft.muvicam.transcoder.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -31,6 +32,7 @@ public class ThumbnailUtil {
 
     private VideoTrackDecoder mDecoder;
     private MediaExtractor mExtractor;
+    private Activity mAct;
     private long mIntervalUs;
     private int mWidth;
     private int mHeight;
@@ -38,30 +40,27 @@ public class ThumbnailUtil {
     private boolean isIFrameMode;
 
     private BitmapHandlerImpl mBitmapListener;
-    private PublishSubject<BitmapSignal> mPublishSubject;
-    private Subscription mSubscription;
     private UserBitmapListener userBitmapListener;
 
-    public ThumbnailUtil(UserBitmapListener userBitmapListener, boolean iFrameExtractingMode) {
+    public ThumbnailUtil(UserBitmapListener userBitmapListener, Activity act, boolean iFrameExtractingMode) {
         this.userBitmapListener = userBitmapListener;
         this.isIFrameMode = iFrameExtractingMode;
+        this.mAct = act;
+        Log.d(TAG, "ThumbnailUtil: " + mAct.toString());
     }
 
 
-    public void extract(final String filePath, final double intervalSec, final int width, final int height ) {
-        if (isStarted) throw new IllegalStateException( "Already started!" );
-        isStarted = true;
-        extractingStart(filePath, intervalSec, width, height);
-    }
+//    public void extract(final String filePath, final double intervalSec, final int width, final int height ) {
+//        if (isStarted) throw new IllegalStateException( "Already started!" );
+//        isStarted = true;
+//        extractingStart(filePath, intervalSec, width, height);
+//    }
 
     public void extractFromNewThread(final String filePath, final double intervalSec, final int width, final int height ) {
         if (isStarted) throw new IllegalStateException( "Already started!" );
         isStarted = true;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+        new Thread( () -> {
                 extractingStart(filePath, intervalSec, width, height);
-            }
         }).start();
     }
 
@@ -77,26 +76,7 @@ public class ThumbnailUtil {
         mWidth = width;
         mHeight = height;
         setup();
-
-        mSubscription = mPublishSubject
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.computation())
-                .subscribe(new Observer<BitmapSignal>() {
-                    @Override
-                    public void onCompleted() {
-                    }
-
-                    @Override
-                    public void onNext(BitmapSignal signal) {
-                        userBitmapListener.onBitmapNext( signal.bitmap, signal.presentationTimeUs, signal.lastOne );
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        userBitmapListener.onError( new Exception( e ) );
-                    }
-                });
-        //start of Subject
+        //start of extracting
         runPipeline();
     }
 
@@ -112,8 +92,7 @@ public class ThumbnailUtil {
     }
 
     private void setup() {
-        mPublishSubject = PublishSubject.create();
-        mBitmapListener = new BitmapHandlerImpl( mPublishSubject );
+        mBitmapListener = new BitmapHandlerImpl();
 
         MediaFormat format = MediaFormat.createVideoFormat( "video/avc", mWidth, mHeight );
         format.setInteger( MediaFormat.KEY_BIT_RATE, 2000000 );
@@ -128,45 +107,26 @@ public class ThumbnailUtil {
 
     public interface UserBitmapListener {
         void onBitmapNext(Bitmap bitmap, long presentationTimeUs, boolean isLast);
+        void onComplete( long totalUs );
         void onError(Exception e);
     }
 
     private class BitmapHandlerImpl implements VideoTrackDecoder.BitmapListener {
 
-        private PublishSubject<BitmapSignal> subject;
-
-        public BitmapHandlerImpl(PublishSubject<BitmapSignal> subject) {
-            this.subject = subject;
-        }
-
         @Override
         public void onBitmapSupply(Bitmap bitmap, long presentationTime, boolean isEnd ) {
-            subject.onNext( new BitmapSignal(bitmap, presentationTime, isEnd ) );
+            mAct.runOnUiThread(() -> {
+                    userBitmapListener.onBitmapNext( bitmap, presentationTime, isEnd );
+            });
         }
 
         @Override
-        public void onComplete() {
+        public void onComplete( long totalUs ) {
             if (VERBOSE) Log.d(TAG, "onComplete: End of Task");
+            userBitmapListener.onComplete( totalUs );
             mDecoder.release();
-            subject.onCompleted();
-            mSubscription.unsubscribe();
         }
     }
-
-    private class BitmapSignal {
-        public BitmapSignal(Bitmap bitmap, long presentationTimeUs, boolean lastOne) {
-            this.bitmap = bitmap;
-            this.lastOne = lastOne;
-            this.presentationTimeUs = presentationTimeUs;
-        }
-
-        Bitmap bitmap;
-        boolean lastOne;
-        long presentationTimeUs;
-    }
-
-
-
 
     //code From Inkiu
     public static void getThumbnails(List<String> videoPaths, Context context, VideoMetaDataListener listener) {
@@ -225,6 +185,7 @@ public class ThumbnailUtil {
         public int position;
         public int width;
         public int height;
+
         private VideoMetaData(Bitmap thumbnailBitmap, int width, int height, long durationMs, int durationSec, String videoPath, int position) {
             this.thumbnailBitmap = thumbnailBitmap;
             this.width = width;
@@ -234,8 +195,6 @@ public class ThumbnailUtil {
             this.videoPath = videoPath;
             this.position = position;
         }
-
-
     }
     //code From Inkiu
     public interface VideoMetaDataListener {
