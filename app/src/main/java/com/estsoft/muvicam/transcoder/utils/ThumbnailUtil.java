@@ -11,15 +11,11 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import com.estsoft.muvicam.transcoder.transcoders.VideoTrackDecoder;
+import com.estsoft.muvicam.ui.selector.videoselector.VideoSelectorPresenter;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
-
-import rx.Observer;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import rx.subjects.PublishSubject;
 
 /**
  * Created by estsoft on 2016-12-09.
@@ -47,6 +43,9 @@ public class ThumbnailUtil {
         this.isIFrameMode = iFrameExtractingMode;
         this.mAct = act;
         Log.d(TAG, "ThumbnailUtil: " + mAct.toString());
+    }
+    public ThumbnailUtil() {
+
     }
 
 
@@ -126,83 +125,6 @@ public class ThumbnailUtil {
             userBitmapListener.onComplete( totalUs );
             mDecoder.release();
         }
-    }
-
-    //code From Inkiu
-    public static void getThumbnails(List<String> videoPaths, Context context, VideoMetaDataListener listener) {
-
-        int count = 0;
-
-        String[] projection = new String[]{
-                MediaStore.MediaColumns._ID,
-                MediaStore.Video.VideoColumns.DURATION,
-                MediaStore.Video.VideoColumns.HEIGHT,
-                MediaStore.Video.VideoColumns.WIDTH,
-                MediaStore.Video.VideoColumns.RESOLUTION};
-        String selection = MediaStore.MediaColumns.DATA + "=?";
-
-        for (String path : videoPaths) {
-            if (!path.endsWith("mp4")) listener.onError(new IOException("file is not mp4."));
-            int imageId = -1;
-            long duration = -1;
-            int width = -1;
-            int height = -1;
-            String[] selectArgs = new String[]{path};
-            Cursor cursor = context.getContentResolver().query(
-                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                    projection,
-                    selection,
-                    selectArgs,
-                    null);
-            if (cursor != null && cursor.moveToFirst()) {
-                imageId = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
-                duration = cursor.getInt(cursor.getColumnIndex(MediaStore.Video.VideoColumns.DURATION));
-                height = cursor.getInt(cursor.getColumnIndex(MediaStore.Video.VideoColumns.HEIGHT));
-                width =  cursor.getInt(cursor.getColumnIndex(MediaStore.Video.VideoColumns.WIDTH));
-            } else {
-                listener.onError(new IOException("query failed."));
-            }
-            cursor.close();
-
-            Bitmap thumbnail = MediaStore.Video.Thumbnails.getThumbnail(
-                    context.getContentResolver(),
-                    imageId,
-                    MediaStore.Images.Thumbnails.MINI_KIND,
-                    null);
-
-            VideoMetaData metaData = new VideoMetaData(thumbnail, width, height, duration, (int) duration / 1000, path, count++);
-            listener.onProgress(metaData);
-        }
-        listener.onComplete();
-    }
-
-    //code From Inkiu
-    public static class VideoMetaData {
-        public Bitmap thumbnailBitmap;
-        public String videoPath;
-        public long durationMs;
-        public int durationSec;
-        public int position;
-        public int width;
-        public int height;
-
-        private VideoMetaData(Bitmap thumbnailBitmap, int width, int height, long durationMs, int durationSec, String videoPath, int position) {
-            this.thumbnailBitmap = thumbnailBitmap;
-            this.width = width;
-            this.height = height;
-            this.durationMs = durationMs;
-            this.durationSec = durationSec;
-            this.videoPath = videoPath;
-            this.position = position;
-        }
-    }
-    //code From Inkiu
-    public interface VideoMetaDataListener {
-        void onProgress(VideoMetaData data);
-
-        void onComplete();
-
-        void onError(Exception e);
     }
 
 }

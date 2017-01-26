@@ -10,4 +10,5 @@ import com.estsoft.muvicam.ui.base.MvpView;
 public interface VideoSelectorView extends MvpView {
 
     void setPresent(BasePresenter basePresenter);
+    void setupVideoSelectorAdapter();
 }

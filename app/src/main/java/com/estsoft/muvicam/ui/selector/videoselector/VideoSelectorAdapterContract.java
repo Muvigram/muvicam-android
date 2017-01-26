@@ -4,6 +4,7 @@ package com.estsoft.muvicam.ui.selector.videoselector;
 import com.estsoft.muvicam.model.EditorVideo;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Administrator on 2017-01-05.
@@ -19,6 +20,6 @@ public interface VideoSelectorAdapterContract {
         void clearItem();
         EditorVideo getItem(int position);
         ArrayList<EditorVideo> getItems();
-        void addItems(ArrayList<EditorVideo> items);
+        void addItems(List<EditorVideo> items);
     }
 }

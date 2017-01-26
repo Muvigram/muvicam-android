@@ -170,7 +170,7 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
     }
 
     @Override
-    public void addItems(ArrayList<EditorVideo> items) {
+    public void addItems(List<EditorVideo> items) {
         this.thumbnailImageViews = items;
         notifyAdapter();
     }

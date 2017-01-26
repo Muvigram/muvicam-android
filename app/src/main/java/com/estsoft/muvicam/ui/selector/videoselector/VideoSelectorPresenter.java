@@ -2,9 +2,7 @@ package com.estsoft.muvicam.ui.selector.videoselector;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.util.Pair;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
@@ -14,13 +12,16 @@ import android.widget.Toast;
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.model.SelectorVideoData;
-import com.estsoft.muvicam.transcoder.utils.ThumbnailUtil;
 import com.estsoft.muvicam.ui.base.BasePresenter;
-import com.estsoft.muvicam.ui.common.BackToHomeDialogFragment;
-import com.estsoft.muvicam.ui.selector.SelectorActivity;
+import com.estsoft.muvicam.util.RxUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import rx.Observer;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 
 /**
@@ -28,11 +29,14 @@ import java.util.List;
  */
 
 public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> implements VideoSelectorAdapter.OnItemClickListener {
+    private VideoSelectorView mView;
     private SelectorVideoData selectorVideoData;
     private VideoSelectorAdapterContract.Model adapterModel;
     private VideoSelectorAdapterContract.View adapterView;
     private int countSelected = 0;
     private String TAG = "VideoSelectorPresenter";
+
+    Subscription subscription;
 
     @Override
     public boolean isViewAttached() {
@@ -52,6 +56,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
     @Override
     public void attachView(VideoSelectorView mvpView) {
         super.attachView(mvpView);
+        mView = mvpView;
     }
 
 
@@ -59,17 +64,31 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
         this.selectorVideoData = selectorVideoData;
     }
 
-    public void loadVideos(final Context context, final ThumbnailUtil.VideoMetaDataListener listener) {
-        // TODO - 자료 중복, (이미 EditorVideo가 Path를 포함하고 있음) ref. getVideos(...);
-        Pair<ArrayList<EditorVideo>, ArrayList<String>> pair = selectorVideoData.getVideos(context);
-        final ArrayList<EditorVideo> videos = pair.first;
-        ((Activity) context).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                adapterModel.addItems(videos);
-            }
-        });
-        ThumbnailUtil.getThumbnails(pair.second, context, listener);
+    public void loadVideos(final Context context) {
+
+        VideoMetaDataScanner scanner = new VideoMetaDataScanner();
+        subscription = scanner.getVideoMetaData(context)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Observer<VideoMetaDataScanner.VideoMetaData>() {
+                               @Override
+                               public void onCompleted() {
+
+                               }
+
+                               @Override
+                               public void onError(Throwable e) {
+
+                               }
+
+                               @Override
+                               public void onNext(VideoMetaDataScanner.VideoMetaData data) {
+                                   selectorVideoData.progressGetThumbnail(data);
+                                   adapterModel.addItems( selectorVideoData.getAllVideos() );
+                               }
+                           }
+                );
+
     }
 
     public void setPickerAdapterModel(VideoSelectorAdapterContract.Model adapterModel) {
@@ -125,6 +144,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
     @Override
     public void detachView() {
         super.detachView();
+        RxUtil.unsubscribe(subscription);
         adapterModel.clearItem();
         selectorVideoData.removeAllVideos();
         countSelected = 0;
@@ -132,12 +152,13 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
     }
 
     // position : list of position
-    public void progress(ThumbnailUtil.VideoMetaData data) {
+    @Deprecated
+    public void progress(VideoMetaDataScanner.VideoMetaData data) {
         selectorVideoData.progressGetThumbnail(data);
     }
 
 
-    public void addItems(ArrayList<EditorVideo> videos) {
+    public void addItems(List<EditorVideo> videos) {
         adapterModel.addItems(videos);
     }
 

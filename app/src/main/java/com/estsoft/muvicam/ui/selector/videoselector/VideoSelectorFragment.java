@@ -38,39 +38,40 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorView
         void passData(ArrayList<EditorVideo> data);
     }
 
-    private ThumbnailUtil.VideoMetaDataListener videoMetaDataListener = new ThumbnailUtil.VideoMetaDataListener() {
-
-        @Override
-        public void onProgress(final ThumbnailUtil.VideoMetaData data) {
-            ((VideoSelectorPresenter) presenter).progress(data);
-        }
-
-        @Override
-        public void onComplete() {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    VideoSelectorAdapter tempA = videoSelectorAdapter;
-                    videoSelectorAdapter = new VideoSelectorAdapter(getActivity());
-                    ((VideoSelectorPresenter) presenter).setPickerAdapterModel(videoSelectorAdapter);
-                    ((VideoSelectorPresenter) presenter).setPickerAdapterView(videoSelectorAdapter);
-                    ((VideoSelectorPresenter) presenter).addItems(tempA.getItems());
-                    videoPickerRecyclerView.setAdapter(videoSelectorAdapter);
-                    // ?    videoSelectorAdapter.notifyDataSetChanged();
-                }
-            });
-
-        }
-
-        @Override
-        public void onError(Exception e) {
-            Log.d(TAG_Lib, "VMDListener");
-        }
-    };
+//    private ThumbnailUtil.VideoMetaDataListener videoMetaDataListener = new ThumbnailUtil.VideoMetaDataListener() {
+//
+//        @Override
+//        public void onProgress(final ThumbnailUtil.VideoMetaData data) {
+////            ((VideoSelectorPresenter) presenter).progress(data);
+//        }
+//
+//        @Override
+//        public void onComplete() {
+//            getActivity().runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    VideoSelectorAdapter tempA = videoSelectorAdapter;
+//                    videoSelectorAdapter = new VideoSelectorAdapter(getActivity());
+//                    ((VideoSelectorPresenter) presenter).setPickerAdapterModel(videoSelectorAdapter);
+//                    ((VideoSelectorPresenter) presenter).setPickerAdapterView(videoSelectorAdapter);
+//                    ((VideoSelectorPresenter) presenter).addItems(tempA.getItems());
+//                    videoPickerRecyclerView.setAdapter(videoSelectorAdapter);
+//                    // ?    videoSelectorAdapter.notifyDataSetChanged();
+//                }
+//            });
+//
+//        }
+//
+//        @Override
+//        public void onError(Exception e) {
+//            Log.d(TAG_Lib, "VMDListener");
+//        }
+//
+//    };
     Thread getThumbnailObjectThread = new Thread(new Runnable() {
         @Override
         public void run() {
-            ((VideoSelectorPresenter) presenter).loadVideos(getActivity(), videoMetaDataListener);
+            ((VideoSelectorPresenter) presenter).loadVideos(getActivity());
         }
     });
 
@@ -79,7 +80,7 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorView
         super.onAttach(context);
         presenter = ((SelectorActivity) getActivity()).getPresenter();
         Log.d(TAG, "onAttach: isnull?" + (presenter == null));
-        ((VideoSelectorPresenter) presenter).setSelectorVideoData(SelectorVideoData.getInstance());
+        ((VideoSelectorPresenter) presenter).setSelectorVideoData(new SelectorVideoData());
         presenter.attachView(this);
 
         ((VideoSelectorPresenter) presenter).setmCallBack(((DataPassListener) getContext()));
@@ -110,12 +111,13 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorView
         nextButton = (TextView) v.findViewById(R.id.selector_next_button);
         videoPickerRecyclerView = (RecyclerView) v.findViewById(R.id.selector_recycler_view_videos);
         videoPickerRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
+
         videoSelectorAdapter = new VideoSelectorAdapter(getActivity());
         ((VideoSelectorPresenter) presenter).setPickerAdapterModel(videoSelectorAdapter);
         ((VideoSelectorPresenter) presenter).setPickerAdapterView(videoSelectorAdapter);
         ((VideoSelectorPresenter) presenter).addItems(new ArrayList<EditorVideo>());
-
         videoPickerRecyclerView.setAdapter(videoSelectorAdapter);
+
         getThumbnailObjectThread.setPriority(Thread.MAX_PRIORITY);
         getThumbnailObjectThread.start();
 
@@ -158,5 +160,9 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorView
     @Override
     public void setPresent(BasePresenter basePresenter) {
         this.presenter = basePresenter;
+    }
+
+    @Override
+    public void setupVideoSelectorAdapter() {
     }
 }
