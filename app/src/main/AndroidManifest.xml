@@ -50,6 +50,9 @@
             android:name=".ui.editor.EditorActivity"
             android:screenOrientation="portrait"
             android:taskAffinity="com.estsoft.muvicam.editor" />
+        <activity
+            android:name=".ui.common.StackRemoverActivity"
+            android:taskAffinity="com.estsoft.muvicam.editor" />
     </application>
 
 </manifest>

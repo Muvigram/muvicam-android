@@ -1,11 +1,14 @@
 package com.estsoft.muvicam.ui.common;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -61,8 +64,8 @@ public class BackToHomeDialogFragment extends DialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder( getActivity() )
                 .setView(view)
-                .setPositiveButton(R.string.dialog_action_ok, (dialogInterface, i) -> onPositive() )
-                .setNegativeButton(R.string.dialog_action_cancel, (dialogInterface, i) -> onNegative() );
+                .setPositiveButton(R.string.dialog_action_ok, this::onPositive)
+                .setNegativeButton(R.string.dialog_action_cancel, this::onNegative);
 
         Dialog dialog = builder.create();
 
@@ -83,13 +86,12 @@ public class BackToHomeDialogFragment extends DialogFragment {
         super.onDestroyView();
     }
 
-    private void onPositive() {
-
-        Intent homeIntent = HomeActivity.newIntent( getContext() );
-        startActivity( homeIntent );
+    private void onPositive(DialogInterface dialogInterface, int i) {
+        Intent intent = StackRemoverActivity.getIntent( getContext() );
+        startActivity( intent );
     }
 
-    private void onNegative() {
+    private void onNegative(DialogInterface dialogInterface, int i) {
         dismiss();
     }
 }
