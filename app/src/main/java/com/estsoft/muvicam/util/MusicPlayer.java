@@ -155,6 +155,13 @@ public class MusicPlayer {
     }
   }
 
+  public boolean isPlaying() {
+    if (mPlayer != null) {
+      return mPlayer.isPlaying();
+    }
+    return false;
+  }
+
   public void stopPlayer() {
     if (mPlayer != null) {
       mPlayer.stop();

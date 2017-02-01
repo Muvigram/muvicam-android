@@ -66,6 +66,7 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
 
   @OnClick(R.id.library_music_search_bar_back)
   public void backToPrevious(View v) {
+
     LibraryActivity.get(this).onBackPressed();
   }
 

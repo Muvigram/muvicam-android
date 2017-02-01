@@ -166,7 +166,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
     }
 
 
-    public void nextButtonClick(View view, Activity activity) {
+    public void nextButtonClick(View view) {
         Log.d(TAG, "nextButtonClick: " + selectorVideoData.getSelectedVideos().size());
         if (selectorVideoData.getSelectedVideos().size() == 0) {
             Toast.makeText(view.getContext(), view.getResources().getString(R.string.selector_next_less_than_one_warning), Toast.LENGTH_SHORT).show();
@@ -183,7 +183,6 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
                 results.add(temp);
             }
             selectorVideoData.getmCallBack().passData(results);
-            activity.finish();
         }
     }
 }

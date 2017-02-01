@@ -28,10 +28,6 @@ public class LibraryActivity extends BaseSingleFragmentActivity {
 
   private static final String EXTRA_VIDEOS = "library.LibraryActivity.editorVideos";
 
-  public static Intent newIntent(Context packageContext) {
-    return new Intent(packageContext, LibraryActivity.class);
-  }
-
   public static Intent newIntent(Context packageContext, ArrayList<EditorVideo> editorVideos) {
     Intent intent = new Intent(packageContext, LibraryActivity.class);
     intent.putExtra(EXTRA_VIDEOS, editorVideos);
