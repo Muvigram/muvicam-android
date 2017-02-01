@@ -28,7 +28,7 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
 
     public VideoPlayerTextureView(Activity activity, MuvicamMediaPlayer muvicamMediaPlayer, EditorVideo editVideo, int editorvideoWidth, int editorVideoHeight, int rotation) {
         super(activity);
-        setParams(activity,editVideo,editorvideoWidth,editorVideoHeight,rotation);
+        setParams(activity, editVideo, editorvideoWidth, editorVideoHeight, rotation);
         this.muvicamMediaPlayer = muvicamMediaPlayer;
         this.setSurfaceTextureListener(this);
         this.muvicamMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -60,14 +60,15 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
 
     public VideoPlayerTextureView(Activity activity, EditorResultMediaPlayer editorResultMediaPlayer, EditorVideo resultVideo, int editorvideoWidth, int editorVideoHeight, int rotation) {
         super(activity);
-        setParams(activity,resultVideo,editorvideoWidth,editorVideoHeight,rotation);
+        setParams(activity, resultVideo, editorvideoWidth, editorVideoHeight, rotation);
         this.editorResultMediaPlayer = editorResultMediaPlayer;
-        editorResultMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-                mediaPlayer.stop();
-            }
-        });
+//        editorResultMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+//            @Override
+//            public void onCompletion(MediaPlayer mediaPlayer) {
+////                mediaPlayer.stop();
+////               if(musicPlayer!= null && musicPlayer.isPlaying()) musicPlayer.pause();
+//            }
+//        });
         this.setSurfaceTextureListener(this);
     }
 
@@ -121,7 +122,8 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
     public void setResultVideo(EditorVideo nowVideo) {
         this.nowVideo = nowVideo;
     }
-    public void setParams(Activity activity, EditorVideo nowVideo, int editorVideoWidth, int editorVideoHeight, int rotation){
+
+    public void setParams(Activity activity, EditorVideo nowVideo, int editorVideoWidth, int editorVideoHeight, int rotation) {
         this.activity = activity;
         this.nowVideo = nowVideo;
         this.editorvideoWidth = editorVideoWidth;

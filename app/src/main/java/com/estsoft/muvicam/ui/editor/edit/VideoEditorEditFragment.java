@@ -91,14 +91,13 @@ public class VideoEditorEditFragment extends Fragment {
 
             if (videoThumbnailendTime < 15000) {
                 if (remainTotalTime < videoThumbnailendTime) {
-                    float length = 5 * dpi + getThumbnailSizePSec() * (remainTotalTime) / 1000;
+                    float length = 10 * dpi + getThumbnailSizePSec() * (remainTotalTime) / 1000;
                     //             Log.d(TAG, "onComplete: <15<thum " + length);
                     seekBarRight.setTranslationX(length);
                     nowVideo.setEnd(remainTotalTime);
                 } else {
-                    float length = 5 * dpi + getThumbnailSizePSec() * 3 * (videoThumbnails.size() - 1) + getThumbnailSizePSec() * (videoThumbnailendTime - videoThumbnails.get(videoThumbnails.size() - 1).getPresentationTimeUs()) / 1000;
+                    float length = 10 * dpi + getThumbnailSizePSec() * 3 * (videoThumbnails.size() - 1) + getThumbnailSizePSec() * (videoThumbnailendTime - videoThumbnails.get(videoThumbnails.size() - 1).getPresentationTimeUs()) / 1000;
                     //          Log.d(TAG, "onComplete: <15>thum " + length);
-
                     seekBarRight.setTranslationX(length);
                     nowVideo.setEnd(videoThumbnailendTime);
                 }
@@ -107,13 +106,11 @@ public class VideoEditorEditFragment extends Fragment {
                 if (remainTotalTime < 15000) {
                     float length = getThumbnailSizePSec() * (remainTotalTime) / 1000;
                     //           Log.d(TAG, "onComplete: >=15<thum " + length);
-
                     seekBarRight.setTranslationX(length);
                     nowVideo.setEnd(remainTotalTime);
                 } else {
                     seekBarRight.setTranslationX(disPlayWidth - 10 * dpi);
                     //         Log.d(TAG, "onComplete: >=15>thum " + (disPlayWidth - 5 * dpi));
-
                     nowVideo.setEnd(15000);
                     //          Log.d(TAG, "onClick: endtime" + nowVideo.getEnd());
                 }
@@ -320,7 +317,7 @@ public class VideoEditorEditFragment extends Fragment {
                                           //     ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
                                                float dpi = getResources().getDimension(R.dimen.resultbar_line);
                                                float remainTime = 15000 - resultVideosTotalTime;
-                                               float X = motionEvent.getRawX() - view.getWidth() + 5 * dpi;
+                                               float X = motionEvent.getRawX() - view.getWidth() + 10 * dpi;
                                                float delta = 0;
                                                float position = X - delta;
 

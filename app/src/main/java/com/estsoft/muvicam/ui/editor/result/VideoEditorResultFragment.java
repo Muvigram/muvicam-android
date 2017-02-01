@@ -115,6 +115,21 @@ public class VideoEditorResultFragment extends Fragment {
         nowVideoNum = 0;
         videoResultPlayer = new EditorResultMediaPlayer(getActivity(), 0, true, false);
         videoResultPlayer2 = new EditorResultMediaPlayer(getActivity(), 0, false, false);
+        videoResultPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                Log.d(TAG, "onCompletion: now1"+nowVideoNum);
+                       if(nowVideoNum== 0) musicResultPlayer.pause();
+            }
+        });
+        videoResultPlayer2.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                Log.d(TAG, "onCompletion: now2 / "+nowVideoNum);
+//                                                                  if(nowVideoNum== 0 || nowVideoNum)
+                if(nowVideoNum== 0) musicResultPlayer.pause();
+            }
+        });
         musicResultPlayer = new MediaPlayer();
         if (resultVideos.size() > 0) {
             try {
@@ -131,7 +146,7 @@ public class VideoEditorResultFragment extends Fragment {
                 musicResultPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                                                               @Override
                                                               public void onCompletion(MediaPlayer mediaPlayer) {
-                                                                  videoResultTextureView.bringToFront();
+                                                                   videoResultTextureView.bringToFront();
                                                                   nowVideoNum = 0;
 
 
@@ -441,6 +456,7 @@ public class VideoEditorResultFragment extends Fragment {
                                 } else {
 
                                     musicResultPlayer.pause();
+                                    Log.d(TAG, "run: isMusicResultPlayer playing?"+musicResultPlayer.isPlaying());
                                     nowVideoNum = 0;
 
 

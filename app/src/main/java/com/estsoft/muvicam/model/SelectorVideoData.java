@@ -23,7 +23,7 @@ public class SelectorVideoData {
         video.setVideoPath(data.videoPath);
         video.setDurationMiliSec((int)(data.durationMs));
         video.setResolutionAcceptable(isSixTVFour(data.width, data.height));
-        if (data.durationMs > 180000) {
+        if (data.durationMs > 180000 || data.durationMs < 3000) {
             video.setResolutionAcceptable(false);
         }
         video.setThumbnailBitmap(data.thumbnailBitmap);
