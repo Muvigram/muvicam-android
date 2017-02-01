@@ -380,12 +380,12 @@ public class VideoEditorResultFragment extends Fragment {
         DisplayMetrics outMetrics = new DisplayMetrics();
         ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
         float widthPSec = (float) outMetrics.widthPixels / 15;
-        int dpi = outMetrics.densityDpi / 160;
+        float height = getResources().getDimension(R.dimen.resultbar_height);
         if (resultVideosTotalTime > 14000) {
-            return (15) * widthPSec - 20 * dpi;
+            return (15) * widthPSec - height;
 
         } else {
-            return (resultVideosTotalTime / 1000) * widthPSec - 20 * dpi;
+            return (resultVideosTotalTime / 1000) * widthPSec - height;
 
         }
     }

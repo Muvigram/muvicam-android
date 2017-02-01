@@ -24,6 +24,7 @@ public class ResultBarView extends View {
     private int totalTime;
     String TAG = "ResultBarView";
     private boolean isProgressBar;
+    private int width;
 
     public ResultBarView(Context context) {
         super(context);
@@ -44,11 +45,18 @@ public class ResultBarView extends View {
     public ResultBarView(Context context, int totalTime, int nowVideoTime, boolean isProgressBar) {
         super(context);
         Log.d(TAG, "onCreate: rbv rvt" + totalTime);
-
         paint = new Paint();
         this.nowVideoTime = nowVideoTime;
         this.totalTime = totalTime;
         this.isProgressBar = isProgressBar;
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        width = MeasureSpec.getSize(widthMeasureSpec);
+        Log.d(TAG, "onMeasure: "+width);
+
     }
 
     @Override
@@ -60,20 +68,13 @@ public class ResultBarView extends View {
             paint.setColor(ContextCompat.getColor(getContext(), R.color.resultSpace));
         }
         paint.setStyle(Paint.Style.FILL);
-        DisplayMetrics outMetrics = new DisplayMetrics();
-        ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
-        int widthPSec = outMetrics.widthPixels / 15;
-        int dpi = outMetrics.densityDpi / 160;
-        Log.d("onDraw", "onDraw: " + ((float) totalTime) / 1000);
-        Log.d("onDraw", "onDraw: editorvideoWidth" + widthPSec);
-        Log.d("onDraw", "onDraw: dpi" + dpi);
+        canvas.drawRect((float) Math.round(( totalTime / 15000f) * width), 0, (float) Math.round((( totalTime + nowVideoTime) / 15000f )* width), getResources().getDimension(R.dimen.resultbar_height), paint);
 
-        canvas.drawRect((float) Math.round(((float) totalTime) / 1000 * widthPSec), 0, (float) Math.round(((float) totalTime + nowVideoTime) / 1000 * widthPSec), Math.round(20 * dpi), paint);
         if (!isProgressBar) {
             paint.setColor(ContextCompat.getColor(getContext(), R.color.selectorVideoSelected));
             paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(dpi);
-            canvas.drawRect((float) Math.round(((float) totalTime) / 1000 * widthPSec), 0, (float) Math.round(((float) totalTime + nowVideoTime) / 1000 * widthPSec), Math.round(20 * dpi), paint);
+            paint.setStrokeWidth(getResources().getDimension(R.dimen.resultbar_line));
+            canvas.drawRect((float) Math.round((totalTime / 15000f) * width), 0, (float) Math.round((( totalTime + nowVideoTime) / 15000f) * width), getResources().getDimension(R.dimen.resultbar_height), paint);
         }
     }
 

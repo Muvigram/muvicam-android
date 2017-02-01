@@ -61,7 +61,8 @@ public class VideoMetaDataScanner {
 
     private boolean isValid( Cursor cursor ) {
         Log.d(TAG, "isValid: " + cursor.getString( mPathIndex ) );
-        return cursor.getString( mPathIndex ).endsWith(".mp4");
+        String path = cursor.getString( mPathIndex );
+        return path.endsWith(".mp4") && !path.contains("camera_video_test");
     }
 
     private Bitmap getThumbnailBitmap( int imageId, Context context ) {

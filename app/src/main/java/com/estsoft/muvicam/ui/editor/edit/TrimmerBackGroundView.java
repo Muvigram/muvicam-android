@@ -45,13 +45,8 @@ public class TrimmerBackGroundView extends View {
         super.onDraw(canvas);
         paint.setColor(ContextCompat.getColor(getContext(), R.color.editorTrimmer));
         paint.setStyle(Paint.Style.FILL);
-        DisplayMetrics outMetrics = new DisplayMetrics();
-        ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
-        int dpi = outMetrics.densityDpi / 160;
-        Log.d("onDraw", "onDraw: " +startX + " / "+ endX);
-        Log.d("onDraw", "onDraw: dpi" + dpi);
-        paint.setStrokeWidth(dpi);
-        canvas.drawRect(startX, 0,endX, Math.round(77* dpi), paint);
+        paint.setStrokeWidth(getResources().getDimension(R.dimen.resultbar_line));
+        canvas.drawRect(startX, 0,endX, getResources().getDimension(R.dimen.editbar_seek_height), paint);
        }
 
     public float getStartX() {

@@ -85,7 +85,7 @@ public class VideoEditorEditFragment extends Fragment {
             DisplayMetrics outMetrics = new DisplayMetrics();
             ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
             float disPlayWidth = outMetrics.widthPixels;
-            float dpi = outMetrics.densityDpi / 160;
+            float dpi = getResources().getDimension(R.dimen.resultbar_line);
 
             int remainTotalTime = 15000 - resultVideosTotalTime;
 
@@ -222,6 +222,7 @@ public class VideoEditorEditFragment extends Fragment {
         for (int i = 0; i < resultVideos.size(); i++) {
 
             int nowVideoTime = resultVideos.get(i).getEnd() - resultVideos.get(i).getStart();
+            Log.d(TAG, "onCreateView: nowV"+nowVideoTime);
             int remainTime = 15000 - resultVideosTotalTime;
             if (i == resultVideos.size() - 1 && remainTime < 1000) {
                 resultBarView = new ResultBarView(getContext(), resultTime, 15000 - resultTime, false);
@@ -315,9 +316,9 @@ public class VideoEditorEditFragment extends Fragment {
         seekBarLeft.setOnTouchListener(new View.OnTouchListener() {
                                            @Override
                                            public boolean onTouch(View view, MotionEvent motionEvent) {
-                                               DisplayMetrics outMetrics = new DisplayMetrics();
-                                               ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
-                                               float dpi = outMetrics.densityDpi / 160;
+                                          //     DisplayMetrics outMetrics = new DisplayMetrics();
+                                          //     ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
+                                               float dpi = getResources().getDimension(R.dimen.resultbar_line);
                                                float remainTime = 15000 - resultVideosTotalTime;
                                                float X = motionEvent.getRawX() - view.getWidth() + 5 * dpi;
                                                float delta = 0;
@@ -420,7 +421,7 @@ public class VideoEditorEditFragment extends Fragment {
                                                 DisplayMetrics outMetrics = new DisplayMetrics();
                                                 ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
                                                 float disPlayWidth = outMetrics.widthPixels;
-                                                float dpi = outMetrics.densityDpi / 160;
+                                                float dpi = getResources().getDimension(R.dimen.resultbar_line);
                                                 float X = (int) motionEvent.getRawX() - 5 * dpi;
                                                 float delta = 0;
                                                 float position = X - delta;
@@ -539,10 +540,11 @@ public class VideoEditorEditFragment extends Fragment {
                                                           {
                                                               @Override
                                                               public boolean onFling(int velocityX, int velocityY) {
-                                                                  DisplayMetrics outMetrics = new DisplayMetrics();
-                                                                  ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
-                                                                  float disPlayWidth = outMetrics.widthPixels;
-                                                                  float dpi = outMetrics.densityDpi / 160;
+//                                                                  DisplayMetrics outMetrics = new DisplayMetrics();
+//                                                                  ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
+//                                                                  float disPlayWidth = outMetrics.widthPixels;
+                                                                  float dpi = getResources().getDimension(R.dimen.resultbar_line);
+
 
                                                                   int length = nowVideo.getEnd() - nowVideo.getStart();
                                                                   //       int start = nowVideo.getStartX() + Math.round(velocityX * 15000 / disPlayWidth);
@@ -672,7 +674,7 @@ public class VideoEditorEditFragment extends Fragment {
         DisplayMetrics outMetrics = new DisplayMetrics();
         ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
         int widthPSec = outMetrics.widthPixels;
-        float dpi = outMetrics.densityDpi / 160;
+        float dpi = getResources().getDimension(R.dimen.resultbar_line);
         float size = (widthPSec - 10 * dpi) / 15;
         //      Log.d(TAG, "getThumbnailSizePSec: " + size);
         return (int) Math.floor(size);
