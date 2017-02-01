@@ -12,6 +12,8 @@ import rx.subjects.Subject;
 
 public class RxEventBus {
 
+  private PublishSubject<Object> mSbject = PublishSubject.create();
+
   private final Subject<Object, Object> mBusSubject = new SerializedSubject<>(PublishSubject.create());
 
   public <T> Subscription register(final Class<T> eventClass, Action1<T> onNext) {

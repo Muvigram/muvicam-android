@@ -45,6 +45,7 @@ public class ApplicationModule {
 
   /* Implicit Functionality */
   @Provides
+  @Singleton
   public MusicService provideMusicService() {
     return new MusicService(mApplication);
   }

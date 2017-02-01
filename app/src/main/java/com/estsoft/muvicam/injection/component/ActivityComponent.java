@@ -28,15 +28,17 @@ public interface ActivityComponent {
 
   /* Dependency objects provided from modules and dependencies */
 
-  // Application context
+  // Event bus
   @ApplicationContext RxEventBus globalBus();
-  @ApplicationContext Context applicationContext();
-  Application application();
-
-  // Activity context
   @ActivityContext RxEventBus localBus();
+
+  // Context
+  @ApplicationContext Context applicationContext();
   @ActivityContext Context activityContext();
+
+  Application application();
   Activity activity();
+
 
   FragmentManager fragmentManager();
 
