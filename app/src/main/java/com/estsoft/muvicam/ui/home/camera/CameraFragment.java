@@ -197,24 +197,31 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     int i = 0;
     int j = 0;
     for (File file : mVideoStack.toArray(new File[mVideoStack.size()])) {
-      String fileName = String.format(Locale.US, "%d_%d.mp4",
-          System.currentTimeMillis(), j++);
-      File newFile = new File(mDir, fileName);
-      new Thread() {
-        @Override
-        public void run() {
-          super.run();
-          try {
-            FileUtil.copyFile(file, newFile);
-          } catch (IOException e) {
-            e.printStackTrace();
-          } finally {
-            Toast.makeText(getActivity(), "SAVE : " + mDir.toString() + fileName, Toast.LENGTH_SHORT).show();
-            Timber.e("Save the file $$ dir : %s, file : %s\n", mDir.toString(), fileName);
-          }
-        }
-      }.run();
-      videoPaths[i++] = newFile.toString();
+
+      ////////////////////////////////////////////////////////////////////////////////////////
+      //
+      //  If required to download each video segment, uncomment this codes.
+      //
+      //  String fileName = String.format(Locale.US, "%d_%d.mp4",
+      //      System.currentTimeMillis(), j++);
+      //  File newFile = new File(mDir, fileName);
+      //  new Thread() {
+      //    @Override
+      //    public void run() {
+      //      super.run();
+      //      try {
+      //        FileUtil.copyFile(file, newFile);
+      //      } catch (IOException e) {
+      //        e.printStackTrace();
+      //      } finally {
+      //        Toast.makeText(getActivity(), "SAVE : " + mDir.toString() + fileName, Toast.LENGTH_SHORT).show();
+      //        Timber.e("Save the file $$ dir : %s, file : %s\n", mDir.toString(), fileName);
+      //      }
+      //    }
+      //  }.run();
+      ////////////////////////////////////////////////////////////////////////////////////////
+
+      videoPaths[i++] = file.toString();
     }
 
     int[] videoOffsets = new int[mOffsetStack.size()];
