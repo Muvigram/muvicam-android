@@ -219,7 +219,7 @@ public class VideoEditorEditFragment extends Fragment {
         for (int i = 0; i < resultVideos.size(); i++) {
 
             int nowVideoTime = resultVideos.get(i).getEnd() - resultVideos.get(i).getStart();
-            Log.d(TAG, "onCreateView: nowV"+nowVideoTime);
+            Log.d(TAG, "onCreateView: nowV" + nowVideoTime);
             int remainTime = 15000 - resultVideosTotalTime;
             if (i == resultVideos.size() - 1 && remainTime < 1000) {
                 resultBarView = new ResultBarView(getContext(), resultTime, 15000 - resultTime, false);
@@ -313,8 +313,8 @@ public class VideoEditorEditFragment extends Fragment {
         seekBarLeft.setOnTouchListener(new View.OnTouchListener() {
                                            @Override
                                            public boolean onTouch(View view, MotionEvent motionEvent) {
-                                          //     DisplayMetrics outMetrics = new DisplayMetrics();
-                                          //     ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
+                                               //     DisplayMetrics outMetrics = new DisplayMetrics();
+                                               //     ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
                                                float dpi = getResources().getDimension(R.dimen.resultbar_line);
                                                float remainTime = 15000 - resultVideosTotalTime;
                                                float X = motionEvent.getRawX() - view.getWidth() + 10 * dpi;
@@ -323,6 +323,7 @@ public class VideoEditorEditFragment extends Fragment {
 
                                                switch (motionEvent.getAction()) {
                                                    case MotionEvent.ACTION_DOWN:
+
                                                        if (musicPlayer.isPlaying()) {
                                                            musicPlayer.pause();
                                                            videoPlayer.pause();
@@ -340,7 +341,7 @@ public class VideoEditorEditFragment extends Fragment {
                                                            position = seekBarRight.getX() - getThumbnailSizePSec() - view.getWidth();
                                                        }
                                                        if (lX1 > lX2 && position <= -view.getWidth() + 10 * dpi) {
-                                                           position = -view.getWidth() + 10* dpi;
+                                                           position = -view.getWidth() + 10 * dpi;
                                                        }
 
                                                        //minwidth
@@ -425,6 +426,7 @@ public class VideoEditorEditFragment extends Fragment {
                                                 float remainTime = 15000 - resultVideosTotalTime;
                                                 switch (motionEvent.getAction()) {
                                                     case MotionEvent.ACTION_DOWN:
+
                                                         if (musicPlayer.isPlaying()) {
                                                             musicPlayer.pause();
                                                             videoPlayer.pause();
@@ -432,21 +434,13 @@ public class VideoEditorEditFragment extends Fragment {
                                                         }
                                                         rX1 = motionEvent.getX();
                                                         delta = X - view.getTranslationX();
-                                                        //        Log.d(TAG, "seekBarRight: action_down" + delta);
-                                                        Log.d(TAG, "onTouch: right"+motionEvent.getRawX());
-                                                        if (motionEvent.getRawX() >= getThumbnailSizePSec() * 3 * (videoThumbnails.size() - 1) + getThumbnailSizePSec() * (videoThumbnailendTime - videoThumbnails.get(videoThumbnails.size() - 1).getPresentationTimeUs()) / 1000) {
-                                                            if (videoThumbnailendTime < 15000) {
-                                                                view.setTranslationX(getThumbnailSizePSec() * 3 * (videoThumbnails.size() - 1) + getThumbnailSizePSec() * (videoThumbnailendTime - videoThumbnails.get(videoThumbnails.size() - 1).getPresentationTimeUs()) / 1000);
-                                                            } else {
-                                                                view.setTranslationX(disPlayWidth - 10 * dpi);
-                                                            }
 
-                                                        }
+
                                                         break;
                                                     case MotionEvent.ACTION_MOVE:
+
                                                         rX2 = motionEvent.getX();
                                                         position = X - delta;
-
                                                         //left position
                                                         if (rX1 > rX2 && getDistanceSeekBars() <= getThumbnailSizePSec()) {
 //                                                            Log.d(TAG, "seekBarRight: distance less than mindistance");
@@ -481,35 +475,42 @@ public class VideoEditorEditFragment extends Fragment {
                                                         break;
 
                                                     case MotionEvent.ACTION_UP:
-
+                                                        Log.d(TAG, "onTouch UP: " + motionEvent.getRawX() + "/ " + motionEvent.getX() + " / " + motionEvent.getAction());
 //                                                        Log.d(TAG, "seekBarRight: distance" + distance);
                                                         if (rX1 > rX2 && getDistanceSeekBars() <= getThumbnailSizePSec()) {
-//                                                            Log.d(TAG, "seekBarRight: distance less than mindistance");
+                                                            Log.d(TAG, "seekBarRight: distance less than mindistance1");
                                                             position = (int) Math.floor(seekBarLeft.getX() + seekBarLeft.getWidth() + getThumbnailSizePSec());
                                                         }
 
                                                         //disPlayWidth - 5 * dpi
-                                                        if (rX1 < rX2 && position >= 10 * dpi + getThumbnailSizePSec() * 3 * (videoThumbnails.size() - 1) + getThumbnailSizePSec() * (videoThumbnailendTime - videoThumbnails.get(videoThumbnails.size() - 1).getPresentationTimeUs()) / 1000) {
+                                                        if (position >= 10 * dpi + getThumbnailSizePSec() * 3 * (videoThumbnails.size() - 1) + getThumbnailSizePSec() * (videoThumbnailendTime - videoThumbnails.get(videoThumbnails.size() - 1).getPresentationTimeUs()) / 1000) {
                                                             if (videoThumbnailendTime < 15000) {
                                                                 position = 10 * dpi + getThumbnailSizePSec() * 3 * (videoThumbnails.size() - 1) + getThumbnailSizePSec() * (videoThumbnailendTime - videoThumbnails.get(videoThumbnails.size() - 1).getPresentationTimeUs()) / 1000;
                                                             } else {
                                                                 position = disPlayWidth - 10 * dpi;
                                                             }
-
+                                                            if (position-(seekBarLeft.getX()+seekBarLeft.getWidth()) <= getThumbnailSizePSec()) {
+                                                                Log.d(TAG, "seekBarRight: distance less than mindistance2");
+                                                                seekBarLeft.setTranslationX(view.getX() - getThumbnailSizePSec() - seekBarLeft.getWidth());
+                                                                nowVideo.setStart((int) Math.floor((seekBarLeft.getX() + seekBarLeft.getWidth() - 10 * dpi) * 1000 / getThumbnailSizePSec()));
+                                                            }
                                                         }
 
                                                         view.setTranslationX(position);
+
+
+
                                                         nowVideo.setEnd((int) Math.floor((position - 10 * dpi) * 1000 / getThumbnailSizePSec()));
 
 //distance time > remaintime
-                                                        if (getDistanceSeekBars() >= getThumbnailSizePSec() * (remainTime / 1000)) {
+                                                        if (getDistanceSeekBars() >= getThumbnailSizePSec() * (remainTime / 1000f)) {
                                                             float leftPosition = seekBarLeft.getX();
                                                             if (remainTime < nowVideo.getDurationMiliSec()) {
-                                                                leftPosition = view.getX() - getThumbnailSizePSec() * (remainTime / 1000) - seekBarLeft.getWidth();
+                                                                leftPosition = view.getX() - getThumbnailSizePSec() * (remainTime / 1000f) - seekBarLeft.getWidth();
                                                             }
 
                                                             seekBarLeft.setTranslationX(leftPosition);
-                                                            nowVideo.setStart((int) Math.floor((leftPosition + seekBarLeft.getWidth() - 10 * dpi) * 1000 / getThumbnailSizePSec()));
+                                                            nowVideo.setStart((int) Math.floor((leftPosition + seekBarLeft.getWidth() - 10 * dpi) * 1000f / getThumbnailSizePSec()));
                                                         }
                                                         videoEditAdapter.notifyDataSetChanged();
 //                                                        Log.d(TAG, "seekBarRight: videoEditEndTime " + nowVideo.getEnd());

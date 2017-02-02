@@ -56,6 +56,7 @@ public class VideoEditorResultFragment extends Fragment {
     VideoPlayerTextureView videoResultTextureView, videoResultTextureView2;
     FrameLayout videoSpaceFrameLayout;
     boolean flag = true;
+    boolean isFirstNumChanged = false, isSecondNumChanged = false;
     private ArrayList<EditorVideo> resultVideos = new ArrayList<>(), selectedVideos = new ArrayList<>();
     String musicPath;
     int musicOffset, musicLength;
@@ -119,7 +120,14 @@ public class VideoEditorResultFragment extends Fragment {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 Log.d(TAG, "onCompletion1: nowVideoNum " + nowVideoNum);
-                nowVideoNum = nowVideoNum + 1;
+                if (!isFirstNumChanged) {
+                    nowVideoNum = nowVideoNum + 1;
+                    isFirstNumChanged = true;
+                }else{
+                    isFirstNumChanged = false;
+                }
+                Log.d(TAG, "run: nowVideoNum1 " + nowVideoNum + "/" + resultVideos.size());
+
                 if (nowVideoNum < resultVideos.size()) {
                     //     Log.d(TAG, "run sec: " + nowVideoNum + " / " + resultVideos.size());
                     videoResultPlayer2.start();
@@ -139,10 +147,6 @@ public class VideoEditorResultFragment extends Fragment {
                             videoResultPlayer2.setFirst(false);
                             prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
                         }
-                        if (videoResultPlayer.isPlaying()) {
-                            videoResultPlayer.pause();
-                            videoResultPlayer.stop();
-                        }
                         videoResultPlayer.setFirst(false);
                         prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
 
@@ -155,16 +159,17 @@ public class VideoEditorResultFragment extends Fragment {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 Log.d(TAG, "onCompletion2: nowVideoNum " + nowVideoNum);
-                nowVideoNum = nowVideoNum + 1;
-                Log.d(TAG, "run: nowVideoNum " + nowVideoNum);
+                if (!isSecondNumChanged) {
+                    nowVideoNum = nowVideoNum + 1;
+                    isSecondNumChanged = true;
+                }else{
+                    isSecondNumChanged= false;
+                }
+                Log.d(TAG, "run: nowVideoNum2 " + nowVideoNum + "/" + resultVideos.size());
+
                 if (nowVideoNum < resultVideos.size()) {
                     videoResultPlayer.start();
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            videoResultTextureView.bringToFront();
-                        }
-                    });
+                    videoResultTextureView.bringToFront();
                     if (nowVideoNum + 1 < resultVideos.size()) {
                         videoResultPlayer2.setFirst(false);
                         prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
@@ -178,10 +183,6 @@ public class VideoEditorResultFragment extends Fragment {
                         if (resultVideos.size() > nowVideoNum + 1) {
                             videoResultPlayer2.setFirst(false);
                             prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
-                        }
-                        if (videoResultPlayer.isPlaying()) {
-                            videoResultPlayer.pause();
-                            videoResultPlayer.stop();
                         }
                         videoResultPlayer.setFirst(false);
                         prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
@@ -497,7 +498,9 @@ public class VideoEditorResultFragment extends Fragment {
                             if (videoResultPlayer.getCurrentPosition() >= resultVideos.get(nowVideoNum).getEnd()) {
                                 videoResultPlayer.pause();
                                 videoResultPlayer.stop();
-                                nowVideoNum = nowVideoNum + 1;
+                                Log.d(TAG, "run: isplaying" + videoResultPlayer.isPlaying());
+                                    nowVideoNum = nowVideoNum + 1;
+                                    isFirstNumChanged = true;
                                 Log.d(TAG, "run: nowVideoNum " + nowVideoNum);
                                 if (nowVideoNum < resultVideos.size()) {
                                     //     Log.d(TAG, "run sec: " + nowVideoNum + " / " + resultVideos.size());
@@ -545,7 +548,7 @@ public class VideoEditorResultFragment extends Fragment {
                                 videoResultPlayer2.pause();
                                 videoResultPlayer2.stop();
                                 nowVideoNum = nowVideoNum + 1;
-
+                                isSecondNumChanged = true;
                                 Log.d(TAG, "run: nowVideoNum " + nowVideoNum);
                                 if (nowVideoNum < resultVideos.size()) {
                                     videoResultPlayer.start();

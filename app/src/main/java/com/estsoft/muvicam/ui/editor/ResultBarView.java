@@ -68,13 +68,13 @@ public class ResultBarView extends View {
             paint.setColor(ContextCompat.getColor(getContext(), R.color.resultSpace));
         }
         paint.setStyle(Paint.Style.FILL);
-        canvas.drawRect((float) Math.round(( totalTime / 15000f) * width), 0, (float) Math.round((( totalTime + nowVideoTime) / 15000f )* width), getResources().getDimension(R.dimen.resultbar_height), paint);
+        canvas.drawRect((float) Math.ceil(( totalTime / 15000f) * width), 0, (float) Math.round((( totalTime + nowVideoTime) / 15000f )* width), getResources().getDimension(R.dimen.resultbar_height), paint);
 
         if (!isProgressBar) {
             paint.setColor(ContextCompat.getColor(getContext(), R.color.selectorVideoSelected));
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(getResources().getDimension(R.dimen.resultbar_line));
-            canvas.drawRect((float) Math.round((totalTime / 15000f) * width), 0, (float) Math.round((( totalTime + nowVideoTime) / 15000f) * width), getResources().getDimension(R.dimen.resultbar_height), paint);
+            canvas.drawRect((float) Math.ceil((totalTime / 15000f) * width), 0, (float) Math.round((( totalTime + nowVideoTime) / 15000f) * width), getResources().getDimension(R.dimen.resultbar_height), paint);
         }
     }
 
