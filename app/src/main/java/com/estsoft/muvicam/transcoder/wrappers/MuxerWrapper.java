@@ -21,7 +21,6 @@ public class MuxerWrapper {
     private static final boolean VERBOSE = false;
     private static final int BUFFER_SIZE = 64 * 1024; // I have no idea whether this value is appropriate or not...
     private static final long MICROSECS_PER_SEC = 1000000;
-    public static int CURRENT_MODE = MediaEditor.NORMAL;
 
     private MediaMuxer mMuxer;
     private MediaFormat mVideoFormat;
@@ -49,11 +48,6 @@ public class MuxerWrapper {
     public MuxerWrapper(MediaMuxer mMuxer, int mode ) {
         this.mMuxer = mMuxer;
         mSampleInfoList = new ArrayList<>();
-        CURRENT_MODE = mode;
-    }
-
-    public void setMode( int mode ) {
-        CURRENT_MODE = mode;
     }
 
     public void setOutputFormat(SampleType type, MediaFormat format) {
@@ -103,7 +97,7 @@ public class MuxerWrapper {
     }
 
     private boolean isFormatSetup() {
-        Log.d(TAG, "isFormatSetup: " + CURRENT_MODE);
+
         if (mVideoFormat == null || mAudioFormat == null) return false;
         mVideoTrack = mMuxer.addTrack(mVideoFormat);
         Log.d(TAG, "Added track #" + mVideoTrack + " with " + mVideoFormat.getString(MediaFormat.KEY_MIME) + " to muxer");

@@ -6,9 +6,12 @@ import android.content.Context;
 import javax.inject.Singleton;
 
 import dagger.Component;
+
+import com.estsoft.muvicam.MuvicamApplication;
 import com.estsoft.muvicam.injection.module.ActivityModule;
 import com.estsoft.muvicam.injection.module.ApplicationModule;
 import com.estsoft.muvicam.injection.qualifier.ApplicationContext;
+import com.estsoft.muvicam.util.RxEventBus;
 
 /**
  * Created by jaylim on 12/12/2016.
@@ -25,8 +28,9 @@ public interface ApplicationComponent {
   // TODO - DataManager
 
   /* Dependency objects provided from modules and dependencies */
-  @ApplicationContext Context context();
-  Application application();
+  // @ApplicationContext RxEventBus globalBus();
+  // @ApplicationContext Context context();
+  // Application application();
 
   /* Field injection */
 }

@@ -1,6 +1,6 @@
-package com.estsoft.muvicam.ui.selector.videoselector;
+package com.estsoft.muvicam.ui.selector.videoselector.legacy;
 
-import android.content.Context;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,42 +10,30 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+
 import com.estsoft.muvicam.R;
-import com.estsoft.muvicam.injection.qualifier.ActivityContext;
 import com.estsoft.muvicam.model.EditorVideo;
-import com.estsoft.muvicam.ui.selector.videoselector.injection.VideoSelectorScope;
+import com.estsoft.muvicam.ui.selector.videoselector.ThumbnailImageView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
 
-/**
- * Created by estsoft on 2017-02-02.
- */
-
-@VideoSelectorScope
-public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdapter.ViewHolder> {
-//        implements VideoSelectorAdapterContract.View, VideoSelectorAdapterContract.Model {
-
-
-    private static final String TAG = "VideoSelectorAdapter";
-    private final Context mContext;
-//    private final FragmentActivity mActivity;
-    VideoSelectorAdapter.OnItemClickListener itemClickListener;
+public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdapter.ViewHolder> implements VideoSelectorAdapterContract.View, VideoSelectorAdapterContract.Model {
+    String TAG = "VideoSelectorAdapter";
+    private final FragmentActivity mActivity;
+    OnItemClickListener itemClickListener;
     List<EditorVideo> thumbnailImageViews;
 
-    @Inject
-    public VideoSelectorAdapter(@ActivityContext Context context ) {
-        mContext = context;
-//        mActivity = fragmentActivity;
+    public VideoSelectorAdapter(FragmentActivity fragmentActivity) {
+        mActivity = fragmentActivity;
     }
 
     @Override
     public VideoSelectorAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater mInflater = LayoutInflater.from(parent.getContext());
         View view = mInflater.inflate(R.layout.layout_recyclerview_selector_video, parent, false);
-        return new VideoSelectorAdapter.ViewHolder(view);
+        return new ViewHolder(view);
     }
 
     @Override
@@ -59,7 +47,7 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
     }
 
     @Override
-    public void onBindViewHolder(VideoSelectorAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, int position) {
         holder.space.setImageResource(R.drawable.editor_picker_white);
         holder.toShowTime.setImageResource(R.drawable.editor_picker_toshowtime);
         if (position < 3) {
@@ -89,6 +77,7 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
         }
     }
 
+    //
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ThumbnailImageView videoThumbnail, toShowTime;
         ImageView space;
@@ -153,7 +142,7 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
         return durationMinString + durationSecString;
     }
 
-//    @Override
+    @Override
     public void clearItem() {
         if (thumbnailImageViews != null) {
             thumbnailImageViews.clear();
@@ -161,36 +150,35 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
         }
     }
 
-//    @Override
+    @Override
     public EditorVideo getItem(int position) {
         return thumbnailImageViews.get(position);
     }
 
-//    @Override
+    @Override
     public void notifyAdapter() {
         notifyDataSetChanged();
     }
 
 
-//    @Override
-    public void setOnClickListener(VideoSelectorAdapter.OnItemClickListener itemClickListener) {
-        this.itemClickListener = itemClickListener;
+    @Override
+    public void setOnClickListener(com.estsoft.muvicam.ui.selector.videoselector.VideoSelectorAdapter.OnItemClickListener clickListener) {
+//        this.itemClickListener = clickListener;
     }
 
-//    @Override
+    @Override
     public ArrayList<EditorVideo> getItems() {
         return (ArrayList<EditorVideo>) thumbnailImageViews;
     }
 
-//    @Override
+    @Override
     public void addItems(List<EditorVideo> items) {
         this.thumbnailImageViews = items;
         notifyAdapter();
     }
 
-//    @Override
+    @Override
     public void notifyDataListChanged() {
         notifyAdapter();
     }
-
 }
