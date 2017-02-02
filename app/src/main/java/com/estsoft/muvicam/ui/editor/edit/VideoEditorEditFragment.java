@@ -86,7 +86,7 @@ public class VideoEditorEditFragment extends Fragment {
             ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
             float disPlayWidth = outMetrics.widthPixels;
             float dpi = getResources().getDimension(R.dimen.resultbar_line);
-
+            Log.d(TAG, "onComplete: "+videoThumbnailendTime);
             int remainTotalTime = 15000 - resultVideosTotalTime;
 
             if (videoThumbnailendTime < 15000) {
@@ -96,7 +96,7 @@ public class VideoEditorEditFragment extends Fragment {
                     seekBarRight.setTranslationX(length);
                     nowVideo.setEnd(remainTotalTime);
                 } else {
-                    float length = 10 * dpi + getThumbnailSizePSec() * 3 * (videoThumbnails.size() - 1) + getThumbnailSizePSec() * (videoThumbnailendTime - videoThumbnails.get(videoThumbnails.size() - 1).getPresentationTimeUs()) / 1000;
+                    float length = 9 * dpi + getThumbnailSizePSec() * 3 * (videoThumbnails.size() - 1) + getThumbnailSizePSec() * (videoThumbnailendTime - videoThumbnails.get(videoThumbnails.size() - 1).getPresentationTimeUs()) / 1000;
                     //          Log.d(TAG, "onComplete: <15>thum " + length);
                     seekBarRight.setTranslationX(length);
                     nowVideo.setEnd(videoThumbnailendTime);
