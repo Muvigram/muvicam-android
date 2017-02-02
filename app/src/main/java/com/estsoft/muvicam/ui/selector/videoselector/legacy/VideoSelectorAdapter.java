@@ -14,8 +14,6 @@ import android.widget.TextView;
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.ui.selector.videoselector.ThumbnailImageView;
-import com.estsoft.muvicam.ui.selector.videoselector.VideoSelectorAdapterContract;
-import com.estsoft.muvicam.ui.selector.videoselector.VideoSelectorAdaptor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -164,7 +162,7 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
 
 
     @Override
-    public void setOnClickListener(VideoSelectorAdaptor.OnItemClickListener clickListener) {
+    public void setOnClickListener(com.estsoft.muvicam.ui.selector.videoselector.VideoSelectorAdapter.OnItemClickListener clickListener) {
 //        this.itemClickListener = clickListener;
     }
 

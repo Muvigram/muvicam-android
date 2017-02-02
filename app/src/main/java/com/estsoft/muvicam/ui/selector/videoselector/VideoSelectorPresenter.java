@@ -12,8 +12,7 @@ import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.model.SelectorVideoData;
 import com.estsoft.muvicam.ui.base.BasePresenter;
-import com.estsoft.muvicam.ui.selector.injection.VideoSelectorScope;
-import com.estsoft.muvicam.ui.selector.videoselector.legacy.VideoSelectorAdapter;
+import com.estsoft.muvicam.ui.selector.videoselector.injection.VideoSelectorScope;
 import com.estsoft.muvicam.util.RxUtil;
 
 import java.util.ArrayList;
@@ -31,12 +30,12 @@ import rx.schedulers.Schedulers;
  * Created by Administrator on 2017-01-05.
  */
 @VideoSelectorScope
-public class VideoSelectorPresenter extends BasePresenter<VideoSelectorMvpView> implements VideoSelectorAdaptor.OnItemClickListener {
+public class VideoSelectorPresenter extends BasePresenter<VideoSelectorMvpView> implements VideoSelectorAdapter.OnItemClickListener {
 //    private VideoSelectorView mView;
     private SelectorVideoData selectorVideoData;
-    private VideoSelectorAdaptor mAdapter;
-    private VideoSelectorAdapterContract.Model adapterModel;
-    private VideoSelectorAdapterContract.View adapterView;
+    private VideoSelectorAdapter mAdapter;
+//    private VideoSelectorAdapterContract.Model adapterModel;
+//    private VideoSelectorAdapterContract.View adapterView;
     private int countSelected = 0;
     private String TAG = "VideoSelectorPresenter";
 
@@ -100,17 +99,17 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorMvpView> 
 
     }
 
-    public void setPickerAdapterModel(VideoSelectorAdapterContract.Model adapterModel) {
-        this.adapterModel = adapterModel;
-        adapterModel.addItems( selectorVideoData.getAllVideos() );
-    }
+//    public void setPickerAdapterModel(VideoSelectorAdapterContract.Model adapterModel) {
+//        this.adapterModel = adapterModel;
+//        adapterModel.addItems( selectorVideoData.getAllVideos() );
+//    }
+//
+//    public void setPickerAdapterView(VideoSelectorAdapterContract.View adapterView) {
+//        this.adapterView = adapterView;
+//        this.adapterView.setOnClickListener(this);
+//    }
 
-    public void setPickerAdapterView(VideoSelectorAdapterContract.View adapterView) {
-        this.adapterView = adapterView;
-        this.adapterView.setOnClickListener(this);
-    }
-
-    public void setAdapter( VideoSelectorAdaptor adapter ) {
+    public void setAdapter( VideoSelectorAdapter adapter ) {
         mAdapter = adapter;
         mAdapter.setOnClickListener( this );
         mAdapter.addItems( selectorVideoData.getAllVideos() );
@@ -131,7 +130,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorMvpView> 
                 layoutSelected.setVisibility(View.GONE);
                 for (EditorVideo mvt : mAdapter.getItems()) {
 //                for (EditorVideo mvt : adapterModel.getItems()) {
-                    if (mvt.getNumSelected() > adapterModel.getItem(position - 3).getNumSelected()) {
+                    if (mvt.getNumSelected() > mAdapter.getItem(position - 3).getNumSelected()) {
                         mvt.setNumSelected((mvt.getNumSelected() - 1));
                         mAdapter.notifyAdapter();
 //                        adapterView.notifyAdapter();

@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.selector.injection;
+package com.estsoft.muvicam.ui.selector.videoselector.injection;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

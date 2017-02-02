@@ -1,7 +1,8 @@
-package com.estsoft.muvicam.ui.selector.videoselector;
+package com.estsoft.muvicam.ui.selector.videoselector.legacy;
 
 
 import com.estsoft.muvicam.model.EditorVideo;
+import com.estsoft.muvicam.ui.selector.videoselector.VideoSelectorAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ public interface VideoSelectorAdapterContract {
 
     interface View {
         void notifyAdapter();
-        void setOnClickListener(VideoSelectorAdaptor.OnItemClickListener clickListener);
+        void setOnClickListener(VideoSelectorAdapter.OnItemClickListener clickListener);
 
     }
 

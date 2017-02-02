@@ -3,8 +3,8 @@ package com.estsoft.muvicam.injection.component;
 import com.estsoft.muvicam.injection.module.SelectorModule;
 import com.estsoft.muvicam.injection.scope.SelectorScope;
 import com.estsoft.muvicam.ui.selector.SelectorActivity;
-import com.estsoft.muvicam.ui.selector.injection.VideoSelectorComponent;
-import com.estsoft.muvicam.ui.selector.injection.VideoSelectorModule;
+import com.estsoft.muvicam.ui.selector.videoselector.injection.VideoSelectorComponent;
+import com.estsoft.muvicam.ui.selector.videoselector.injection.VideoSelectorModule;
 
 import dagger.Component;
 

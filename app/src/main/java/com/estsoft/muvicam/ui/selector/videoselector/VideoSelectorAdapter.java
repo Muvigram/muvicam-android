@@ -1,9 +1,7 @@
 package com.estsoft.muvicam.ui.selector.videoselector;
 
 import android.content.Context;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +13,7 @@ import android.widget.TextView;
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.injection.qualifier.ActivityContext;
 import com.estsoft.muvicam.model.EditorVideo;
-import com.estsoft.muvicam.ui.selector.injection.VideoSelectorScope;
+import com.estsoft.muvicam.ui.selector.videoselector.injection.VideoSelectorScope;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,27 +25,27 @@ import javax.inject.Inject;
  */
 
 @VideoSelectorScope
-public class VideoSelectorAdaptor extends RecyclerView.Adapter<VideoSelectorAdaptor.ViewHolder> {
+public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdapter.ViewHolder> {
 //        implements VideoSelectorAdapterContract.View, VideoSelectorAdapterContract.Model {
 
 
-    private static final String TAG = "VideoSelectorAdaptor";
+    private static final String TAG = "VideoSelectorAdapter";
     private final Context mContext;
 //    private final FragmentActivity mActivity;
-    VideoSelectorAdaptor.OnItemClickListener itemClickListener;
+    VideoSelectorAdapter.OnItemClickListener itemClickListener;
     List<EditorVideo> thumbnailImageViews;
 
     @Inject
-    public VideoSelectorAdaptor( @ActivityContext Context context ) {
+    public VideoSelectorAdapter(@ActivityContext Context context ) {
         mContext = context;
 //        mActivity = fragmentActivity;
     }
 
     @Override
-    public VideoSelectorAdaptor.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public VideoSelectorAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater mInflater = LayoutInflater.from(parent.getContext());
         View view = mInflater.inflate(R.layout.layout_recyclerview_selector_video, parent, false);
-        return new VideoSelectorAdaptor.ViewHolder(view);
+        return new VideoSelectorAdapter.ViewHolder(view);
     }
 
     @Override
@@ -61,7 +59,7 @@ public class VideoSelectorAdaptor extends RecyclerView.Adapter<VideoSelectorAdap
     }
 
     @Override
-    public void onBindViewHolder(VideoSelectorAdaptor.ViewHolder holder, int position) {
+    public void onBindViewHolder(VideoSelectorAdapter.ViewHolder holder, int position) {
         holder.space.setImageResource(R.drawable.editor_picker_white);
         holder.toShowTime.setImageResource(R.drawable.editor_picker_toshowtime);
         if (position < 3) {
@@ -175,7 +173,7 @@ public class VideoSelectorAdaptor extends RecyclerView.Adapter<VideoSelectorAdap
 
 
 //    @Override
-    public void setOnClickListener(VideoSelectorAdaptor.OnItemClickListener itemClickListener) {
+    public void setOnClickListener(VideoSelectorAdapter.OnItemClickListener itemClickListener) {
         this.itemClickListener = itemClickListener;
     }
 

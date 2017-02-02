@@ -17,9 +17,8 @@ import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.model.SelectorVideoData;
 import com.estsoft.muvicam.ui.common.BackToHomeDialogFragment;
 import com.estsoft.muvicam.ui.selector.SelectorActivity;
-import com.estsoft.muvicam.ui.selector.injection.VideoSelectorComponent;
-import com.estsoft.muvicam.ui.selector.injection.VideoSelectorModule;
-import com.estsoft.muvicam.ui.selector.videoselector.legacy.VideoSelectorAdapter;
+import com.estsoft.muvicam.ui.selector.videoselector.injection.VideoSelectorComponent;
+import com.estsoft.muvicam.ui.selector.videoselector.injection.VideoSelectorModule;
 
 import java.util.ArrayList;
 
@@ -29,7 +28,7 @@ import javax.inject.Inject;
 public class VideoSelectorFragment extends Fragment implements VideoSelectorMvpView {
     private String TAG = "VideoSelectorFragment";
     private String TAG_Lib = "Lib:";
-    private VideoSelectorAdapter videoSelectorAdapter;
+    private com.estsoft.muvicam.ui.selector.videoselector.legacy.VideoSelectorAdapter videoSelectorAdapter;
     private TextView nextButton, homeButton;
     private RecyclerView videoPickerRecyclerView;
 //    BasePresenter presenter;
@@ -98,7 +97,8 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorMvpV
         return fragment;
     }
 
-    @Inject VideoSelectorAdaptor mAdapter;
+    @Inject
+    VideoSelectorAdapter mAdapter;
     @Inject VideoSelectorPresenter mPresenter;
 
     @Override
