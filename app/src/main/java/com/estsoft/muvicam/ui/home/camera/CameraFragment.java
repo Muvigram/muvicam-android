@@ -584,6 +584,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       params.leftMargin = pos - trashbinWidth / 2;
     }
 
+    mStackTrashbinContainer.removeView(mStackTrashbin);
     mStackTrashbinContainer.addView(mStackTrashbin, params);
   }
 
@@ -1062,6 +1063,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
       // start capture request
       mCaptureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+      mCaptureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF);
       try {
         mSession.setRepeatingRequest(mCaptureRequestBuilder.build(), null, mBackgroundHandler);
       } catch (CameraAccessException e) {
