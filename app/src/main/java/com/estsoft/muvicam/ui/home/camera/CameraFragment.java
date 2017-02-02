@@ -1317,10 +1317,14 @@ public class CameraFragment extends Fragment implements CameraMvpView {
         case UI_LOGIC_RELEASE_SHOOT_BUTTON:
           mShootButton.setImageResource(R.drawable.camera_shoot_button_release_70dp);
           mShootButton.startAnimation(getAnimation(getActivity(), R.anim.clicking_101));
+          if (!duringShootingVideo) {
+            ((HomeActivity) getActivity()).enableScroll();
+          }
           break;
         case UI_LOGIC_HOLD_SHOOT_BUTTON:
           mShootButton.setImageResource(R.drawable.camera_shoot_button_hold_70dp);
           mShootButton.startAnimation(getAnimation(getActivity(), R.anim.clicking_101));
+          ((HomeActivity) getActivity()).disableScroll();
           break;
         case UI_LOGIC_LOCK_SHOOT_BUTTON:
           mShootButton.setImageResource(R.drawable.camera_shoot_button_shooting_70dp);
