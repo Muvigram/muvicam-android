@@ -118,16 +118,76 @@ public class VideoEditorResultFragment extends Fragment {
         videoResultPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
-                Log.d(TAG, "onCompletion: now1"+nowVideoNum);
-                       if(nowVideoNum== 0) musicResultPlayer.pause();
+                Log.d(TAG, "onCompletion1: nowVideoNum " + nowVideoNum);
+                nowVideoNum = nowVideoNum + 1;
+                if (nowVideoNum < resultVideos.size()) {
+                    //     Log.d(TAG, "run sec: " + nowVideoNum + " / " + resultVideos.size());
+                    videoResultPlayer2.start();
+                    videoResultTextureView2.bringToFront();
+                    //   Log.d(TAG, "run third: " + nowVideoNum + " / " + resultVideos.size());
+                    if (nowVideoNum + 1 < resultVideos.size()) {
+                        videoResultPlayer.setFirst(false);
+                        prepareVideoPlayer(videoResultPlayer, nowVideoNum + 1, true);
+                    }
+                } else {
+
+                    musicResultPlayer.pause();
+                    nowVideoNum = 0;
+
+                    if (flag && resultVideos.size() > nowVideoNum && !musicResultPlayer.isPlaying()) {
+                        if (resultVideos.size() > nowVideoNum + 1) {
+                            videoResultPlayer2.setFirst(false);
+                            prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
+                        }
+                        if (videoResultPlayer.isPlaying()) {
+                            videoResultPlayer.pause();
+                            videoResultPlayer.stop();
+                        }
+                        videoResultPlayer.setFirst(false);
+                        prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
+
+                    }
+                }
+
             }
         });
         videoResultPlayer2.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
-                Log.d(TAG, "onCompletion: now2 / "+nowVideoNum);
-//                                                                  if(nowVideoNum== 0 || nowVideoNum)
-                if(nowVideoNum== 0) musicResultPlayer.pause();
+                Log.d(TAG, "onCompletion2: nowVideoNum " + nowVideoNum);
+                nowVideoNum = nowVideoNum + 1;
+                Log.d(TAG, "run: nowVideoNum " + nowVideoNum);
+                if (nowVideoNum < resultVideos.size()) {
+                    videoResultPlayer.start();
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            videoResultTextureView.bringToFront();
+                        }
+                    });
+                    if (nowVideoNum + 1 < resultVideos.size()) {
+                        videoResultPlayer2.setFirst(false);
+                        prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
+                    }
+                    //else videoplayer1 to start
+                } else {
+                    musicResultPlayer.pause();
+                    nowVideoNum = 0;
+
+                    if (flag && resultVideos.size() > nowVideoNum && !musicResultPlayer.isPlaying()) {
+                        if (resultVideos.size() > nowVideoNum + 1) {
+                            videoResultPlayer2.setFirst(false);
+                            prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
+                        }
+                        if (videoResultPlayer.isPlaying()) {
+                            videoResultPlayer.pause();
+                            videoResultPlayer.stop();
+                        }
+                        videoResultPlayer.setFirst(false);
+                        prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
+                    }
+                }
+                videoResultTextureView.bringToFront();
             }
         });
         musicResultPlayer = new MediaPlayer();
@@ -146,7 +206,7 @@ public class VideoEditorResultFragment extends Fragment {
                 musicResultPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                                                               @Override
                                                               public void onCompletion(MediaPlayer mediaPlayer) {
-                                                                   videoResultTextureView.bringToFront();
+                                                                  videoResultTextureView.bringToFront();
                                                                   nowVideoNum = 0;
 
 
@@ -228,7 +288,7 @@ public class VideoEditorResultFragment extends Fragment {
             selectedVideoButtons.setVisibility(View.GONE);
             buttonsGone.setVisibility(View.VISIBLE);
         }
-        resultProgressBar = new ResultBarView(getContext(),0,0,true);
+        resultProgressBar = new ResultBarView(getContext(), 0, 0, true);
         linearResultSpace.addView(resultProgressBar);
         linearResultSpace.invalidate();
         return v;
@@ -438,6 +498,7 @@ public class VideoEditorResultFragment extends Fragment {
                                 videoResultPlayer.pause();
                                 videoResultPlayer.stop();
                                 nowVideoNum = nowVideoNum + 1;
+                                Log.d(TAG, "run: nowVideoNum " + nowVideoNum);
                                 if (nowVideoNum < resultVideos.size()) {
                                     //     Log.d(TAG, "run sec: " + nowVideoNum + " / " + resultVideos.size());
                                     videoResultPlayer2.start();
@@ -456,7 +517,7 @@ public class VideoEditorResultFragment extends Fragment {
                                 } else {
 
                                     musicResultPlayer.pause();
-                                    Log.d(TAG, "run: isMusicResultPlayer playing?"+musicResultPlayer.isPlaying());
+                                    Log.d(TAG, "run: isMusicResultPlayer playing?" + musicResultPlayer.isPlaying());
                                     nowVideoNum = 0;
 
 
@@ -485,7 +546,7 @@ public class VideoEditorResultFragment extends Fragment {
                                 videoResultPlayer2.stop();
                                 nowVideoNum = nowVideoNum + 1;
 
-
+                                Log.d(TAG, "run: nowVideoNum " + nowVideoNum);
                                 if (nowVideoNum < resultVideos.size()) {
                                     videoResultPlayer.start();
                                     getActivity().runOnUiThread(new Runnable() {
@@ -595,6 +656,5 @@ public class VideoEditorResultFragment extends Fragment {
             e.printStackTrace();
         }
     }
-
 
 }
