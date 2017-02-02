@@ -11,7 +11,7 @@ import java.util.List;
  * Created by Administrator on 2017-01-05.
  */
 
-public interface VideoSelectorAdapterContract {
+public interface LVideoSelectorAdapterContract {
 
     interface View {
         void notifyAdapter();

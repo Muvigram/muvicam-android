@@ -19,18 +19,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdapter.ViewHolder> implements VideoSelectorAdapterContract.View, VideoSelectorAdapterContract.Model {
-    String TAG = "VideoSelectorAdapter";
+public class LVideoSelectorAdapter extends RecyclerView.Adapter<LVideoSelectorAdapter.ViewHolder> implements LVideoSelectorAdapterContract.View, LVideoSelectorAdapterContract.Model {
+    String TAG = "LVideoSelectorAdapter";
     private final FragmentActivity mActivity;
     OnItemClickListener itemClickListener;
     List<EditorVideo> thumbnailImageViews;
 
-    public VideoSelectorAdapter(FragmentActivity fragmentActivity) {
+    public LVideoSelectorAdapter(FragmentActivity fragmentActivity) {
         mActivity = fragmentActivity;
     }
 
     @Override
-    public VideoSelectorAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public LVideoSelectorAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater mInflater = LayoutInflater.from(parent.getContext());
         View view = mInflater.inflate(R.layout.layout_recyclerview_selector_video, parent, false);
         return new ViewHolder(view);

@@ -9,6 +9,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
+import com.estsoft.muvicam.data.DataManager;
+import com.estsoft.muvicam.data.local.VideoService;
 import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.model.SelectorVideoData;
 import com.estsoft.muvicam.ui.base.BasePresenter;
@@ -31,18 +33,21 @@ import rx.schedulers.Schedulers;
  */
 @VideoSelectorScope
 public class VideoSelectorPresenter extends BasePresenter<VideoSelectorMvpView> implements VideoSelectorAdapter.OnItemClickListener {
-//    private VideoSelectorView mView;
+    private String TAG = "VideoSelectorPresenter";
+    //    private LVideoSelectorView mView;
     private SelectorVideoData selectorVideoData;
     private VideoSelectorAdapter mAdapter;
-//    private VideoSelectorAdapterContract.Model adapterModel;
-//    private VideoSelectorAdapterContract.View adapterView;
+//    private LVideoSelectorAdapterContract.Model adapterModel;
+//    private LVideoSelectorAdapterContract.View adapterView;
     private int countSelected = 0;
-    private String TAG = "VideoSelectorPresenter";
+
+    private DataManager mDataManager;
 
     Subscription subscription;
 
     @Inject
-    public VideoSelectorPresenter() {
+    public VideoSelectorPresenter(DataManager dataManager) {
+        mDataManager = dataManager;
     }
 
     @Override
@@ -51,7 +56,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorMvpView> 
     }
 
 //    @Override
-//    public VideoSelectorView getMvpView() {
+//    public LVideoSelectorView getMvpView() {
 //        return super.getMvpView();
 //    }
 
@@ -61,7 +66,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorMvpView> 
     }
 
 //    @Override
-//    public void attachView(VideoSelectorView mvpView) {
+//    public void attachView(LVideoSelectorView mvpView) {
 //        super.attachView(mvpView);
 //        mView = mvpView;
 //    }
@@ -71,13 +76,12 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorMvpView> 
         this.selectorVideoData = selectorVideoData;
     }
 
-    public void loadVideos(final Context context) {
+    public void loadVideos( ) {
 
-        VideoMetaDataScanner scanner = new VideoMetaDataScanner();
-        subscription = scanner.getVideoMetaData(context)
+        subscription = mDataManager.getVideoMetadata( true )
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .subscribe(new Observer<VideoMetaDataScanner.VideoMetaData>() {
+                .subscribe(new Observer<VideoService.VideoMetaData>() {
                                @Override
                                public void onCompleted() {
 
@@ -89,7 +93,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorMvpView> 
                                }
 
                                @Override
-                               public void onNext(VideoMetaDataScanner.VideoMetaData data) {
+                               public void onNext(VideoService.VideoMetaData data) {
                                    selectorVideoData.progressGetThumbnail(data);
                                    mAdapter.notifyDataListChanged();
 //                                   adapterModel.notifyDataListChanged();
@@ -99,12 +103,12 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorMvpView> 
 
     }
 
-//    public void setPickerAdapterModel(VideoSelectorAdapterContract.Model adapterModel) {
+//    public void setPickerAdapterModel(LVideoSelectorAdapterContract.Model adapterModel) {
 //        this.adapterModel = adapterModel;
 //        adapterModel.addItems( selectorVideoData.getAllVideos() );
 //    }
 //
-//    public void setPickerAdapterView(VideoSelectorAdapterContract.View adapterView) {
+//    public void setPickerAdapterView(LVideoSelectorAdapterContract.View adapterView) {
 //        this.adapterView = adapterView;
 //        this.adapterView.setOnClickListener(this);
 //    }
@@ -179,7 +183,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorMvpView> 
 
     // position : list of position
     @Deprecated
-    public void progress(VideoMetaDataScanner.VideoMetaData data) {
+    public void progress(VideoService.VideoMetaData data) {
         selectorVideoData.progressGetThumbnail(data);
     }
 

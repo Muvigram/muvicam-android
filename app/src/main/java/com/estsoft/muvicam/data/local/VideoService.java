@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.selector.videoselector;
+package com.estsoft.muvicam.data.local;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -15,8 +15,16 @@ import rx.schedulers.Schedulers;
  * Created by estsoft on 2017-01-25.
  */
 
-public class VideoMetaDataScanner {
-    private static final String TAG = "VideoMetaDataScanner";
+public class VideoService {
+    private static final String TAG = "VideoService";
+    private static final String ASC = " ASC";
+    private static final String DESC = " DESC";
+
+    private Context mContext;
+
+    public VideoService( Context context ) {
+        mContext = context;
+    }
 
     private int mPathIndex;
     private int mImageIdIndex;
@@ -36,12 +44,16 @@ public class VideoMetaDataScanner {
         mResolutionIndex = cursor.getColumnIndex( MediaStore.Video.VideoColumns.RESOLUTION );
     }
 
-    public Observable<VideoMetaData> getVideoMetaData( Context context ) {
+    public Observable<VideoMetaData> getVideos( boolean idOrderToDESC ) {
 
-            Cursor cursor = context.getContentResolver().query(
+        String order;
+        if (idOrderToDESC) order = DESC;
+        else order = ASC;
+
+            Cursor cursor = mContext.getContentResolver().query(
                     MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                     null, null, null,
-                    MediaStore.Video.Media._ID + " DESC"
+                    MediaStore.Video.Media._ID + order
                     , null
             );
 
@@ -54,7 +66,7 @@ public class VideoMetaDataScanner {
                 .doOnSubscribe( this::init )
                 .doOnCompleted( this::init )
                 .filter( this::isValid )
-                .map(cursor1 -> getVideoMetadata(cursor1, context) );
+                .map(cursor1 -> getVideoMetadata(cursor1) );
     }
 
     private void init() {
@@ -64,11 +76,11 @@ public class VideoMetaDataScanner {
         stopped = true;
     }
 
-    private VideoMetaData getVideoMetadata( Cursor cursor, Context context ) {
+    private VideoMetaData getVideoMetadata( Cursor cursor ) {
         if ( this.stopped ) return null;
         Log.d( TAG, "getVideoMetadata: extracted " + cursor.getString(mPathIndex) );
         return new VideoMetaData(
-                getThumbnailBitmap( cursor.getInt(mImageIdIndex), context ),
+                getThumbnailBitmap( cursor.getInt(mImageIdIndex), mContext ),
                 cursor.getInt(mWidthIndex),
                 cursor.getInt(mHeghtIndex),
                 cursor.getInt(mDurationIndex),

@@ -28,7 +28,7 @@ import javax.inject.Inject;
 public class VideoSelectorFragment extends Fragment implements VideoSelectorMvpView {
     private String TAG = "VideoSelectorFragment";
     private String TAG_Lib = "Lib:";
-    private com.estsoft.muvicam.ui.selector.videoselector.legacy.VideoSelectorAdapter videoSelectorAdapter;
+//    private com.estsoft.muvicam.ui.selector.videoselector.legacy.LVideoSelectorAdapter videoSelectorAdapter;
     private TextView nextButton, homeButton;
     private RecyclerView videoPickerRecyclerView;
 //    BasePresenter presenter;
@@ -49,8 +49,8 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorMvpV
 //            getActivity().runOnUiThread(new Runnable() {
 //                @Override
 //                public void run() {
-//                    VideoSelectorAdapter tempA = videoSelectorAdapter;
-//                    videoSelectorAdapter = new VideoSelectorAdapter(getActivity());
+//                    LVideoSelectorAdapter tempA = videoSelectorAdapter;
+//                    videoSelectorAdapter = new LVideoSelectorAdapter(getActivity());
 //                    ((VideoSelectorPresenter) presenter).setPickerAdapterModel(videoSelectorAdapter);
 //                    ((VideoSelectorPresenter) presenter).setPickerAdapterView(videoSelectorAdapter);
 //                    ((VideoSelectorPresenter) presenter).addItems(tempA.getItems());
@@ -70,7 +70,7 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorMvpV
     Thread getThumbnailObjectThread = new Thread(new Runnable() {
         @Override
         public void run() {
-            mPresenter.loadVideos( getActivity() );
+            mPresenter.loadVideos( );
 //            ((VideoSelectorPresenter) presenter).loadVideos(getActivity());
         }
     });
@@ -117,7 +117,7 @@ public class VideoSelectorFragment extends Fragment implements VideoSelectorMvpV
         videoPickerRecyclerView = (RecyclerView) v.findViewById(R.id.selector_recycler_view_videos);
         videoPickerRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
 
-//        videoSelectorAdapter = new VideoSelectorAdapter(getActivity());
+//        videoSelectorAdapter = new LVideoSelectorAdapter(getActivity());
 //        ((VideoSelectorPresenter) presenter).setPickerAdapterModel(videoSelectorAdapter);
 //        ((VideoSelectorPresenter) presenter).setPickerAdapterView(videoSelectorAdapter);
 //        ((VideoSelectorPresenter) presenter).addItems(new ArrayList<EditorVideo>());

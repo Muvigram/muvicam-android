@@ -26,10 +26,10 @@ import javax.inject.Inject;
 
 @VideoSelectorScope
 public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdapter.ViewHolder> {
-//        implements VideoSelectorAdapterContract.View, VideoSelectorAdapterContract.Model {
+//        implements LVideoSelectorAdapterContract.View, LVideoSelectorAdapterContract.Model {
 
 
-    private static final String TAG = "VideoSelectorAdapter";
+    private static final String TAG = "LVideoSelectorAdapter";
     private final Context mContext;
 //    private final FragmentActivity mActivity;
     VideoSelectorAdapter.OnItemClickListener itemClickListener;
