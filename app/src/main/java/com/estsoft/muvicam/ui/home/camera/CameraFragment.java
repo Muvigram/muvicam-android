@@ -108,7 +108,9 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_cut_button)
   public void _musicCut(View v) {
-    if (mMusic == null || !mVideoStack.isEmpty()) {
+    if (!isSessionPreviewReady ||
+        mMusic == null         ||
+        !mVideoStack.isEmpty()) {
       return;
     }
 
@@ -132,7 +134,8 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_selfie_button)
   public void _shiftSelfieMode(View v) {
-    if (!mVideoStack.isEmpty()) {
+    if (!isSessionPreviewReady ||
+        !mVideoStack.isEmpty()) {
       return;
     }
 
@@ -150,7 +153,9 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_ok_button)
   public void _completeVideo(View v) {
-    if (mVideoStack.isEmpty() || mMusicPlayer.getRelativePosition() < 5000) {
+    if (!isSessionPreviewReady ||
+        mVideoStack.isEmpty()  ||
+        mMusicPlayer.getRelativePosition() < 5000) {
       return;
     }
     v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
@@ -167,6 +172,10 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_library_button)
   public void _goToLibrary(View v) {
+    if (!isSessionPreviewReady ||
+        !mVideoStack.isEmpty()) {
+      return;
+    }
     v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
       @Override
       public void onAnimationEnd(Animation animation) {
@@ -177,7 +186,8 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   // OnClick
   public void _deleteRecentVideo(View v) {
-    if (mVideoStack.isEmpty()) {
+    if (!isSessionPreviewReady ||
+        mVideoStack.isEmpty()) {
       return;
     }
     v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
@@ -501,7 +511,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 //          mVideoStack.peek().toString(), mOffsetStack.peek());
     }
     if (!mVideoStack.isEmpty()) {
-      mUiThreadHandler.post(() -> updateTrashbin());
+      mUiThreadHandler.post(this::updateTrashbin);
       requestUiChange(UI_LOGIC_DURING_SHOOTING);
     }
 
@@ -517,37 +527,9 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       Timber.e("Pop the file file the stack %s [ms : %d]\n", oldVideo, oldOffset);
     }
     if (mVideoStack.isEmpty()) {
-      mUiThreadHandler.post(() -> updateTrashbin());
+      mUiThreadHandler.post(this::updateTrashbin);
       requestUiChange(UI_LOGIC_BEFORE_SHOOTING);
     }
-  }
-
-  //
-  private void saveAllFilesInStack() {
-    int i = 0;
-    for (Object obj : mVideoStack.toArray()) {
-      File file = (File) obj;
-      String fileName = String.format(Locale.US, "%d_%d.mp4",
-          System.currentTimeMillis(), i++);
-      File newFile = new File(mDir, fileName);
-
-      new Thread() {
-        @Override
-        public void run() {
-          super.run();
-          try {
-            FileUtil.copyFile(file, newFile);
-          } catch (IOException e) {
-            e.printStackTrace();
-          } finally {
-            Toast.makeText(getActivity(), "SAVE : " + mDir.toString() + fileName, Toast.LENGTH_SHORT).show();
-            Timber.e("Save the file $$ dir : %s, file : %s\n", mDir.toString(), fileName);
-          }
-        }
-      }.run();
-
-    }
-    mVideoStack.clear();
   }
 
   // STEP - STACK TRASH BIN ///////////////////////////////////////////////////////////////////////
