@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.selector.videoselector;
+package com.estsoft.muvicam.ui.selector.videoselector.legacy;
 
 import com.estsoft.muvicam.ui.base.BasePresenter;
 import com.estsoft.muvicam.ui.base.MvpView;

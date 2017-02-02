@@ -1,6 +1,5 @@
 package com.estsoft.muvicam.ui.selector.videoselector;
 
-import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import android.view.View;
@@ -13,10 +12,14 @@ import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
 import com.estsoft.muvicam.model.SelectorVideoData;
 import com.estsoft.muvicam.ui.base.BasePresenter;
+import com.estsoft.muvicam.ui.selector.injection.VideoSelectorScope;
+import com.estsoft.muvicam.ui.selector.videoselector.legacy.VideoSelectorAdapter;
 import com.estsoft.muvicam.util.RxUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import rx.Observer;
 import rx.Subscription;
@@ -27,10 +30,11 @@ import rx.schedulers.Schedulers;
 /**
  * Created by Administrator on 2017-01-05.
  */
-
-public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> implements VideoSelectorAdapter.OnItemClickListener {
-    private VideoSelectorView mView;
+@VideoSelectorScope
+public class VideoSelectorPresenter extends BasePresenter<VideoSelectorMvpView> implements VideoSelectorAdaptor.OnItemClickListener {
+//    private VideoSelectorView mView;
     private SelectorVideoData selectorVideoData;
+    private VideoSelectorAdaptor mAdapter;
     private VideoSelectorAdapterContract.Model adapterModel;
     private VideoSelectorAdapterContract.View adapterView;
     private int countSelected = 0;
@@ -38,26 +42,30 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
 
     Subscription subscription;
 
+    @Inject
+    public VideoSelectorPresenter() {
+    }
+
     @Override
     public boolean isViewAttached() {
         return super.isViewAttached();
     }
 
-    @Override
-    public VideoSelectorView getMvpView() {
-        return super.getMvpView();
-    }
+//    @Override
+//    public VideoSelectorView getMvpView() {
+//        return super.getMvpView();
+//    }
 
     @Override
     public void checkViewAttached() {
         super.checkViewAttached();
     }
 
-    @Override
-    public void attachView(VideoSelectorView mvpView) {
-        super.attachView(mvpView);
-        mView = mvpView;
-    }
+//    @Override
+//    public void attachView(VideoSelectorView mvpView) {
+//        super.attachView(mvpView);
+//        mView = mvpView;
+//    }
 
 
     public void setSelectorVideoData(SelectorVideoData selectorVideoData) {
@@ -84,7 +92,8 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
                                @Override
                                public void onNext(VideoMetaDataScanner.VideoMetaData data) {
                                    selectorVideoData.progressGetThumbnail(data);
-                                   adapterModel.notifyDataListChanged();
+                                   mAdapter.notifyDataListChanged();
+//                                   adapterModel.notifyDataListChanged();
                                }
                            }
                 );
@@ -101,6 +110,12 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
         this.adapterView.setOnClickListener(this);
     }
 
+    public void setAdapter( VideoSelectorAdaptor adapter ) {
+        mAdapter = adapter;
+        mAdapter.setOnClickListener( this );
+        mAdapter.addItems( selectorVideoData.getAllVideos() );
+    }
+
     //position : touched position
     @Override
     public void onItemClick(View view, int position) {
@@ -109,17 +124,23 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
         FrameLayout hide = (FrameLayout) view.findViewById(R.id.video_hided);
         TextView selectedNum = (TextView) view.findViewById(R.id.video_num);
         if (position > 2 && hide.getVisibility() == View.GONE) {
-            if (adapterModel.getItem(position - 3).isSelected()) {
-                selectorVideoData.removeSelectedVideo(adapterModel.getItem(position - 3));
+            if (mAdapter.getItem(position - 3).isSelected()) {
+//            if (adapterModel.getItem(position - 3).isSelected()) {
+                selectorVideoData.removeSelectedVideo( mAdapter.getItem( position - 3));
+//                selectorVideoData.removeSelectedVideo(adapterModel.getItem(position - 3));
                 layoutSelected.setVisibility(View.GONE);
-                for (EditorVideo mvt : adapterModel.getItems()) {
+                for (EditorVideo mvt : mAdapter.getItems()) {
+//                for (EditorVideo mvt : adapterModel.getItems()) {
                     if (mvt.getNumSelected() > adapterModel.getItem(position - 3).getNumSelected()) {
                         mvt.setNumSelected((mvt.getNumSelected() - 1));
-                        adapterView.notifyAdapter();
+                        mAdapter.notifyAdapter();
+//                        adapterView.notifyAdapter();
                     }
                 }
-                adapterModel.getItem(position - 3).setNumSelected(-1);
-                adapterModel.getItem(position - 3).setSelected(false);
+                mAdapter.getItem(position - 3).setNumSelected( -1 );
+//                adapterModel.getItem(position - 3).setNumSelected(-1);
+                mAdapter.getItem(position - 3).setSelected( false );
+//                adapterModel.getItem(position - 3).setSelected(false);
                 --countSelected;
             } else {
                 if (countSelected > 4) {
@@ -127,12 +148,16 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
                     Toast.makeText(view.getContext(), view.getResources().getString(R.string.selector_next_more_than_six_warning), Toast.LENGTH_SHORT).show();
                 } else {
 //                    Log.d(TAG, "audio" + adapterModel.getItem(position - 3).getAudioPath());
-                    adapterModel.getItem(position - 3).setSelected(true);
-                    adapterModel.getItem(position - 3).setNumSelected(countSelected + 1);
-                    String selectedNumS = "" + adapterModel.getItem(position - 3).getNumSelected();
+                    mAdapter.getItem( position - 3).setSelected(true);
+//                    adapterModel.getItem(position - 3).setSelected(true);
+                    mAdapter.getItem(position - 3).setNumSelected( countSelected + 1);
+//                    adapterModel.getItem(position - 3).setNumSelected(countSelected + 1);
+                    String selectedNumS = "" + mAdapter.getItem(position - 3).getNumSelected();
+//                    String selectedNumS = "" + adapterModel.getItem(position - 3).getNumSelected();
                     selectedNum.setText(selectedNumS);
                     layoutSelected.setVisibility(View.VISIBLE);
-                    selectorVideoData.addSelectedVideo(adapterModel.getItem(position - 3));
+                    selectorVideoData.addSelectedVideo(mAdapter.getItem(position - 3));
+//                    selectorVideoData.addSelectedVideo(adapterModel.getItem(position - 3));
                     ++countSelected;
                 }
 
@@ -145,10 +170,12 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
     public void detachView() {
         super.detachView();
         RxUtil.unsubscribe(subscription);
-        adapterModel.clearItem();
+        mAdapter.clearItem();
+//        adapterModel.clearItem();
         selectorVideoData.removeAllVideos();
         countSelected = 0;
-        adapterView.notifyAdapter();
+        mAdapter.notifyAdapter();
+//        adapterView.notifyAdapter();
     }
 
     // position : list of position
@@ -158,7 +185,8 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorView> imp
     }
 
     public void addItems(List<EditorVideo> videos) {
-        adapterModel.addItems(videos);
+        mAdapter.addItems(videos);
+//        adapterModel.addItems(videos);
     }
 
     public void setmCallBack(VideoSelectorFragment.DataPassListener context) {

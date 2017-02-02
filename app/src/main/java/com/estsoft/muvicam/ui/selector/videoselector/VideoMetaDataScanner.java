@@ -9,6 +9,7 @@ import android.util.Log;
 import com.estsoft.muvicam.util.CursorObservable;
 
 import rx.Observable;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by estsoft on 2017-01-25.
@@ -24,6 +25,8 @@ public class VideoMetaDataScanner {
     private int mHeghtIndex;
     private int mResolutionIndex;
 
+    private boolean stopped;
+
     private void initCursorIndex( Cursor cursor ) {
         mPathIndex = cursor.getColumnIndex( MediaStore.MediaColumns.DATA );
         mImageIdIndex = cursor.getColumnIndex( MediaStore.MediaColumns._ID );
@@ -33,7 +36,7 @@ public class VideoMetaDataScanner {
         mResolutionIndex = cursor.getColumnIndex( MediaStore.Video.VideoColumns.RESOLUTION );
     }
 
-    public Observable<VideoMetaData> getVideoMetaData(Context context ) {
+    public Observable<VideoMetaData> getVideoMetaData( Context context ) {
 
             Cursor cursor = context.getContentResolver().query(
                     MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
@@ -47,20 +50,35 @@ public class VideoMetaDataScanner {
                 return null;
             }
         return CursorObservable.create(cursor, true)
-                .filter(this::isValid)
-                .map(cursor1 -> new VideoMetaData(
-                        getThumbnailBitmap( cursor.getInt(mImageIdIndex), context ),
-                        cursor.getInt(mWidthIndex),
-                        cursor.getInt(mHeghtIndex),
-                        cursor.getInt(mDurationIndex),
-                        cursor.getInt(mDurationIndex) / 1000,
-                        cursor.getString(mPathIndex),
-                        0
-                ));
+                .doOnUnsubscribe( this::stopExtracting )
+                .doOnSubscribe( this::init )
+                .doOnCompleted( this::init )
+                .filter( this::isValid )
+                .map(cursor1 -> getVideoMetadata(cursor1, context) );
+    }
+
+    private void init() {
+        stopped = false;
+    }
+    private void stopExtracting() {
+        stopped = true;
+    }
+
+    private VideoMetaData getVideoMetadata( Cursor cursor, Context context ) {
+        if ( this.stopped ) return null;
+        Log.d( TAG, "getVideoMetadata: extracted " + cursor.getString(mPathIndex) );
+        return new VideoMetaData(
+                getThumbnailBitmap( cursor.getInt(mImageIdIndex), context ),
+                cursor.getInt(mWidthIndex),
+                cursor.getInt(mHeghtIndex),
+                cursor.getInt(mDurationIndex),
+                cursor.getInt(mDurationIndex) / 1000,
+                cursor.getString(mPathIndex),
+                0
+        );
     }
 
     private boolean isValid( Cursor cursor ) {
-        Log.d(TAG, "isValid: " + cursor.getString( mPathIndex ) );
         String path = cursor.getString( mPathIndex );
         return path.endsWith(".mp4") && !path.contains("camera_video_test");
     }

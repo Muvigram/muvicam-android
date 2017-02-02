@@ -29,7 +29,6 @@ public class VideoTrackTranscoder implements TrackTranscoder {
     private final MediaFormat mOutputFormat;
     private final BufferListener mBufferListener;
     private final int mTrackIndex;
-    private final boolean mFlipping;
     private MediaFormat mActualOutputFormat;
     private MediaCodec mEncoder;
     private MediaCodec mDecoder;
@@ -48,14 +47,15 @@ public class VideoTrackTranscoder implements TrackTranscoder {
     private boolean sawExtractorEOS;
     private boolean forceExtractingStop;
     private boolean mEncodePermitted;
+    private boolean mFlipping;
 
-    public VideoTrackTranscoder(MediaExtractor extractor, MediaFormat outFormat, BufferListener bufferListener, int trackIndex, boolean flipping ) {
+    public VideoTrackTranscoder(MediaExtractor extractor, MediaFormat outFormat, BufferListener bufferListener, int trackIndex ) {
         this.mExtractor = extractor;
         this.mOutputFormat = outFormat;
         this.mBufferListener = bufferListener;
         this.mTrackIndex = trackIndex;
         this.mBufferInfo = new MediaCodec.BufferInfo();
-        this.mFlipping = flipping;
+//        this.mFlipping = flipping;
     }
 
     @Override
@@ -77,12 +77,18 @@ public class VideoTrackTranscoder implements TrackTranscoder {
         mEncoderOutputBuffers = mEncoder.getOutputBuffers();
 
         MediaFormat inputFormat = mExtractor.getTrackFormat( mTrackIndex );
+
+        // NOTE Surface ROTATION
+        int originRotation = 0;
         if (inputFormat.containsKey( MediaFormatExtraInfo.KEY_ROTATION_DEGREES )) {
-            // Decoded video is rotated automatically in Android 5.0 lollipop.
-            // Turn off here because we don't want to encode rotated one.
-            // refer: https://android.googlesource.com/platform/frameworks/av/+blame/lollipop-release/media/libstagefright/Utils.cpp
-            inputFormat.setInteger( MediaFormatExtraInfo.KEY_ROTATION_DEGREES, 0 );
+            originRotation = inputFormat.getInteger( MediaFormatExtraInfo.KEY_ROTATION_DEGREES);
         }
+        // NOTE is from front camera ?
+        if ( originRotation == 270 ) mFlipping = true;
+        int rotation = originRotation - 90;
+
+        inputFormat.setInteger( MediaFormatExtraInfo.KEY_ROTATION_DEGREES, rotation < 0 ? rotation + 360 : rotation );
+
         // OutputSurface uses the EGL context created by InputSurface
         mDecoderOutputSurfaceWrapper = new OutputSurface();
         try {
