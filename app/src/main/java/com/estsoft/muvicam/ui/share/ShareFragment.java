@@ -137,6 +137,7 @@ public class ShareFragment extends Fragment implements ShareMvpView {
     public void onDestroyView() {
         mVideoView.stopPlayback();
         mUnbinder.unbind();
+        mPresenter.deleteCashFile();
         if (mUnbinder != null) {
             mUnbinder = null;
         }
@@ -184,10 +185,7 @@ public class ShareFragment extends Fragment implements ShareMvpView {
     public void videoSetAndStart( String videoPath, int durationMs ) {
         mVideoView.setOnCompletionListener( mediaPlayer  ->    mVideoView.start()   );
         mVideoView.setOnPreparedListener( mediaPlayer ->  {
-
-//            mVideoView.start();
             mThumbnailHolder.setVisibility(View.GONE);
-
         });
         mVideoView.setupReplay( 0, durationMs , null );
         mVideoView.setVideoPath( videoPath );

@@ -14,14 +14,6 @@ import java.nio.ByteBuffer;
 
 public class MediaTarget {
     private static final String TAG = "MediaTarget";
-    public static final int VIDEO_ONLY = -101;
-    public static final int AUDIO_ONLY = -102;
-    public static final int NORMAL = -103;
-    public static int CURRENT_MODE = 104;
-
-//    MuxerWrapper muxerWrapper;
-//    private final String outputFilePath;
-//    private final int outputContainer = MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4;
 
     MediaFormat videoOutputFormat;
     private final String videoCodec = MediaFormatExtraInfo.MIMETYPE_VIDEO_AVC;
@@ -32,43 +24,18 @@ public class MediaTarget {
     private final String audioCodec = MediaFormatExtraInfo.MIMETYPE_AUDIO_AAC;
     private final int audioAACProfile = MediaCodecInfo.CodecProfileLevel.AACObjectLC;
 
-    public MediaTarget() {
+    public void initVideoTarget(int interval, int frameRate, int bitrate, int width, int height ) {
 
-    }
-//    public MediaTarget( MuxerWrapper wrapper, String outputFilePath ) {
-//        this.muxerWrapper = wrapper;
-//        this.outputFilePath = outputFilePath;
-//    }
-//
-//    public MediaTarget(String outputFilePath, int mode) {
-//        this.outputFilePath = outputFilePath;
-//        MediaMuxer muxer;
-//        try {
-//            muxer = new MediaMuxer(this.outputFilePath, outputContainer);
-//        } catch ( IOException e ) {
-//            throw new IllegalStateException( e );
-//        }
-//        CURRENT_MODE = mode;
-//        int muxerMode = -1;
-//        switch ( mode ) {
-//            case VIDEO_ONLY : muxerMode = MuxerWrapper.VIDEO_ONLY; break;
-//            case AUDIO_ONLY : muxerMode = MuxerWrapper.AUDIO_ONLY; break;
-//            case NORMAL : muxerMode = MuxerWrapper.NORMAL; break;
-//            default : muxerMode = MuxerWrapper.NORMAL; break;
-//        }
-//        muxerWrapper = new MuxerWrapper( muxer, muxerMode );
-//    }
-
-    public void initVideoTarget(int interval, int frameRate, int bitrate, int rotation, int width, int height, boolean videoFlipping ) {
         videoOutputFormat = MediaFormat.createVideoFormat( videoCodec, width, height );
         videoOutputFormat.setInteger( MediaFormat.KEY_I_FRAME_INTERVAL, interval );
         videoOutputFormat.setInteger( MediaFormat.KEY_FRAME_RATE, frameRate );
         videoOutputFormat.setInteger( MediaFormat.KEY_BIT_RATE, bitrate );
         videoOutputFormat.setInteger( MediaFormat.KEY_COLOR_FORMAT, colorFormat );
-        this.videoFlipping = videoFlipping;
+
         // NOTE Coded will select a profile on its own
 //        videoOutputFormat.setInteger( MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AVCProfileBaseline );
 //        setCsdForVideo( videoOutputFormat );
+
     }
     private void setCsdForVideo( MediaFormat format ) {
         byte[] header_sps = { 0, 0, 0, 1, 103, 100, 0, 40, -84, 52, -59, 1, -32, 17, 31, 120, 11, 80, 16, 16, 31, 0, 0, 3, 3, -23, 0, 0, -22, 96, -108 };

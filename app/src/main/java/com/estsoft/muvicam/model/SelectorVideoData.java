@@ -1,7 +1,7 @@
 package com.estsoft.muvicam.model;
 
 
-import com.estsoft.muvicam.ui.selector.videoselector.VideoMetaDataScanner;
+import com.estsoft.muvicam.data.local.VideoService;
 import com.estsoft.muvicam.ui.selector.videoselector.VideoSelectorFragment;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ public class SelectorVideoData {
 
     private VideoSelectorFragment.DataPassListener mCallBack;
 
-    public void progressGetThumbnail(VideoMetaDataScanner.VideoMetaData data) {
+    public void progressGetThumbnail(VideoService.VideoMetaData data) {
 
         EditorVideo video = new EditorVideo();
         video.setVideoPath(data.videoPath);

@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.estsoft.muvicam.data.local.MusicService;
+import com.estsoft.muvicam.data.local.VideoService;
 import com.estsoft.muvicam.model.Music;
 
 import java.util.List;
@@ -22,10 +23,15 @@ import rx.Observable;
 public class DataManager {
 
   private MusicService mMusicService;
+  private VideoService mVideoService;
 
   @Inject
-  public DataManager(MusicService musicService) {
+  public DataManager(MusicService musicService,
+                     VideoService videoService) {
+
     mMusicService = musicService;
+    mVideoService = videoService;
+
   }
 
   // TODO - Which one is fast?
@@ -49,5 +55,9 @@ public class DataManager {
       }
     }
     return false;
+  }
+
+  public Observable<VideoService.VideoMetaData> getVideoMetadata( boolean lastTakenVideoFirst ) {
+    return mVideoService.getVideos( lastTakenVideoFirst );
   }
 }

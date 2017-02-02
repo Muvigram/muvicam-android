@@ -6,6 +6,7 @@ import android.content.Context;
 import dagger.Module;
 import dagger.Provides;
 import com.estsoft.muvicam.data.local.MusicService;
+import com.estsoft.muvicam.data.local.VideoService;
 import com.estsoft.muvicam.injection.qualifier.ApplicationContext;
 import com.estsoft.muvicam.util.RxEventBus;
 
@@ -49,4 +50,8 @@ public class ApplicationModule {
   public MusicService provideMusicService() {
     return new MusicService(mApplication);
   }
+
+  @Provides
+  @Singleton
+  public VideoService provideVideoService() { return new VideoService(mApplication); }
 }

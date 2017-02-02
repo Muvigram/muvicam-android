@@ -59,7 +59,6 @@ public class ShareVideoView extends VideoView {
             makeThread();
            while( isThreadAlive() ) {
                sleepWhile( WATCH_INTERVAL_MS );
-//               Log.d( TAG, "setupWatcher: " + Thread.currentThread().getName() + " / " + getCurrentPosition() + " / " + mPlayLimit );
                if ( getCurrentPosition() >= mPlayLimit ) {
                    seekTo( mPlayOffset );
                    WATCH_INTERVAL_MS = WATCH_INTERVAL_STANDARD;
