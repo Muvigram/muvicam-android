@@ -491,7 +491,7 @@ public class VideoEditorEditFragment extends Fragment {
                                                             }
                                                             if (position-(seekBarLeft.getX()+seekBarLeft.getWidth()) <= getThumbnailSizePSec()) {
                                                                 Log.d(TAG, "seekBarRight: distance less than mindistance2");
-                                                                seekBarLeft.setTranslationX(view.getX() - getThumbnailSizePSec() - seekBarLeft.getWidth());
+                                                                seekBarLeft.setTranslationX(position - getThumbnailSizePSec() - seekBarLeft.getWidth());
                                                                 nowVideo.setStart((int) Math.floor((seekBarLeft.getX() + seekBarLeft.getWidth() - 10 * dpi) * 1000 / getThumbnailSizePSec()));
                                                             }
                                                         }
