@@ -159,6 +159,7 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
             thumbnailImageViews.clear();
             notifyAdapter();
         }
+        thumbnailImageViews = null;
     }
 
 //    @Override

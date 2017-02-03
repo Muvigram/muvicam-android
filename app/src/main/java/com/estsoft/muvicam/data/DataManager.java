@@ -58,7 +58,6 @@ public class DataManager {
   }
 
   public Observable<VideoService.VideoMetaData> getVideoMetadata( boolean lastTakenVideoFirst ) {
-    mVideoService.scanGallery();
     return mVideoService.getVideos( lastTakenVideoFirst );
   }
 }

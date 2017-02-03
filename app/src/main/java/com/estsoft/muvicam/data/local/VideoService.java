@@ -33,7 +33,7 @@ public class VideoService {
     private int mDurationIndex;
     private int mWidthIndex;
     private int mHeghtIndex;
-    private int mResolutionIndex;
+//    private int mResolutionIndex;
 
     private boolean stopped;
 
@@ -43,13 +43,7 @@ public class VideoService {
         mDurationIndex = cursor.getColumnIndex( MediaStore.Video.VideoColumns.DURATION );
         mWidthIndex = cursor.getColumnIndex( MediaStore.Video.VideoColumns.WIDTH );
         mHeghtIndex = cursor.getColumnIndex( MediaStore.Video.VideoColumns.HEIGHT );
-        mResolutionIndex = cursor.getColumnIndex( MediaStore.Video.VideoColumns.RESOLUTION );
-        cursor.moveToFirst();
-    }
-
-    public void scanGallery() {
-        mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
-                Uri.parse("file://" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM))));
+//        mResolutionIndex = cursor.getColumnIndex( MediaStore.Video.VideoColumns.RESOLUTION );
     }
 
     public Observable<VideoMetaData> getVideos( boolean idOrderToDESC ) {

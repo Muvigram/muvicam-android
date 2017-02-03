@@ -86,8 +86,13 @@ public class VideoTrackTranscoder implements TrackTranscoder {
         Log.d(TAG, "setup ... : " + originRotation);
         // NOTE is from front camera ?
         if ( originRotation == 270 ) mFlipping = true;
-        int rotation = originRotation;
-        if ( originRotation == 270 || originRotation == 90 ) rotation = originRotation - 90;
+        int rotation = getProperRotation(
+                inputFormat.getInteger( MediaFormat.KEY_WIDTH),
+                inputFormat.getInteger( MediaFormat.KEY_HEIGHT),
+                originRotation
+        );
+
+        Log.d(TAG, "setup: ... re-rotation  " + rotation);
 
         inputFormat.setInteger( MediaFormatExtraInfo.KEY_ROTATION_DEGREES, rotation < 0 ? rotation + 360 : rotation );
 
@@ -102,6 +107,20 @@ public class VideoTrackTranscoder implements TrackTranscoder {
         mDecoder.start();
         isDecoderStarted = true;
         mDecoderInputBuffers = mDecoder.getInputBuffers();
+    }
+
+    private int getProperRotation(int width, int height, int originRotation ) {
+        Log.d(TAG, "getProperRotation: " + originRotation);
+        if ( originRotation == 90 ) {
+            if ( width > height ) return 0;
+            else return 0;
+        } else if (originRotation == 0 ) {
+            if ( width > height ) return 0;
+            else return 270;
+        } else if ( originRotation == 270 ) {
+            return 180;
+        }
+        return 0;
     }
 
     @Override

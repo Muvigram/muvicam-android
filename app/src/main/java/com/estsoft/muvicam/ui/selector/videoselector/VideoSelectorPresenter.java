@@ -84,7 +84,8 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorMvpView> 
                 .subscribe(new Observer<VideoService.VideoMetaData>() {
                                @Override
                                public void onCompleted() {
-
+                                   subscription.unsubscribe();
+                                   Log.d(TAG, "onCompleted: ");
                                }
 
                                @Override
@@ -96,6 +97,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorMvpView> 
                                public void onNext(VideoService.VideoMetaData data) {
                                    selectorVideoData.progressGetThumbnail(data);
                                    mAdapter.notifyDataListChanged();
+                                   Log.d(TAG, "onNext: " + data.toString());
 //                                   adapterModel.notifyDataListChanged();
                                }
                            }
@@ -172,7 +174,7 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorMvpView> 
     @Override
     public void detachView() {
         super.detachView();
-        RxUtil.unsubscribe(subscription);
+        if (!subscription.isUnsubscribed()) RxUtil.unsubscribe(subscription);
         mAdapter.clearItem();
 //        adapterModel.clearItem();
         selectorVideoData.removeAllVideos();

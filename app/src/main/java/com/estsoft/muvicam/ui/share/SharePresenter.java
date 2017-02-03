@@ -78,7 +78,7 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
         mContext = context;
         mActivity = activity;
         mTmpStoredPath = TranscodeUtils.getAppCashingFile( mContext );
-        mLogoVideoFile = mContext.getResources().openRawResourceFd(R.raw.logo_video_1s);
+        mLogoVideoFile = mContext.getResources().openRawResourceFd(R.raw.logo_sound_0d_1s);
         Toast.makeText(mContext, mTmpStoredPath, Toast.LENGTH_LONG).show();
         Log.e(TAG, "SharePresenter: " + mTmpStoredPath );
     }
@@ -152,8 +152,8 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
         int logoDuration = Integer.parseInt(
                         retriever.extractMetadata(  MediaMetadataRetriever.METADATA_KEY_DURATION ));
 
-        mView.videoSetAndStart( mTmpStoredPath, duration );
-//        mView.videoSetAndStart( mTmpStoredPath, duration - logoDuration );
+//        mView.videoSetAndStart( mTmpStoredPath, duration );
+        mView.videoSetAndStart( mTmpStoredPath, duration - logoDuration );
     }
 
     /* click control */

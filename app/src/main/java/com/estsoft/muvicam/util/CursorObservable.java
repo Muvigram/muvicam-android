@@ -1,6 +1,7 @@
 package com.estsoft.muvicam.util;
 
 import android.database.Cursor;
+import android.util.Log;
 
 import java.util.concurrent.Semaphore;
 
@@ -36,6 +37,7 @@ public class CursorObservable {
         sub.onError(e);
       } finally {
         if (autoClose && !cursor.isClosed()) {
+          Log.d("test","create: Closed");
           cursor.close();
         }
       }
