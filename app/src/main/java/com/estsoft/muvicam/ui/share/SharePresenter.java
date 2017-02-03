@@ -21,7 +21,7 @@ import com.estsoft.muvicam.transcoder.wrappers.MediaEditor;
 import com.estsoft.muvicam.transcoder.wrappers.MediaTranscoder;
 import com.estsoft.muvicam.transcoder.wrappers.ProgressListener;
 import com.estsoft.muvicam.ui.base.BasePresenter;
-import com.estsoft.muvicam.ui.share.injection.ShareScope;
+import com.estsoft.muvicam.ui.share.injection.ShareMediaScope;
 
 import java.io.File;
 import java.util.List;
@@ -34,7 +34,7 @@ import rx.Subscription;
  * Created by estsoft on 2017-01-19.
  */
 
-@ShareScope
+@ShareMediaScope
 public class SharePresenter extends BasePresenter<ShareMvpView>{
     private static final String TAG = "SharePresenter";
     private final String EXPORT_VIDEO_TYPE = "video/*";
@@ -78,7 +78,7 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
         mContext = context;
         mActivity = activity;
         mTmpStoredPath = TranscodeUtils.getAppCashingFile( mContext );
-        mLogoVideoFile = mContext.getResources().openRawResourceFd(R.raw.logo_sound_90d_1s);
+        mLogoVideoFile = mContext.getResources().openRawResourceFd(R.raw.logo_video_1s);
         Toast.makeText(mContext, mTmpStoredPath, Toast.LENGTH_LONG).show();
         Log.e(TAG, "SharePresenter: " + mTmpStoredPath );
     }

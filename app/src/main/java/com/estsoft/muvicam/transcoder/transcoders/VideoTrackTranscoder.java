@@ -83,9 +83,11 @@ public class VideoTrackTranscoder implements TrackTranscoder {
         if (inputFormat.containsKey( MediaFormatExtraInfo.KEY_ROTATION_DEGREES )) {
             originRotation = inputFormat.getInteger( MediaFormatExtraInfo.KEY_ROTATION_DEGREES);
         }
+        Log.d(TAG, "setup ... : " + originRotation);
         // NOTE is from front camera ?
         if ( originRotation == 270 ) mFlipping = true;
-        int rotation = originRotation - 90;
+        int rotation = originRotation;
+        if ( originRotation == 270 || originRotation == 90 ) rotation = originRotation - 90;
 
         inputFormat.setInteger( MediaFormatExtraInfo.KEY_ROTATION_DEGREES, rotation < 0 ? rotation + 360 : rotation );
 
