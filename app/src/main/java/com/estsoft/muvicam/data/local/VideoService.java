@@ -9,7 +9,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import com.estsoft.muvicam.util.CursorObservableVideo;
+import com.estsoft.muvicam.util.CursorObservable;
 
 import rx.Observable;
 
@@ -69,7 +69,7 @@ public class VideoService {
             if (cursor == null || !cursor.moveToFirst()) {
                 return null;
             }
-        return CursorObservableVideo.create(cursor, true)
+        return CursorObservable.create(cursor, true)
 //                .doOnUnsubscribe( this::stopExtracting )
 //                .doOnSubscribe( this::init )
 //                .doOnCompleted( this::init )

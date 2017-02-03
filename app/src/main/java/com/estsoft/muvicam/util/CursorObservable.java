@@ -22,10 +22,16 @@ public class CursorObservable {
         return;
       }
       try {
-        while (cursor.moveToNext()) {
-          sub.onNext(cursor);
-        }
+        do {
+          if (sub.isUnsubscribed()) {
+            sub.onCompleted();
+            return;
+          }
+          sub.onNext( cursor );
+        } while( cursor.moveToNext() );
+
         sub.onCompleted();
+
       } catch (Exception e) {
         sub.onError(e);
       } finally {
