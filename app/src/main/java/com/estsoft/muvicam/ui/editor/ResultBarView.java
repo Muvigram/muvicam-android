@@ -13,10 +13,6 @@ import android.view.View;
 
 import com.estsoft.muvicam.R;
 
-/**
- * Created by Administrator on 2017-01-10.
- */
-
 public class ResultBarView extends View {
     private Paint paint;
     // ms

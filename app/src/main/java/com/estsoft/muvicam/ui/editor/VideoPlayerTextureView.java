@@ -22,7 +22,6 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
     String TAG = "VideoTextureView";
     MuvicamMediaPlayer muvicamMediaPlayer;
     EditorResultMediaPlayer editorResultMediaPlayer;
-    Activity activity;
     int rotation, editorvideoWidth, editorVideoHeight;
     EditorVideo nowVideo;
 
@@ -47,7 +46,7 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
             public void onPrepared(MediaPlayer mediaPlayer) {
                 Log.d(TAG, "onPrepared: ");
                 if (nowVideo != null) mediaPlayer.seekTo(nowVideo.getStart());
-        }
+            }
         });
 
         this.muvicamMediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
@@ -66,7 +65,7 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
         this.editorvideoWidth = editorVideoWidth;
         this.rotation = rotation;
         this.editorVideoHeight = editorVideoHeight;
-       this.editorResultMediaPlayer = editorResultMediaPlayer;
+        this.editorResultMediaPlayer = editorResultMediaPlayer;
         this.setSurfaceTextureListener(this);
     }
 
@@ -107,13 +106,11 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         Log.d(TAG, "onMeasure: w " + editorvideoWidth + "/ h " + editorVideoHeight + "r " + rotation);
 
-        if ((editorvideoWidth > editorVideoHeight && rotation == 0)||(editorvideoWidth < editorVideoHeight && rotation != 0)) {
+        if ((editorvideoWidth > editorVideoHeight && rotation == 0) || (editorvideoWidth < editorVideoHeight && rotation != 0)) {
             this.setRotation(90);
-        }
-        if ((editorvideoWidth > editorVideoHeight && rotation == 0)||(editorvideoWidth < editorVideoHeight && rotation != 0)) {
             setMeasuredDimension(heightMeasureSpec, widthMeasureSpec);
         } else {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
 
         FrameLayout.LayoutParams layoutParam = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);

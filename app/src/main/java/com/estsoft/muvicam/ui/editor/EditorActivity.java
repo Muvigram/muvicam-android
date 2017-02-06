@@ -44,8 +44,6 @@ public class EditorActivity extends BaseActivity implements VideoEditorResultFra
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
-        //   getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-
         Bundle args = getIntent().getExtras();
         ArrayList<EditorVideo> selectedVideos = args.getParcelableArrayList(EXTRA_VIDEOS);
         String musicPath = args.getString(EXTRA_MUSIC_PATH);
@@ -55,16 +53,9 @@ public class EditorActivity extends BaseActivity implements VideoEditorResultFra
 
     }
 
-//    @Override
-//    public void onBackPressed() {
-//        //super.onBackPressed();
-//
-//    }
-
     @Override
     public void passDataFToF(int selectedNum, ArrayList<EditorVideo> selectedVideos, ArrayList<EditorVideo> resultEditorVideos, int resultVideosTotalTime, String musicPath, int musicOffset, int musicLength) {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragment = fragmentManager.findFragmentById(R.id.editor_fragment_container);
         Bundle args = new Bundle();
 
         if (selectedNum == 0) {
@@ -88,7 +79,7 @@ public class EditorActivity extends BaseActivity implements VideoEditorResultFra
         args.putInt(VideoEditorResultFragment.EXTRA_MUSIC_LENGTH, musicLength);
 
         fragment.setArguments(args);
-        fragmentManager.beginTransaction().replace(R.id.editor_fragment_container, fragment).commit();
+        fragmentManager.beginTransaction().replace(R.id.editor_fragment_container, fragment).disallowAddToBackStack().commit();
     }
 
     @Override

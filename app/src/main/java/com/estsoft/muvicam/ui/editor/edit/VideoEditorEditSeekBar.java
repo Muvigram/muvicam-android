@@ -44,10 +44,8 @@ public class VideoEditorEditSeekBar extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
         paint.setColor(ContextCompat.getColor(getContext(), R.color.resultSpace));
         paint.setStyle(Paint.Style.FILL);
-
         canvas.drawRect(startX, 0, startX + getResources().getDimension(R.dimen.editbar_seek_width), getResources().getDimension(R.dimen.editbar_seek_height), paint);
     }
 

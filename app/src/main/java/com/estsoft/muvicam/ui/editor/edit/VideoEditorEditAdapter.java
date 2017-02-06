@@ -17,10 +17,6 @@ import com.estsoft.muvicam.ui.selector.videoselector.ThumbnailImageView;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Administrator on 2017-01-10.
- */
-
 public class VideoEditorEditAdapter extends RecyclerView.Adapter<VideoEditorEditAdapter.ViewHolder> {
     String TAG = "";
     private final FragmentActivity mActivity;
@@ -73,17 +69,9 @@ public class VideoEditorEditAdapter extends RecyclerView.Adapter<VideoEditorEdit
 
         @Override
         public void onClick(View view) {
-            //        videoEditorFragment.setResultClicked(false);
-            //       videoEditorFragment.setEditClicked(true);
-            //       mActivity.findViewById(R.id.video_result).setBackgroundColor(ContextCompat.getColor(mActivity, R.color.colorEditBackground));
-            if (itemClickListener != null) {
+         if (itemClickListener != null) {
                 itemClickListener.onItemClick(view, getAdapterPosition());
             }
-            //           if (!videoEditorFragment.videoRunningThread.isAlive() && !videoEditorFragment.isThreadRun()) {
-            //               videoEditorFragment.setThreadRun(true);
-            //               videoEditorFragment.videoRunningThread.start();
-            //           }
-
         }
     }
 
@@ -102,5 +90,13 @@ public class VideoEditorEditAdapter extends RecyclerView.Adapter<VideoEditorEdit
 
     public int getSelectedFragmentNum() {
         return selectedFragmentNum;
+    }
+
+    public void recycleThumbnails() {
+        for (EditorVideo e : videoThumbnails) {
+            e.getThumbnailBitmap().recycle();
+            e.setThumbnailBitmap(null);
+        }
+        videoThumbnails.clear();
     }
 }
