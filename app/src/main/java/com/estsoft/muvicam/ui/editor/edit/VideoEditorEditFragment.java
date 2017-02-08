@@ -711,4 +711,13 @@ public class VideoEditorEditFragment extends Fragment {
     private float getDistanceSeekBars() {
         return seekBarRight.getX() - (seekBarLeft.getX() + seekBarLeft.getWidth());
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        for (EditorVideo e : videoThumbnails){
+            Log.d(TAG, "onDestroy: "+e.getThumbnailBitmap());
+            if(e.getThumbnailBitmap() != null) e.getThumbnailBitmap().recycle();
+        }
+    }
 }
