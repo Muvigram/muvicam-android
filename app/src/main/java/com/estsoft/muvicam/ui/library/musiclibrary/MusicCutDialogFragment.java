@@ -133,7 +133,7 @@ public class MusicCutDialogFragment extends DialogFragment {
 
     builder.setView(view)
         .setPositiveButton(android.R.string.ok, (dialog, id) -> {
-          LibraryActivity.get(this).completeSelection(mMusic.uri().toString(), mOffset, 15);
+          LibraryActivity.get(this).completeMusicSelection(mMusic.uri().toString(), mOffset, 15);
         })
         .setNegativeButton(android.R.string.cancel, (dialog, id) -> dismiss());
 

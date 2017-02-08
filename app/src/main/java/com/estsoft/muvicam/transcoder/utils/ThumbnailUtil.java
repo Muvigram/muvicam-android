@@ -1,21 +1,13 @@
 package com.estsoft.muvicam.transcoder.utils;
 
 import android.app.Activity;
-import android.content.Context;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.MediaCodecInfo;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
-import android.provider.MediaStore;
 import android.util.Log;
 
 import com.estsoft.muvicam.transcoder.transcoders.VideoTrackDecoder;
-import com.estsoft.muvicam.ui.selector.videoselector.VideoSelectorPresenter;
-
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Created by estsoft on 2016-12-09.

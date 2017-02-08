@@ -39,10 +39,6 @@
 
         <!-- Task affinity : editor -->
         <activity
-            android:name=".ui.selector.SelectorActivity"
-            android:screenOrientation="portrait"
-            android:taskAffinity="com.estsoft.muvicam.editor" />
-        <activity
             android:name=".ui.library.LibraryActivity"
             android:screenOrientation="portrait"
             android:taskAffinity="com.estsoft.muvicam.editor" />

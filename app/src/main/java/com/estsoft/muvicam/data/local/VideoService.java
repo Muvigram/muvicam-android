@@ -1,109 +1,100 @@
 package com.estsoft.muvicam.data.local;
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.Log;
 
+import com.estsoft.muvicam.model.Video;
 import com.estsoft.muvicam.util.CursorObservable;
 
 import rx.Observable;
+import timber.log.Timber;
+
 
 /**
- * Created by estsoft on 2017-01-25.
+ *
+ * Created by jaylim on 12/01/2017.
  */
 
 public class VideoService {
-    private static final String TAG = "VideoService";
-    private static final String ASC = " ASC";
-    private static final String DESC = " DESC";
 
-    private Context mContext;
+  private Context mContext;
 
-    public VideoService( Context context ) {
-        mContext = context;
+  public VideoService(Context context) {
+    mContext = context;
+
+  }
+
+  private int mIdColumn;
+  private int mPathColumn;
+  private int mHeightColumn;
+  private int mWidthColumn;
+  private int mDurationColumn;
+
+  public void initColumnIndex(Cursor cursor) {
+    mIdColumn = cursor.getColumnIndex(MediaStore.Video.Media._ID);
+    mPathColumn = cursor.getColumnIndex(MediaStore.Video.Media.DATA);
+    mHeightColumn = cursor.getColumnIndex(MediaStore.Video.Media.HEIGHT);
+    mWidthColumn = cursor.getColumnIndex(MediaStore.Video.Media.WIDTH);
+    mDurationColumn = cursor.getColumnIndex(MediaStore.Video.Media.DURATION);
+  }
+
+  public Observable<Video> getVideos() {
+
+    Cursor videoCursor = mContext.getContentResolver().query(
+        MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+        null, null, null, null
+    );
+    initColumnIndex(videoCursor);
+
+    if (videoCursor == null || !videoCursor.moveToFirst()) {
+      return null;
     }
 
-    private int mPathIndex;
-    private int mImageIdIndex;
-    private int mDurationIndex;
-    private int mWidthIndex;
-    private int mHeghtIndex;
-//    private int mResolutionIndex;
+    return CursorObservable.create(videoCursor, false)
+        .filter(this::isValid)
+        .map(cursor -> Video.builder()
+            .setUri(getUri(cursor))
+            .setDuration(getDuration(cursor))
+            .setWidth(getWidth(cursor))
+            .setHeight(getHeight(cursor))
+            .setThumbnail(getThumbnail(cursor))
+            .build())
+        .doOnCompleted(videoCursor::close);
+  }
 
-    private boolean stopped;
+  private boolean isValid(Cursor cursor) {
+    return Integer.parseInt(cursor.getString(mDurationColumn)) < 180000;
+  }
 
-    private void initCursorIndex( Cursor cursor ) {
-        mPathIndex = cursor.getColumnIndex( MediaStore.MediaColumns.DATA );
-        mImageIdIndex = cursor.getColumnIndex( MediaStore.MediaColumns._ID );
-        mDurationIndex = cursor.getColumnIndex( MediaStore.Video.VideoColumns.DURATION );
-        mWidthIndex = cursor.getColumnIndex( MediaStore.Video.VideoColumns.WIDTH );
-        mHeghtIndex = cursor.getColumnIndex( MediaStore.Video.VideoColumns.HEIGHT );
-//        mResolutionIndex = cursor.getColumnIndex( MediaStore.Video.VideoColumns.RESOLUTION );
-    }
+  public Uri getUri(Cursor cursor) {
+    return Uri.parse(cursor.getString(mPathColumn));
+  }
 
-    public Observable<VideoMetaData> getVideos( boolean idOrderToDESC ) {
+  public int getDuration(Cursor cursor) {
+    return cursor.getInt(mDurationColumn);
+  }
 
-        String order;
-        if (idOrderToDESC) order = DESC;
-        else order = ASC;
+  public int getWidth(Cursor cursor) {
+    return cursor.getInt(mWidthColumn);
+  }
 
-            Cursor cursor = mContext.getContentResolver().query(
-                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                    null, null, null,
-                    MediaStore.Video.Media._ID + order
-                    , null
-            );
+  public int getHeight(Cursor cursor) {
+    return cursor.getInt(mHeightColumn);
+  }
 
-            initCursorIndex( cursor );
-            if (cursor == null || !cursor.moveToFirst()) {
-                return null;
-            }
-        return CursorObservable.create(cursor, true)
-//                .doOnUnsubscribe( this::stopExtracting )
-//                .doOnSubscribe( this::init )
-//                .doOnCompleted( this::init )
-                .filter( this::isValid )
-                .map(cursor1 -> getVideoMetadata(cursor1) );
-    }
+  public Bitmap getThumbnail(Cursor cursor) {
+    long id = cursor.getLong(mIdColumn);
+    Timber.e("PATH : %s", id);
+    Bitmap bmp = MediaStore.Video.Thumbnails.getThumbnail(
+        mContext.getContentResolver(),
+        id, MediaStore.Video.Thumbnails.MINI_KIND,
+        null);
 
-    private void init() {
-        stopped = false;
-    }
-    private void stopExtracting() {
-        stopped = true;
-    }
-
-    private VideoMetaData getVideoMetadata( Cursor cursor ) {
-//        if ( this.stopped ) return null;
-        return new VideoMetaData(
-                getThumbnailBitmap( cursor.getInt(mImageIdIndex), mContext ),
-                cursor.getInt(mWidthIndex),
-                cursor.getInt(mHeghtIndex),
-                cursor.getInt(mDurationIndex),
-                cursor.getInt(mDurationIndex) / 1000,
-                cursor.getString(mPathIndex),
-                0
-        );
-    }
-
-    private boolean isValid( Cursor cursor ) {
-        String path = cursor.getString( mPathIndex );
-        Log.d( TAG, "isValid: extracted " + path );
-        return path.endsWith(".mp4") && !path.contains("camera_video_test");
-    }
-
-    private Bitmap getThumbnailBitmap( int imageId, Context context ) {
-        return MediaStore.Video.Thumbnails.getThumbnail(
-                context.getContentResolver(),
-                imageId,
-                MediaStore.Images.Thumbnails.MINI_KIND,
-                null);
-    }
+    return bmp;
+  }
 
     public static class VideoMetaData {
         public Bitmap thumbnailBitmap;

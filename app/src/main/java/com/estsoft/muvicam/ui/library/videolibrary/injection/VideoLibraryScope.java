@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.injection.scope;
+package com.estsoft.muvicam.ui.library.videolibrary.injection;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -6,9 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import javax.inject.Scope;
 
 /**
- * Created by estsoft on 2017-02-02.
+ * Created by jaylim on 10/01/2017.
  */
+
 @Scope
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SelectorScope {
+public @interface VideoLibraryScope {
 }

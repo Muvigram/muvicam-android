@@ -5,6 +5,8 @@ import com.estsoft.muvicam.injection.scope.LibraryScope;
 import com.estsoft.muvicam.ui.library.LibraryActivity;
 import com.estsoft.muvicam.ui.library.musiclibrary.injection.MusicLibraryComponent;
 import com.estsoft.muvicam.ui.library.musiclibrary.injection.MusicLibraryModule;
+import com.estsoft.muvicam.ui.library.videolibrary.injection.VideoLibraryComponent;
+import com.estsoft.muvicam.ui.library.videolibrary.injection.VideoLibraryModule;
 
 import dagger.Component;
 
@@ -18,6 +20,7 @@ import dagger.Component;
 public interface LibraryComponent {
   /* Subcomponent */
   MusicLibraryComponent plus(MusicLibraryModule musicLibraryModule);
+  VideoLibraryComponent plus(VideoLibraryModule videoLibraryModule);
 
   /* Dependency objects extended by constructor injections */
 

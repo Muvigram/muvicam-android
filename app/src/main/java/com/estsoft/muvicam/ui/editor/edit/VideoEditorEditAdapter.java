@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.EditorVideo;
-import com.estsoft.muvicam.ui.selector.videoselector.ThumbnailImageView;
+import com.estsoft.muvicam.util.ThumbnailImageView;
 
 import java.util.ArrayList;
 import java.util.List;
