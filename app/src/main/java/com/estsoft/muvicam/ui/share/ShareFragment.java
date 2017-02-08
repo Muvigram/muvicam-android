@@ -158,7 +158,7 @@ public class ShareFragment extends Fragment implements ShareMvpView {
 
     @Override
     public void showToast( String msg ) {
-        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT ).show();
+//        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT ).show();
     }
 
     @Override

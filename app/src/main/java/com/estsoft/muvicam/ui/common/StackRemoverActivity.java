@@ -17,8 +17,12 @@ public class StackRemoverActivity extends AppCompatActivity {
 
   public static Intent getIntent(Context packageContext) {
     Intent intent = new Intent(packageContext, StackRemoverActivity.class);
-    return intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK
-        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+    intent.addFlags( Intent.FLAG_ACTIVITY_CLEAR_TASK );
+    intent.addFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
+    intent.addFlags( Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS );
+    return intent;
+//    return intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK
+//        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
   }
 
   @Override

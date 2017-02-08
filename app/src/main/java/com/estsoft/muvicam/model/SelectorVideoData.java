@@ -1,6 +1,8 @@
 package com.estsoft.muvicam.model;
 
 
+import android.util.Log;
+
 import com.estsoft.muvicam.data.local.VideoService;
 import com.estsoft.muvicam.ui.selector.videoselector.VideoSelectorFragment;
 
@@ -65,8 +67,15 @@ public class SelectorVideoData {
         selectedVideos.remove(selectedVideo);
     }
     public void removeAllVideos(){
+        Log.d("clearItem", "removeAllVideos: " + allVideos.size());
+        for ( EditorVideo video : allVideos ) {
+            if ( video.getThumbnailBitmap() == null) continue;
+            Log.d("clearItem", "removeAllVideos: " + video.getThumbnailBitmap());
+            video.getThumbnailBitmap().recycle();
+            video.setThumbnailBitmap( null );
+        }
+        allVideos.clear();
         selectedVideos.clear();
-        selectedVideos = null;
     }
 
     public void addSelectedVideo(EditorVideo selectedVideo) {

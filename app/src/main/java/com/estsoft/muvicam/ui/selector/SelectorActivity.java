@@ -34,6 +34,7 @@ public class SelectorActivity extends BaseSingleFragmentActivity implements Vide
 
     private SelectorComponent mSelectorComponent;
 
+
     public SelectorComponent getComponent() { return mSelectorComponent; }
 
     public static SelectorActivity get(Fragment fragment) {
@@ -51,8 +52,8 @@ public class SelectorActivity extends BaseSingleFragmentActivity implements Vide
         super.onCreate(savedInstanceState);
 
         mSelectorComponent = DaggerSelectorComponent.builder()
-                .activityComponent( getActivityComponent() ).build();
-        mSelectorComponent.inject( this );
+    .activityComponent( getActivityComponent() ).build();
+    mSelectorComponent.inject( this );
 
 //        setTheme(android.R.style.Theme_NoTitleBar_Fullscreen);
 //        setContentView(R.layout.activity_selector);
@@ -66,7 +67,7 @@ public class SelectorActivity extends BaseSingleFragmentActivity implements Vide
 //            fragment.setArguments(bundle);
 //        }
 //        fragmentManager.beginTransaction().replace(R.id.selector_fragment_container, fragment).commit();
-    }
+}
 
 //    Fragment fragment;
 //    private BasePresenter presenter;
@@ -77,6 +78,8 @@ public class SelectorActivity extends BaseSingleFragmentActivity implements Vide
         BackToHomeDialogFragment fragment = BackToHomeDialogFragment.newInstance(
                 getResources().getString(R.string.dialog_back_to_home));
         fragment.show(getSupportFragmentManager(), BackToHomeDialogFragment.TAG);
+
+
     }
 
 
@@ -89,15 +92,10 @@ public class SelectorActivity extends BaseSingleFragmentActivity implements Vide
         startActivity(LibraryActivity.newIntent(this, data));
     }
 
-
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
     }
 
-//    public BasePresenter getPresenter() {
-//        return presenter;
-//    }
 
 }

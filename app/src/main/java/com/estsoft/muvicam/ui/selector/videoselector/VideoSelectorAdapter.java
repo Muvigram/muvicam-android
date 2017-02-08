@@ -2,6 +2,7 @@ package com.estsoft.muvicam.ui.selector.videoselector;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -159,7 +160,6 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
             thumbnailImageViews.clear();
             notifyAdapter();
         }
-        thumbnailImageViews = null;
     }
 
 //    @Override

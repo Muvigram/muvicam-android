@@ -1,6 +1,7 @@
 package com.estsoft.muvicam.ui.selector.videoselector;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -175,9 +176,9 @@ public class VideoSelectorPresenter extends BasePresenter<VideoSelectorMvpView> 
     public void detachView() {
         super.detachView();
         if (!subscription.isUnsubscribed()) RxUtil.unsubscribe(subscription);
+        selectorVideoData.removeAllVideos();
         mAdapter.clearItem();
 //        adapterModel.clearItem();
-        selectorVideoData.removeAllVideos();
         countSelected = 0;
         mAdapter.notifyAdapter();
 //        adapterView.notifyAdapter();
