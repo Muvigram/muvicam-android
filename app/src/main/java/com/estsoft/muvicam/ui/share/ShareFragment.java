@@ -56,7 +56,7 @@ public class ShareFragment extends Fragment implements ShareMvpView {
 
     @BindView(R.id.share_result_video) ShareVideoView mVideoView;
     @BindView(R.id.share_camera_home) ImageView mHome;
-    @BindView(R.id.share_save) ImageView mSave;
+//    @BindView(R.id.share_save) ImageView mSave;
     @BindView(R.id.share_custom_progress) CircularProgressBar mProgressbar;
     @BindView(R.id.share_progress_container) FrameLayout mProgressContainer;
     @BindView(R.id.share_thumbnail_holder) ImageView mThumbnailHolder;
