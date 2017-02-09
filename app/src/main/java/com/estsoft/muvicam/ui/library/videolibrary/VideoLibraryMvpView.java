@@ -10,12 +10,8 @@ import java.util.List;
  */
 
 public interface VideoLibraryMvpView extends MvpView {
-    // show videos
-    void showVideos(List<Video> videos);
-    void showVideosEmpty();
-    void showError();
-
-    // selection
-    void selectVideo(List<Video> videos);
-    void releaseVideo(List<Video> videos);
+  // show videos
+  void showVideos(List<Video> videos);
+  void showVideosEmpty();
+  void showError();
 }

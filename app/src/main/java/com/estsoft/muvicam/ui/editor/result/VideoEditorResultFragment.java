@@ -56,6 +56,7 @@ public class VideoEditorResultFragment extends Fragment {
     VideoPlayerTextureView videoResultTextureView, videoResultTextureView2;
     FrameLayout videoSpaceFrameLayout;
     boolean flag = true;
+    boolean isFirstNumChanged = false, isSecondNumChanged = false, isMusicComplition = false;
     private ArrayList<EditorVideo> resultVideos = new ArrayList<>(), selectedVideos = new ArrayList<>();
     String musicPath;
     int musicOffset, musicLength;
@@ -63,13 +64,13 @@ public class VideoEditorResultFragment extends Fragment {
     int nowVideoNum;
     DataPassListener mCallBack;
     ImageView doneButton, homeButton;
-    ArrayList<ResultBarView> resultProgressBars = new ArrayList<>();
+    ResultBarView resultProgressBar;
 
 
     VideoEditSelectedNumberAdapter.OnItemClickListener itemClickListener = new VideoEditSelectedNumberAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(View view, int position) {
-
+            selectedVideoButtons.setClickable(false);
             Log.d(TAG, "onCreateView: resultVideosTotalTime6" + resultVideosTotalTime);
 
             flag = false;
@@ -115,6 +116,81 @@ public class VideoEditorResultFragment extends Fragment {
         nowVideoNum = 0;
         videoResultPlayer = new EditorResultMediaPlayer(getActivity(), 0, true, false);
         videoResultPlayer2 = new EditorResultMediaPlayer(getActivity(), 0, false, false);
+        videoResultPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                Log.d(TAG, "onCompletion1: nowVideoNum " + nowVideoNum);
+                if (!isFirstNumChanged) {
+                    nowVideoNum = nowVideoNum + 1;
+                    isFirstNumChanged = true;
+                } else {
+                    isFirstNumChanged = false;
+                }
+                Log.d(TAG, "run: nowVideoNum1 " + nowVideoNum + "/" + resultVideos.size());
+
+                if (nowVideoNum < resultVideos.size()) {
+                    //     Log.d(TAG, "run sec: " + nowVideoNum + " / " + resultVideos.size());
+                    videoResultPlayer2.start();
+                    videoResultTextureView2.bringToFront();
+                    //   Log.d(TAG, "run third: " + nowVideoNum + " / " + resultVideos.size());
+                    if (nowVideoNum + 1 < resultVideos.size()) {
+                        videoResultPlayer.setFirst(false);
+                        prepareVideoPlayer(videoResultPlayer, nowVideoNum + 1, true);
+                    }
+                } else {
+
+                    musicResultPlayer.pause();
+                    nowVideoNum = 0;
+
+                    if (flag && resultVideos.size() > nowVideoNum && !musicResultPlayer.isPlaying()) {
+                        if (resultVideos.size() > nowVideoNum + 1) {
+                            videoResultPlayer2.setFirst(false);
+                            prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
+                        }
+                        videoResultPlayer.setFirst(false);
+                        prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
+
+                    }
+                }
+
+            }
+        });
+        videoResultPlayer2.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                Log.d(TAG, "onCompletion2: nowVideoNum " + nowVideoNum);
+                if (!isSecondNumChanged) {
+                    nowVideoNum = nowVideoNum + 1;
+                    isSecondNumChanged = true;
+                } else {
+                    isSecondNumChanged = false;
+                }
+                Log.d(TAG, "run: nowVideoNum2 " + nowVideoNum + "/" + resultVideos.size());
+
+                if (nowVideoNum < resultVideos.size()) {
+                    videoResultPlayer.start();
+                    videoResultTextureView.bringToFront();
+                    if (nowVideoNum + 1 < resultVideos.size()) {
+                        videoResultPlayer2.setFirst(false);
+                        prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
+                    }
+                    //else videoplayer1 to start
+                } else {
+                    musicResultPlayer.pause();
+                    nowVideoNum = 0;
+
+                    if (flag && resultVideos.size() > nowVideoNum && !musicResultPlayer.isPlaying()) {
+                        if (resultVideos.size() > nowVideoNum + 1) {
+                            videoResultPlayer2.setFirst(false);
+                            prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
+                        }
+                        videoResultPlayer.setFirst(false);
+                        prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
+                    }
+                }
+                videoResultTextureView.bringToFront();
+            }
+        });
         musicResultPlayer = new MediaPlayer();
         if (resultVideos.size() > 0) {
             try {
@@ -131,10 +207,10 @@ public class VideoEditorResultFragment extends Fragment {
                 musicResultPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                                                               @Override
                                                               public void onCompletion(MediaPlayer mediaPlayer) {
+                                                                  isMusicComplition = true;
                                                                   videoResultTextureView.bringToFront();
                                                                   nowVideoNum = 0;
-
-
+                                                                  isMusicComplition = false;
                                                               }
                                                           }
                 );
@@ -156,9 +232,17 @@ public class VideoEditorResultFragment extends Fragment {
                 e.printStackTrace();
             }
 
+            resultThread.start();
         }
 
-        resultThread.start();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!flag) {
+            mCallBack.passDataFToF(0, selectedVideos, resultVideos, resultVideosTotalTime, musicPath, musicOffset, musicLength);
+        }
     }
 
     @Override
@@ -205,6 +289,9 @@ public class VideoEditorResultFragment extends Fragment {
             selectedVideoButtons.setVisibility(View.GONE);
             buttonsGone.setVisibility(View.VISIBLE);
         }
+        resultProgressBar = new ResultBarView(getContext(), 0, 0, true);
+        linearResultSpace.addView(resultProgressBar);
+        linearResultSpace.invalidate();
         return v;
     }
 
@@ -318,7 +405,7 @@ public class VideoEditorResultFragment extends Fragment {
                     getActivity().startActivity(ShareActivity.newIntent(getContext(), videoPaths, videoStartTimes, videoEndTimes, musicPath, musicOffset, resultVideosTotalTime, true));
                     getActivity().finish();
                 } else {
-                    Toast.makeText(getContext(),getResources().getString(R.string.editor_result_done_warning), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getResources().getString(R.string.editor_result_done_warning), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -334,7 +421,7 @@ public class VideoEditorResultFragment extends Fragment {
         videoSpaceFrameLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (flag && resultVideos.size() > nowVideoNum && !musicResultPlayer.isPlaying()) {
+                if (flag && !isMusicComplition && resultVideos.size() > nowVideoNum && !musicResultPlayer.isPlaying()) {
                     musicResultPlayer.seekTo(musicOffset);
                     videoResultPlayer.start();
                     videoResultTextureView.bringToFront();
@@ -369,12 +456,12 @@ public class VideoEditorResultFragment extends Fragment {
         DisplayMetrics outMetrics = new DisplayMetrics();
         ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
         float widthPSec = (float) outMetrics.widthPixels / 15;
-        int dpi = outMetrics.densityDpi / 160;
+        float height = getResources().getDimension(R.dimen.resultbar_height);
         if (resultVideosTotalTime > 14000) {
-            return (15) * widthPSec - 20 * dpi;
+            return (15) * widthPSec - height;
 
         } else {
-            return (resultVideosTotalTime / 1000) * widthPSec - 20 * dpi;
+            return (resultVideosTotalTime / 1000) * widthPSec - height;
 
         }
     }
@@ -394,20 +481,15 @@ public class VideoEditorResultFragment extends Fragment {
                             @Override
                             public void run() {
                                 if (flag) {
-                                    ResultBarView resultProgressBar;
-
-                                    for (ResultBarView rv : resultProgressBars) {
-                                        linearResultSpace.removeView(rv);
-                                    }
-                                    resultProgressBars.clear();
-                                    if (musicResultPlayer.getCurrentPosition() - musicOffset > resultVideosTotalTime) {
-                                         resultProgressBar = new ResultBarView(getContext(), 0, resultVideosTotalTime, true);
+                                    if (musicResultPlayer.getCurrentPosition() - musicOffset >= resultVideosTotalTime) {
+                                        resultProgressBar.setTotalTime(0);
+                                        resultProgressBar.setNowVideoTime(resultVideosTotalTime);
                                     } else {
-                                         resultProgressBar = new ResultBarView(getContext(), 0, musicResultPlayer.getCurrentPosition() - musicOffset, true);
+                                        resultProgressBar.setTotalTime(0);
+                                        resultProgressBar.setNowVideoTime(musicResultPlayer.getCurrentPosition() - musicOffset);
                                     }
-                                    resultProgressBars.add(resultProgressBar);
-                                    linearResultSpace.addView(resultProgressBar);
-                                    linearResultSpace.invalidate();
+
+                                    resultProgressBar.invalidate();
                                 }
                             }
                         });
@@ -416,7 +498,10 @@ public class VideoEditorResultFragment extends Fragment {
                             if (videoResultPlayer.getCurrentPosition() >= resultVideos.get(nowVideoNum).getEnd()) {
                                 videoResultPlayer.pause();
                                 videoResultPlayer.stop();
+                                Log.d(TAG, "run: isplaying" + videoResultPlayer.isPlaying());
                                 nowVideoNum = nowVideoNum + 1;
+                                isFirstNumChanged = true;
+                                Log.d(TAG, "run: nowVideoNum " + nowVideoNum);
                                 if (nowVideoNum < resultVideos.size()) {
                                     //     Log.d(TAG, "run sec: " + nowVideoNum + " / " + resultVideos.size());
                                     videoResultPlayer2.start();
@@ -433,8 +518,9 @@ public class VideoEditorResultFragment extends Fragment {
                                         prepareVideoPlayer(videoResultPlayer, nowVideoNum + 1, true);
                                     }
                                 } else {
-
+                                    isMusicComplition = true;
                                     musicResultPlayer.pause();
+                                    Log.d(TAG, "run: isMusicResultPlayer playing?" + musicResultPlayer.isPlaying());
                                     nowVideoNum = 0;
 
 
@@ -443,10 +529,15 @@ public class VideoEditorResultFragment extends Fragment {
                                             videoResultPlayer2.setFirst(false);
                                             prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
                                         }
+                                        if (videoResultPlayer.isPlaying()) {
+                                            videoResultPlayer.pause();
+                                            videoResultPlayer.stop();
+                                        }
                                         videoResultPlayer.setFirst(false);
                                         prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
 
                                     }
+                                    isMusicComplition = false;
                                 }
 
                             }
@@ -458,8 +549,8 @@ public class VideoEditorResultFragment extends Fragment {
                                 videoResultPlayer2.pause();
                                 videoResultPlayer2.stop();
                                 nowVideoNum = nowVideoNum + 1;
-
-
+                                isSecondNumChanged = true;
+                                Log.d(TAG, "run: nowVideoNum " + nowVideoNum);
                                 if (nowVideoNum < resultVideos.size()) {
                                     videoResultPlayer.start();
                                     getActivity().runOnUiThread(new Runnable() {
@@ -474,6 +565,7 @@ public class VideoEditorResultFragment extends Fragment {
                                     }
                                     //else videoplayer1 to start
                                 } else {
+                                    isMusicComplition = true;
                                     musicResultPlayer.pause();
                                     nowVideoNum = 0;
 
@@ -482,9 +574,14 @@ public class VideoEditorResultFragment extends Fragment {
                                             videoResultPlayer2.setFirst(false);
                                             prepareVideoPlayer(videoResultPlayer2, nowVideoNum + 1, false);
                                         }
+                                        if (videoResultPlayer.isPlaying()) {
+                                            videoResultPlayer.pause();
+                                            videoResultPlayer.stop();
+                                        }
                                         videoResultPlayer.setFirst(false);
                                         prepareVideoPlayer(videoResultPlayer, nowVideoNum, true);
                                     }
+                                    isMusicComplition = false;
                                 }
                             }
 
@@ -496,11 +593,9 @@ public class VideoEditorResultFragment extends Fragment {
                             public void run() {
                                 if (flag) {
                                     //remove progress bar
-                                    for (ResultBarView progressBar : resultProgressBars) {
-                                        linearResultSpace.removeView(progressBar);
-                                    }
-                                    resultProgressBars.clear();
-                                    linearResultSpace.invalidate();
+                                    resultProgressBar.setNowVideoTime(0);
+                                    resultProgressBar.setTotalTime(0);
+                                    resultProgressBar.invalidate();
                                 }
                             }
                         });
@@ -567,6 +662,5 @@ public class VideoEditorResultFragment extends Fragment {
             e.printStackTrace();
         }
     }
-
 
 }

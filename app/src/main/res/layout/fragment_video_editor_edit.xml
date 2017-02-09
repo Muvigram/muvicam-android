@@ -7,8 +7,7 @@
     <FrameLayout
         android:id="@+id/editor_edit_frame_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/White" />
+        android:layout_height="match_parent"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -17,7 +16,7 @@
         <FrameLayout
             android:id="@+id/editor_edit_result_space_linear"
             android:layout_width="match_parent"
-            android:layout_height="20dp"
+            android:layout_height="@dimen/resultbar_height"
             android:layout_alignParentTop="true"
             android:background="@color/selectorVideoSelected"
             android:orientation="horizontal" />
@@ -48,7 +47,7 @@
         <FrameLayout
             android:id="@+id/editor_edit_frame_thumbnails"
             android:layout_width="match_parent"
-            android:layout_height="77dp"
+            android:layout_height="@dimen/editbar_seek_height"
             android:layout_alignParentBottom="true"
             android:background="@color/editorThumbnailBackground">
 
@@ -64,8 +63,8 @@
                 android:layout_gravity="center"
                 android:layout_marginBottom="1dp"
                 android:layout_marginTop="1dp"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
+                android:paddingLeft="@dimen/editbar_padding"
+                android:paddingRight="@dimen/editbar_padding"
                 android:background="@color/editorRecyclerViewBackground"/>
 
             <RelativeLayout

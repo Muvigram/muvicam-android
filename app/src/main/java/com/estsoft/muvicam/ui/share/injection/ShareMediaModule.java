@@ -7,5 +7,5 @@ import dagger.Module;
  */
 
 @Module
-public class ShareModule {
+public class ShareMediaModule {
 }

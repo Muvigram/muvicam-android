@@ -1,9 +1,11 @@
 package com.estsoft.muvicam.transcoder.wrappers;
 
+import android.content.res.AssetFileDescriptor;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.util.Log;
+
 
 import com.estsoft.muvicam.transcoder.transcoders.BufferListener;
 
@@ -13,130 +15,204 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by estsoft on 2016-12-08.
+ * Created by estsoft on 2016-12-21.
  */
 
-// NOTE Since this can't resampling, Track Audio should NOT be encoding. i.e) VIDEO_ONLY
-// NOTE Just encode Music segment.
-
-public class MediaEditor {
+public
+class MediaEditor implements MediaTranscoder {
     private static final String TAG = "MediaEditor";
-    public static final int VIDEO_ONLY = -10;
-    public static final int AUDIO_ONLY = -11;
     public static final int NORMAL = -12;
-    public static int CURRENT_MODE = NORMAL;
+    public static final int MUTE_AND_ADD_MUSIC = -13;
+    public static final int ADD_MUSIC = -14;
+    private int progressInterval;
 
-    public static final boolean pFrameSeek = true;
-
+    private final int CURRENT_MODE;
+    private final int outputContainer = MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4;
     private final MuxerWrapper mMuxer;
     private final String mOutputFilePath;
-    private final int outputContainer = MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4;
-
     private final MediaTarget mTarget;
     private final List<MediaSegment> mSegmentLists;
-    private MediaSegment mMusicSegment;
 
-    public MediaEditor(String outputPath, int TranscodeMode ) {
+    private final ProgressListener mListener;
+
+    private MediaSegment mMusicSegment;
+    private long mTotalEstimatedDuration;
+    private long mSegmentTargetDuration;
+    private boolean musicSegmentAdded;
+
+    public MediaEditor(String outputPath, int transcodeMode, ProgressListener progressListener ) {
         this.mOutputFilePath = outputPath;
+        this.CURRENT_MODE = transcodeMode;
+        this.mTarget = new MediaTarget();
+        this.mSegmentLists = new ArrayList<>();
 
         MediaMuxer muxer;
         try {
-            muxer = new MediaMuxer(this.mOutputFilePath, outputContainer);
+            muxer = new MediaMuxer( this.mOutputFilePath, outputContainer );
         } catch ( IOException e ) {
-            throw new IllegalStateException( e );
+            throw new RuntimeException( e );
         }
-
-        CURRENT_MODE = TranscodeMode;
-        mTarget = new MediaTarget();
-
-        mMuxer = new MuxerWrapper( muxer, CURRENT_MODE );
-        mSegmentLists = new ArrayList<>();
+        this.mMuxer = new MuxerWrapper( muxer, CURRENT_MODE );
+        this.mListener = progressListener;
     }
 
+    @Override
     public void initVideoTarget(int interval, int frameRate, int bitrate, int rotation, int width, int height ) {
-        mTarget.initVideoTarget( interval, frameRate, bitrate, rotation, width, height, false );
+        mTarget.initVideoTarget( interval, frameRate, bitrate, width, height );
         mMuxer.setOrientation( rotation );
         mMuxer.setVideoParams( frameRate );
     }
+    @Override
     public void initAudioTarget( int sampleRate, int channelCount, int bitrate ) {
         mTarget.initAudioTarget( sampleRate, channelCount, bitrate );
         mMuxer.setAudioParams( sampleRate );
     }
-    public void addSegment(String inputFilePath, long startTimeUs, long endTimeUs, int audioVolume  ){
-        if ( !(endTimeUs < 0) && startTimeUs >= endTimeUs) throw new IllegalStateException( " start can't be later than end " );
-        MediaSegment segment = new MediaSegment( mTarget, inputFilePath, mMuxer, mBufferListener, startTimeUs, endTimeUs, audioVolume );
-        mSegmentLists.add( segment );
+
+
+    @Override
+    public void addSegment(String inputFilePath, long startTimeUs, long endTimeUs, int audioVolume  ) {
+        if ( musicSegmentAdded ) throw new IllegalStateException( "music segment can be added after all segments added " );
+        if ( !(endTimeUs < 0) && startTimeUs >= endTimeUs) throw new IllegalStateException( "start can't be later than end " );
+
+        int mode = MediaSegment.NORMAL;
+        if ( CURRENT_MODE == MUTE_AND_ADD_MUSIC ) mode = MediaSegment.VIDEO_ONLY;
+        MediaSegment segment = new MediaSegment( mTarget, inputFilePath, mBufferListener,
+                startTimeUs, endTimeUs, audioVolume, mode );
+        // NOTE check startTime over total duration
+        if ( segment.getStartTimeUs() < segment.getEndTimeUs() ) {
+            mSegmentLists.add(segment);
+            mTotalEstimatedDuration += segment.getEndTimeUs() - segment.getStartTimeUs();
+            Log.e(TAG, "addSegment: Adding segment ... " + inputFilePath + " / " + segment.getStartTimeUs() + " to " + segment.getEndTimeUs() );
+        } else {
+            Log.e(TAG, "addSegment: Skipping segment ... " + inputFilePath + " / " + segment.getStartTimeUs() + " to " + segment.getEndTimeUs());
+        }
     }
-    public void setMusicSegment(String musicPath, long offset, int volume ) {
-        mMusicSegment = new MediaSegment( mTarget, musicPath, mMuxer, mBufferListener, offset, -1, volume );
-        mMuxer.setMode( NORMAL );
+
+    @Override
+    public void addLogoSegment(AssetFileDescriptor inputFile, long startTimeUs, long endTimeUs, int audioVolume) {
+        if ( musicSegmentAdded ) throw new IllegalStateException( "music segment can be added after all segments added " );
+        if ( !(endTimeUs < 0) && startTimeUs >= endTimeUs) throw new IllegalStateException( "start can't be later than end " );
+
+        int mode = MediaSegment.NORMAL;
+        if ( CURRENT_MODE == MUTE_AND_ADD_MUSIC ) mode = MediaSegment.VIDEO_ONLY;
+        MediaSegment segment = new MediaSegment( mTarget, inputFile, mBufferListener,
+                startTimeUs, endTimeUs, audioVolume, mode );
+        // NOTE check startTime over total duration
+        if ( segment.getStartTimeUs() < segment.getEndTimeUs() ) {
+            mSegmentLists.add(segment);
+//            mTotalEstimatedDuration += segment.getEndTimeUs() - segment.getStartTimeUs();
+            Log.e(TAG, "addSegment: Adding segment as logo ... " + inputFile.toString() + " / " + segment.getStartTimeUs() + " to " + segment.getEndTimeUs() );
+        } else {
+            Log.e(TAG, "addSegment: Skipping segment ... " + inputFile.toString() + " / " + segment.getStartTimeUs() + " to " + segment.getEndTimeUs() );
+        }
     }
 
-    public void start() {
+    @Override
+    public void addMusicSegment(String inputFilePath, long offset, int audioVolume ) {
+        if ( CURRENT_MODE == NORMAL ) throw new IllegalStateException( "to add MusicSegment, mode should be ADD_MUSIC or MUTE_AND_ADD_MUSIC " );
 
-        if ( mMusicSegment != null ) mMusicSegment.prepare( AUDIO_ONLY, pFrameSeek );
+        musicSegmentAdded = true;
+//        mMusicSegment = new MediaSegment( mTarget, inputFilePath, mBufferListener,
+//                offset,-1, audioVolume, MediaSegment.AUDIO_ONLY);
+        mMusicSegment = new MediaSegment( mTarget, inputFilePath, mBufferListener,
+                offset, mTotalEstimatedDuration + offset, audioVolume, MediaSegment.AUDIO_ONLY);
+        Log.d(TAG, "addMusicSegment: " + mTotalEstimatedDuration);
+    }
+    @Override
+    public void startWork() {
+        if ( mListener != null ) callListener( ProgressListener.START );
+        if ( mMusicSegment != null ) mMusicSegment.prepare();
 
-        for ( MediaSegment segment  : mSegmentLists ) {
-            segment.prepare( CURRENT_MODE, pFrameSeek );
+        boolean segmentStepped;
+        long videoSyncBufferTimeUs = 0;
+        long audioSyncBufferTimeUs = 0;
+        for ( MediaSegment segment : mSegmentLists ) {
+            Log.d(TAG, "start: Start of new segment");
+            segment.prepare();
+            segment.setSmallSync( videoSyncBufferTimeUs, audioSyncBufferTimeUs );
 
-            Log.d(TAG, "start: START OF NEW SEGMENT" );
+            long segmentDuration = segment.getEndTimeUs() - segment.getStartTimeUs();
+            mSegmentTargetDuration += segmentDuration;
+
             while ( !segment.checkFinished() ) {
-//                if ( segment.isTranscdoerStoppedSignal() ) break;
-                boolean stepped = segment.stepOnce();
-                Log.d(TAG, "start: " + segment.getExtractor().getSampleTime() + " / " + segment.getExtractor().getSampleTrackIndex());
-                if (segment.getVideoCurrentPresentationTimeUs() > segment.getEndTimeUs() ) {
-                    segment.forceStopVideo();
-                    if (segment.getExtractor().getSampleTrackIndex() == segment.getVideoTrackIndex()) segment.getExtractor().advance();
+                segmentStepped = segment.stepOnce();
+                if ( !segmentStepped ) sleepWhile( 20 );
+                    // TODO segment.isAudioEncodingStarted? when ADD_MUSIC MODE
+                else if ( mMusicSegment != null && segment.isVideoEncodingStarted() ) {
+                    musicSegmentStepping( segment.getVideoCurrentWrittenTimeUs() + mSegmentTargetDuration - segment.getEndTimeUs());
                 }
-                if (segment.getAudioCurrentPresentationTimeUs() > segment.getEndTimeUs() ) {
-                    segment.forceStopAudio();
-                    if (segment.getExtractor().getSampleTrackIndex() == segment.getAudioTrackIndex()) segment.getExtractor().advance();
-                }
+                if (mListener != null) callListener( ProgressListener.PROGRESS );
+                Log.d(TAG, "stepOnce: ");
 
-//                if (segment.getExtractor().getSampleTime() > segment.getEndTimeUs()
-//                        || segment.isTranscdoerStoppedSignal() ) {
-//                    segment.setTranscdoerStoppedSignal( true );
-//                    segment.forceStop();
-//                    segment.getExtractor().advance();
-//                }
-
-                if (!stepped) {
-                    try {    Thread.sleep(20);  }
-                    catch ( Exception e ) { e.printStackTrace(); }
-                } else {
-                    if ( mMusicSegment != null && segment.isEncodeStarted()) {
-                        // NOTE should it be avg of video and audio?
-                        long mediaProcessedTime = segment.getVideoCurrentPresentationTimeUs() - segment.getStartTimeUs();
-                        long musicProcessedTime = mMusicSegment.getAudioCurrentPresentationTimeUs() - mMusicSegment.getStartTimeUs();
-                        while (mediaProcessedTime >= musicProcessedTime) {
-                            mMusicSegment.stepOnce();
-                            musicProcessedTime = mMusicSegment.getAudioCurrentPresentationTimeUs() - mMusicSegment.getStartTimeUs();
-                            Log.d(TAG, "start: " + mediaProcessedTime + " / MUSIC!  " + musicProcessedTime);
-                        }
-                    }
-                }
             }
+
+            videoSyncBufferTimeUs = (mMuxer.getVideoPresentationTimeUs() - mSegmentTargetDuration);
+            audioSyncBufferTimeUs = (mMuxer.getAudioPresentationTimeUs() - mSegmentTargetDuration);
+
+            Log.d(TAG, "start: End of this segment ... target Duration is " + mSegmentTargetDuration );
             segment.release();
-            Log.d(TAG, "start: END OF SEGMENTS");
         }
-        if ( mMusicSegment != null ) {
-            mMusicSegment.setTranscdoerStoppedSignal(true);
-            mMusicSegment.forceStop();
-            mMusicSegment.getExtractor().advance();
-            mMusicSegment.release();
-        }
-        stop();
+
+        // NOTE this method order is important
+        if (mMusicSegment != null) flushMusicSegment();
         release();
+        if (mListener != null) callListener( ProgressListener.COMPLETE );
     }
-    public void stop() {
-        if (!mMuxer.isStopped()) mMuxer.stop();
-    }
+
     public void release() {
+        if (mMusicSegment != null) mMusicSegment.release();
         if (!mMuxer.isStopped()) mMuxer.stop();
         mMuxer.release();
     }
 
-    // TODO Audio from Video Mix with MP3 Buffer. - in AudioChannel X _X
+    private void musicSegmentStepping( long totalProcessed ) {
+        long musicProcessed = mMusicSegment.getAudioCurrentWrittenTimeUs() - mMusicSegment.getStartTimeUs();
+        long musicExtracted;
+        while ( !mMusicSegment.checkFinished()
+                && (!mMusicSegment.isAudioEncodingStarted() || totalProcessed >= musicProcessed) ) {
+            boolean stepped = mMusicSegment.stepOnce();
+            if (!stepped) sleepWhile( 20 );
+            musicProcessed = mMusicSegment.getAudioCurrentWrittenTimeUs() - mMusicSegment.getStartTimeUs();
+            musicExtracted = mMusicSegment.getAudioCurrentExtractedTimeUs() - mMusicSegment.getStartTimeUs();
+            // NOTE for safety
+            if ( musicExtracted >= mTotalEstimatedDuration )  mMusicSegment.forceStop();
+        }
+    }
+    private void flushMusicSegment() {
+        while ( !mMusicSegment.checkFinished() ) {
+            Log.e(TAG, "flushMusicSegment: FLUSHING");
+            boolean stepped = mMusicSegment.stepOnce();
+            if (!stepped) sleepWhile( 20 );
+        }
+    }
+
+    private void sleepWhile( long sleepUs ) {
+        try { Thread.sleep( sleepUs ); }
+        catch ( Exception e ) { throw new RuntimeException( e ); }
+    }
+
+    private void callListener( int mode ) {
+        if ( mListener == null ) return;
+        switch ( mode ) {
+            case ProgressListener.START :
+                mListener.onStart( mTotalEstimatedDuration );
+                break;
+            case ProgressListener.PROGRESS :
+                if ( ++ progressInterval < ProgressListener.PROGRESS_INTERVAL ) return;
+                progressInterval %= ProgressListener.PROGRESS_INTERVAL;
+                mListener.onProgress( mMuxer.getVideoPresentationTimeUs(), (int) (mMuxer.getVideoPresentationTimeUs() * 100 / mTotalEstimatedDuration) );
+                break;
+            case ProgressListener.COMPLETE :
+                mListener.onComplete( mMuxer.getVideoPresentationTimeUs() );
+                break;
+            case ProgressListener.ERROR :
+                mListener.onError( new Exception( "Exception Occurred" ) );
+                break;
+            default :
+                throw new IllegalStateException( "check listener mode" );
+        }
+    }
+
     private final BufferListener mBufferListener = new BufferListener() {
         @Override
         public void onBufferAvailable(BufferType type, ByteBuffer buffer, MediaCodec.BufferInfo bufferInfo) {
@@ -147,11 +223,10 @@ public class MediaEditor {
         }
 
         @Override
-        public void onOutputFormat(BufferType type, MediaFormat format) {
+        public void onOutputFormat(BufferListener.BufferType type, MediaFormat format) {
             mMuxer.setOutputFormat(
-                    type == BufferListener.BufferType.VIDEO ? MuxerWrapper.SampleType.VIDEO : MuxerWrapper.SampleType.AUDIO,
+                    type == BufferType.VIDEO ? MuxerWrapper.SampleType.VIDEO : MuxerWrapper.SampleType.AUDIO,
                     format);
         }
     };
-
 }

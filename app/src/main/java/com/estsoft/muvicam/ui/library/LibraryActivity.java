@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -16,10 +15,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 
-import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.injection.component.DaggerLibraryComponent;
 import com.estsoft.muvicam.injection.component.LibraryComponent;
 import com.estsoft.muvicam.model.EditorVideo;
+import com.estsoft.muvicam.model.Video;
+import com.estsoft.muvicam.ui.base.BaseMultiFragmentActivity;
 import com.estsoft.muvicam.ui.base.BaseSingleFragmentActivity;
 import com.estsoft.muvicam.ui.editor.EditorActivity;
 import com.estsoft.muvicam.ui.library.musiclibrary.MusicLibraryFragment;
@@ -35,12 +35,6 @@ public class LibraryActivity extends BaseSingleFragmentActivity {
 
   public static Intent newIntent(Context packageContext) {
     return new Intent(packageContext, LibraryActivity.class);
-  }
-
-  public static Intent newIntent(Context packageContext, ArrayList<EditorVideo> editorVideos) {
-    Intent intent = new Intent(packageContext, LibraryActivity.class);
-    intent.putExtra(EXTRA_VIDEOS, editorVideos);
-    return intent;
   }
 
   private LibraryComponent mLibraryComponent;
@@ -60,14 +54,11 @@ public class LibraryActivity extends BaseSingleFragmentActivity {
 
   @Override
   protected Fragment createDefaultFragment() {
-    return new VideoLibraryFragment();
+    return VideoLibraryFragment.newInstance();
   }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    // set fullscreen
-    setFullscreen();
-
     // inflate single fragment activity
     super.onCreate(savedInstanceState);
 
@@ -77,42 +68,9 @@ public class LibraryActivity extends BaseSingleFragmentActivity {
     mLibraryComponent.inject(this);
   }
 
-  public void goToNext(@NonNull List<EditorVideo> videos) {
-    FragmentManager fragmentManager = getSupportFragmentManager();
-    Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
-    if (fragment != null) {
-      fragmentManager.beginTransaction()
-          .remove(fragment)
-          .commit();
-    }
-    setVideos(videos);
-    fragment = MusicLibraryFragment.newInstance();
-    fragmentManager.beginTransaction()
-        .replace(R.id.fragment_container, fragment)
-        .commit();
-  }
+  private List<Video> mVideos;
 
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-  }
-
-  public void setFullscreen() {
-    requestWindowFeature(Window.FEATURE_NO_TITLE);
-    getWindow().setFlags(
-        WindowManager.LayoutParams.FLAG_FULLSCREEN,
-        WindowManager.LayoutParams.FLAG_FULLSCREEN
-    );
-  }
-
-  private List<EditorVideo> mVideos = new ArrayList<>();
-
-  /**
-   * Set videos selected from library.
-   * @param videos A list of videos selected from local library.
-   */
-  public void setVideos(List<EditorVideo> videos) {
+  public void completeVideoSelection(@NonNull List<Video> videos) {
     mVideos = videos;
   }
 
@@ -125,10 +83,23 @@ public class LibraryActivity extends BaseSingleFragmentActivity {
    * @param musicOffset An offset where a music file would be started.
    * @param musicLength A length of music file.
    */
-  public void completeSelection(@Nullable String musicPath, int musicOffset, int musicLength) {
-    ArrayList<EditorVideo> editorVideos = getIntent().getParcelableArrayListExtra(EXTRA_VIDEOS);
+  public void completeMusicSelection(@Nullable String musicPath, int musicOffset, int musicLength) {
+    ArrayList<EditorVideo> editorVideos = convertVideoObject(mVideos);
     Intent intent = EditorActivity.newIntent(this, editorVideos, musicPath, musicOffset, musicLength);
     startActivity(intent);
+  }
+
+  public static ArrayList<EditorVideo> convertVideoObject(@NonNull List<Video> videos) {
+    ArrayList<EditorVideo> editorVideoList = new ArrayList<>();
+
+    for (Video video : videos) {
+      EditorVideo editorVideo = new EditorVideo();
+      editorVideo.setDurationMiliSec(video.duration());
+      editorVideo.setVideoPath(video.uri().toString());
+      editorVideoList.add(editorVideo);
+    }
+
+    return editorVideoList;
   }
 
   @Override

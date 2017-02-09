@@ -21,20 +21,22 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
     String TAG = "VideoTextureView";
     MuvicamMediaPlayer muvicamMediaPlayer;
     EditorResultMediaPlayer editorResultMediaPlayer;
-    Activity activity;
     int rotation, editorvideoWidth, editorVideoHeight;
     EditorVideo nowVideo;
 
-    public VideoPlayerTextureView(Activity activity, MuvicamMediaPlayer muvicamMediaPlayer, EditorVideo editVideo, int editorvideoWidth, int editorVideoHeight, int rotation) {
+    public VideoPlayerTextureView(Activity activity, MuvicamMediaPlayer muvicamMediaPlayer, EditorVideo editVideo, int editorVideoWidth, int editorVideoHeight, int rotation) {
         super(activity);
-        setParams(activity,editVideo,editorvideoWidth,editorVideoHeight,rotation);
+        this.nowVideo = editVideo;
+        this.editorvideoWidth = editorVideoWidth;
+        this.rotation = rotation;
+        this.editorVideoHeight = editorVideoHeight;
         this.muvicamMediaPlayer = muvicamMediaPlayer;
         this.setSurfaceTextureListener(this);
         this.muvicamMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 Log.d(TAG, "onCompletion: ");
-                mediaPlayer.seekTo(editVideo.getStart());
+                mediaPlayer.seekTo(nowVideo.getStart());
             }
         });
 
@@ -43,7 +45,6 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
             public void onPrepared(MediaPlayer mediaPlayer) {
                 Log.d(TAG, "onPrepared: ");
                 if (nowVideo != null) mediaPlayer.seekTo(nowVideo.getStart());
-//                    ((Videoeditor) context).findViewById(R.id.video_start_button).setVisibility(VISIBLE);
             }
         });
 
@@ -57,16 +58,13 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
         });
     }
 
-    public VideoPlayerTextureView(Activity activity, EditorResultMediaPlayer editorResultMediaPlayer, EditorVideo resultVideo, int editorvideoWidth, int editorVideoHeight, int rotation) {
+    public VideoPlayerTextureView(Activity activity, EditorResultMediaPlayer editorResultMediaPlayer, EditorVideo resultVideo, int editorVideoWidth, int editorVideoHeight, int rotation) {
         super(activity);
-        setParams(activity,resultVideo,editorvideoWidth,editorVideoHeight,rotation);
+        this.nowVideo = resultVideo;
+        this.editorvideoWidth = editorVideoWidth;
+        this.rotation = rotation;
+        this.editorVideoHeight = editorVideoHeight;
         this.editorResultMediaPlayer = editorResultMediaPlayer;
-        editorResultMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-                mediaPlayer.stop();
-            }
-        });
         this.setSurfaceTextureListener(this);
     }
 
@@ -95,7 +93,7 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
         if (muvicamMediaPlayer != null) muvicamMediaPlayer.release();
         if (editorResultMediaPlayer != null) editorResultMediaPlayer.release();
-        return false;
+        return true;
     }
 
     @Override
@@ -105,20 +103,18 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        Log.d(TAG, "onMeasure: " + widthMeasureSpec + " / " + heightMeasureSpec);
-        Log.d(TAG, "onMeasure: " + editorvideoWidth + " / " + editorVideoHeight);
+        Log.d(TAG, "onMeasure: w " + editorvideoWidth + "/ h " + editorVideoHeight + "r " + rotation);
 
-        if (rotation != 90) {
-            DisplayMetrics outMetrics = new DisplayMetrics();
-            activity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
-            int newWidth = outMetrics.heightPixels;
-            int newHeight = outMetrics.widthPixels;
-            setMeasuredDimension(newWidth, newHeight);
-
+        if ((editorvideoWidth > editorVideoHeight && rotation == 0) || (editorvideoWidth < editorVideoHeight && rotation != 0)) {
+            this.setRotation(90);
+            setMeasuredDimension(heightMeasureSpec, widthMeasureSpec);
         } else {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
 
+        FrameLayout.LayoutParams layoutParam = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
+        layoutParam.gravity = Gravity.CENTER;
+        this.setLayoutParams(layoutParam);
     }
 
     public EditorVideo getResultVideo() {
@@ -127,18 +123,5 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
 
     public void setResultVideo(EditorVideo nowVideo) {
         this.nowVideo = nowVideo;
-    }
-    public void setParams(Activity activity, EditorVideo nowVideo, int editorVideoWidth, int editorVideoHeight, int rotation){
-        this.activity = activity;
-        this.nowVideo = nowVideo;
-        this.editorvideoWidth = editorVideoWidth;
-        this.rotation = rotation;
-        this.editorVideoHeight = editorVideoHeight;
-        if (rotation != 90) {
-            this.setRotation(90);
-        }
-        FrameLayout.LayoutParams layoutParam = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
-        layoutParam.gravity = Gravity.CENTER;
-        this.setLayoutParams(layoutParam);
     }
 }

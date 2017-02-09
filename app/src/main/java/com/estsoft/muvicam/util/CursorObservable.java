@@ -1,6 +1,7 @@
 package com.estsoft.muvicam.util;
 
 import android.database.Cursor;
+import android.util.Log;
 
 import java.util.concurrent.Semaphore;
 
@@ -22,14 +23,21 @@ public class CursorObservable {
         return;
       }
       try {
-        while (cursor.moveToNext()) {
-          sub.onNext(cursor);
-        }
+        do {
+          if (sub.isUnsubscribed()) {
+            sub.onCompleted();
+            return;
+          }
+          sub.onNext( cursor );
+        } while( cursor.moveToNext() );
+
         sub.onCompleted();
+
       } catch (Exception e) {
         sub.onError(e);
       } finally {
         if (autoClose && !cursor.isClosed()) {
+          Log.d("test","create: Closed");
           cursor.close();
         }
       }

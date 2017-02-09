@@ -4,14 +4,15 @@ import com.estsoft.muvicam.injection.component.ActivityComponent;
 import com.estsoft.muvicam.ui.share.ShareFragment;
 
 import dagger.Component;
+import dagger.Subcomponent;
 
 /**
  * Created by estsoft on 2017-01-19.
  */
 
-@ShareScope
-@Component ( dependencies = ActivityComponent.class, modules = ShareModule.class )
-public interface ShareComponent {
+@ShareMediaScope
+@Subcomponent ( modules = ShareMediaModule.class )
+public interface ShareMediaComponent {
     /* Subcomponent */
 
   /* Dependency objects extended by constructor injections */

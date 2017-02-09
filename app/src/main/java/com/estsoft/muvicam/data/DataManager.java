@@ -43,9 +43,9 @@ public class DataManager {
         .buffer(500, TimeUnit.MILLISECONDS);
   }
 
-
   public Observable<List<Video>> getVideos() {
-    return mVideoService.getVideos().buffer(200, TimeUnit.MILLISECONDS);
+    return mVideoService.getVideos()
+        .buffer(200, TimeUnit.MILLISECONDS);
   }
 
   private static boolean filterOutMusics(Music music, String[] tokens) {

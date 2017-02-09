@@ -29,7 +29,6 @@ public class VideoTrackTranscoder implements TrackTranscoder {
     private final MediaFormat mOutputFormat;
     private final BufferListener mBufferListener;
     private final int mTrackIndex;
-    private final boolean mFlipping;
     private MediaFormat mActualOutputFormat;
     private MediaCodec mEncoder;
     private MediaCodec mDecoder;
@@ -48,14 +47,15 @@ public class VideoTrackTranscoder implements TrackTranscoder {
     private boolean sawExtractorEOS;
     private boolean forceExtractingStop;
     private boolean mEncodePermitted;
+    private boolean mFlipping;
 
-    public VideoTrackTranscoder(MediaExtractor extractor, MediaFormat outFormat, BufferListener bufferListener, int trackIndex, boolean flipping ) {
+    public VideoTrackTranscoder(MediaExtractor extractor, MediaFormat outFormat, BufferListener bufferListener, int trackIndex ) {
         this.mExtractor = extractor;
         this.mOutputFormat = outFormat;
         this.mBufferListener = bufferListener;
         this.mTrackIndex = trackIndex;
         this.mBufferInfo = new MediaCodec.BufferInfo();
-        this.mFlipping = flipping;
+//        this.mFlipping = flipping;
     }
 
     @Override
@@ -77,12 +77,25 @@ public class VideoTrackTranscoder implements TrackTranscoder {
         mEncoderOutputBuffers = mEncoder.getOutputBuffers();
 
         MediaFormat inputFormat = mExtractor.getTrackFormat( mTrackIndex );
+
+        // NOTE Surface ROTATION
+        int originRotation = 0;
         if (inputFormat.containsKey( MediaFormatExtraInfo.KEY_ROTATION_DEGREES )) {
-            // Decoded video is rotated automatically in Android 5.0 lollipop.
-            // Turn off here because we don't want to encode rotated one.
-            // refer: https://android.googlesource.com/platform/frameworks/av/+blame/lollipop-release/media/libstagefright/Utils.cpp
-            inputFormat.setInteger( MediaFormatExtraInfo.KEY_ROTATION_DEGREES, 0 );
+            originRotation = inputFormat.getInteger( MediaFormatExtraInfo.KEY_ROTATION_DEGREES);
         }
+        Log.d(TAG, "setup ... : " + originRotation);
+        // NOTE is from front camera ?
+        if ( originRotation == 270 ) mFlipping = true;
+        int rotation = getProperRotation(
+                inputFormat.getInteger( MediaFormat.KEY_WIDTH),
+                inputFormat.getInteger( MediaFormat.KEY_HEIGHT),
+                originRotation
+        );
+
+        Log.d(TAG, "setup: ... re-rotation  " + rotation);
+
+        inputFormat.setInteger( MediaFormatExtraInfo.KEY_ROTATION_DEGREES, rotation < 0 ? rotation + 360 : rotation );
+
         // OutputSurface uses the EGL context created by InputSurface
         mDecoderOutputSurfaceWrapper = new OutputSurface();
         try {
@@ -94,6 +107,20 @@ public class VideoTrackTranscoder implements TrackTranscoder {
         mDecoder.start();
         isDecoderStarted = true;
         mDecoderInputBuffers = mDecoder.getInputBuffers();
+    }
+
+    private int getProperRotation(int width, int height, int originRotation ) {
+        Log.d(TAG, "getProperRotation: " + originRotation);
+        if ( originRotation == 90 ) {
+            if ( width > height ) return 0;
+            else return 0;
+        } else if (originRotation == 0 ) {
+            if ( width > height ) return 0;
+            else return 270;
+        } else if ( originRotation == 270 ) {
+            return 180;
+        }
+        return 0;
     }
 
     @Override
@@ -156,7 +183,7 @@ public class VideoTrackTranscoder implements TrackTranscoder {
         int index = mDecoder.dequeueInputBuffer( timeoutUs );
         if ( index < 0 ) return DRAIN_STATE_NONE;
         if ( track < 0 || forceExtractingStop) {
-            Log.d(TAG, "permitEncode: forceStop! VIDEO " + mExtractedPresentationTimeUs + " / " + mExtractor.getSampleTrackIndex());
+            Log.d(TAG, "permitEncode: release! VIDEO " + mExtractedPresentationTimeUs + " / " + mExtractor.getSampleTrackIndex());
             if (VERBOSE) Log.d(TAG, "permitEncode: END OF EXTRACTING " + mExtractedPresentationTimeUs);
             sawExtractorEOS = true;
             mDecoder.queueInputBuffer( index, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM );

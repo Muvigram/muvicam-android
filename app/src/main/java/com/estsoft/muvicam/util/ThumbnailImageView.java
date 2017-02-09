@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.library.videolibrary;
+package com.estsoft.muvicam.util;
 
 import android.content.Context;
 import android.util.AttributeSet;

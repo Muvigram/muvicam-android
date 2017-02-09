@@ -15,12 +15,14 @@ import android.view.WindowManager;
 import com.estsoft.muvicam.injection.component.DaggerHomeComponent;
 import com.estsoft.muvicam.injection.component.HomeComponent;
 import com.estsoft.muvicam.R;
+import com.estsoft.muvicam.injection.qualifier.ActivityContext;
 import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.ui.base.BaseActivity;
 import com.estsoft.muvicam.ui.home.camera.CameraFragment;
 import com.estsoft.muvicam.ui.home.camera.ControllableViewPager;
 import com.estsoft.muvicam.ui.home.camera.MusicCutFragment;
 import com.estsoft.muvicam.ui.home.music.MusicFragment;
+import com.estsoft.muvicam.util.RxEventBus;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,8 +51,7 @@ public class HomeActivity extends BaseActivity {
 
   public static Intent newIntent(Context packageContext) {
     Intent intent = new Intent(packageContext, HomeActivity.class);
-    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-    return intent;
+    return intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
   }
 
   public static HomeActivity get(Fragment fragment) {
@@ -62,6 +63,7 @@ public class HomeActivity extends BaseActivity {
   }
 
   @Inject HomePagerAdapter mPagerAdapter;
+
 
   @BindView(R.id.home_view_pager) ControllableViewPager mViewPager;
 
@@ -162,6 +164,13 @@ public class HomeActivity extends BaseActivity {
       mViewPager.disableScroll();
     }
   }
+
+  // EVENT BUS //////////////////////////// For future use
+  // @Inject @ActivityContext RxEventBus mBus;
+  //
+  // public RxEventBus localBus() {
+  //   return mBus;
+  // }
 }
 
 

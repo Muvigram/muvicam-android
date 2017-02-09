@@ -14,9 +14,9 @@ import com.estsoft.muvicam.R;
 
 
 public class VideoEditorEditSeekBar extends View {
-  private Paint paint;
+    private Paint paint;
     // ms
-    private int nowPosition;
+    private int startX;
     String TAG = "VideoEditorEditSeekBar";
 
     public VideoEditorEditSeekBar(Context context) {
@@ -35,29 +35,26 @@ public class VideoEditorEditSeekBar extends View {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    public VideoEditorEditSeekBar(Context context,int nowPosition) {
+    public VideoEditorEditSeekBar(Context context, int startX) {
         super(context);
-//        Log.d(TAG, "onCreate: rbv rvt" + totalTime);
-
         paint = new Paint();
-        this.nowPosition = nowPosition;
+        this.startX = startX;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
         paint.setColor(ContextCompat.getColor(getContext(), R.color.resultSpace));
         paint.setStyle(Paint.Style.FILL);
-        DisplayMetrics outMetrics = new DisplayMetrics();
-        ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
-        int widthPSec = outMetrics.widthPixels / 15;
-        int dpi = outMetrics.densityDpi / 160;
-        Log.d("onDraw", "onDraw: editorvideoWidth" + widthPSec);
-        Log.d("onDraw", "onDraw: dpi" + dpi);
-
-        canvas.drawRect(nowPosition, 0, nowPosition+3*dpi, Math.round(77 * dpi), paint);
+        canvas.drawRect(startX, 0, startX + getResources().getDimension(R.dimen.editbar_seek_width), getResources().getDimension(R.dimen.editbar_seek_height), paint);
     }
 
+    public int getStartX() {
+        return startX;
+    }
+
+    public void setStartX(int startX) {
+        this.startX = startX;
+    }
 }
 

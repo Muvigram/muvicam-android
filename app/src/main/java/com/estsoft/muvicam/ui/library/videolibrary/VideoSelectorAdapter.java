@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Video;
 import com.estsoft.muvicam.ui.library.videolibrary.injection.VideoLibraryScope;
+import com.estsoft.muvicam.util.ThumbnailImageView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +62,7 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
 
   @Override
   public void onBindViewHolder(VideoViewHolder holder, int position) {
-    holder.bindVideo(mVideos.get(position));
+    holder.bindVideo(mVideos.get(position), position);
   }
 
   //
@@ -75,7 +76,7 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
     @BindView(R.id.library_video_item_main_duration)  TextView mVideoDuration;
     @BindView(R.id.library_video_item_selected_order) TextView mSelectedOrder;
 
-    public void bindVideo(Video video) {
+    public void bindVideo(Video video, int position) {
       // Main frame
       mLayoutMain.setVisibility(View.VISIBLE);
       if (video.thumbnail() != null) {
@@ -100,9 +101,9 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
 
       mLayoutMain.setOnClickListener(v -> {
         if (video.isSelected()) {
-          mFragment.getPresenter().onItemReleased(video);
+          onItemReleased(position);
         } else /* if not selected */ {
-          mFragment.getPresenter().onItemSelected(video);
+          onItemSelected(position);
         }
 
       });
@@ -111,15 +112,6 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
     public VideoViewHolder(View itemView) {
       super(itemView);
       ButterKnife.bind(this, itemView);
-    }
-  }
-
-  public void updateView(List<Video> videos) {
-    int pos;
-    for (int i = 0; i < videos.size(); i++) {
-      Video video = videos.get(i);
-      pos = mVideos.indexOf(video);
-      notifyItemChanged(pos);
     }
   }
 
@@ -132,4 +124,86 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
     return String.format(Locale.US, "%02d:%02d", sec / 60, sec % 60);
   }
 
+  /* Update specific views */
+  public void updateView() {
+    for (int pos : mSelected) {
+      notifyItemChanged(pos);
+    }
+  }
+
+  public void updateView(int removed) {
+    for (int pos : mSelected) {
+      notifyItemChanged(pos);
+    }
+    notifyItemChanged(removed);
+  }
+
+  public void onItemSelected(int pos) {
+    // push items
+    pushPos(pos);
+
+    // update view
+    updateView();
+  }
+
+  public void onItemReleased(int pos) {
+    // pop items
+    removePos(pos);
+
+    // update view
+    updateView(pos);
+  }
+
+  public List<Video> getVideos() {
+    return null;
+  }
+
+  private static final int MAX_SELECTION = 5;
+  private List<Integer> mSelected = new ArrayList<>();
+
+  private void pushPos(Integer pos) {
+    if (isFull()) {
+      Timber.e("Selected video array is full.");
+      return;
+    }
+
+    int idx = mSelected.indexOf(pos);
+    if (idx != -1) {
+      Timber.e("Already matching item exists in the list.");
+      return;
+    }
+
+    mVideos.get(pos).selected();
+    mVideos.get(pos).setSelectionOrder(mSelected.size());
+
+    mSelected.add(pos);
+  }
+
+  private void removePos(Integer pos) {
+    if (isEmpty()) {
+      Timber.e("Selected video array is empty.");
+      return;
+    }
+
+    int idx = mSelected.indexOf(pos);
+    if (idx == -1) {
+      Timber.e("There is no matching item in the list.");
+      return;
+    }
+
+    mVideos.get(pos).released();
+    for (int i = idx + 1; i < mSelected.size(); i++) {
+      mVideos.get(mSelected.get(i)).decreaseSelectionOrder();
+    }
+
+    mSelected.remove(idx);
+  }
+
+  private boolean isEmpty() {
+    return mSelected.size() == 0;
+  }
+
+  private boolean isFull() {
+    return mSelected.size() == MAX_SELECTION;
+  }
 }

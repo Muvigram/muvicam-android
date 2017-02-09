@@ -59,7 +59,7 @@ public class VideoLibraryFragment extends Fragment implements VideoLibraryMvpVie
 
   @OnClick(R.id.library_video_next_button)
   public void goToNext(View v) {
-    LibraryActivity.get(this).goToNext(mPresenter.getVideos());
+    LibraryActivity.get(this).completeVideoSelection(mAdapter.getVideos());
   }
 
   @Override
@@ -141,20 +141,6 @@ public class VideoLibraryFragment extends Fragment implements VideoLibraryMvpVie
         getActivity(),
         getString(R.string.library_video_error_loading)
     ).show();
-  }
-
-  @Override
-  public void selectVideo(List<Video> videos) {
-    mAdapter.updateView(videos);
-  }
-
-  @Override
-  public void releaseVideo(List<Video> videos) {
-    mAdapter.updateView(videos);
-  }
-
-  public VideoLibraryPresenter getPresenter() {
-    return mPresenter;
   }
 
 }

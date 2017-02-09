@@ -14,10 +14,9 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
-import com.estsoft.muvicam.injection.component.ActivityComponent;
-import com.estsoft.muvicam.ui.share.injection.DaggerShareComponent;
-import com.estsoft.muvicam.ui.share.injection.ShareComponent;
+import com.estsoft.muvicam.ui.share.injection.ShareMediaComponent;
 import com.estsoft.muvicam.ui.common.BackToHomeDialogFragment;
+import com.estsoft.muvicam.ui.share.injection.ShareMediaModule;
 
 import javax.inject.Inject;
 
@@ -46,7 +45,7 @@ public class ShareFragment extends Fragment implements ShareMvpView {
     private final static String EXTRA_VIDEO_ENDS = "ShareFragment.videoEnds";
 
 
-    ShareComponent mShareComponent;
+    ShareMediaComponent mShareMediaComponent;
     @Inject SharePresenter mPresenter;
 
     @BindView(R.id.share_result_video) ShareVideoView mVideoView;
@@ -91,11 +90,11 @@ public class ShareFragment extends Fragment implements ShareMvpView {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ActivityComponent ac = ShareActivity.get( this ).getComponent();
-        mShareComponent = DaggerShareComponent.builder()
-                .activityComponent( ac ).build();
-        mShareComponent.inject( this );
+        mShareMediaComponent = ShareActivity.get(this)
+                .getComponent().plus( new ShareMediaModule() );
+        mShareMediaComponent.inject( this );
         mPresenter.attachView( this );
+
         if (getArguments() != null ) {
             mPresenter.setVideoParams(
                     (String[])getArguments().getSerializable( EXTRA_VIDEO_PATHS ),
@@ -107,6 +106,7 @@ public class ShareFragment extends Fragment implements ShareMvpView {
                     (int)getArguments().getSerializable( EXTRA_MUSIC_LENGTH ),
                     (boolean)getArguments().getSerializable( EXTRA_FROM_CAMERA ));
         }
+
         mPresenter.doTranscode();
 
     }
@@ -137,6 +137,7 @@ public class ShareFragment extends Fragment implements ShareMvpView {
     public void onDestroyView() {
         mVideoView.stopPlayback();
         mUnbinder.unbind();
+        mPresenter.deleteCashFile();
         if (mUnbinder != null) {
             mUnbinder = null;
         }
@@ -149,15 +150,15 @@ public class ShareFragment extends Fragment implements ShareMvpView {
         if (mPresenter != null) {
             mPresenter = null;
         }
-        if (mShareComponent != null) {
-            mShareComponent = null;
+        if (mShareMediaComponent != null) {
+            mShareMediaComponent = null;
         }
         super.onDestroy();
     }
 
     @Override
     public void showToast( String msg ) {
-        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT ).show();
+//        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT ).show();
     }
 
     @Override
@@ -184,10 +185,7 @@ public class ShareFragment extends Fragment implements ShareMvpView {
     public void videoSetAndStart( String videoPath, int durationMs ) {
         mVideoView.setOnCompletionListener( mediaPlayer  ->    mVideoView.start()   );
         mVideoView.setOnPreparedListener( mediaPlayer ->  {
-
-//            mVideoView.start();
             mThumbnailHolder.setVisibility(View.GONE);
-
         });
         mVideoView.setupReplay( 0, durationMs , null );
         mVideoView.setVideoPath( videoPath );

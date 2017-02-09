@@ -73,6 +73,10 @@ public class MusicCutDialogFragment extends DialogFragment {
   public void onResume() {
     super.onResume();
     mOnPreparedListener.onPrepared();
+    if (!mMusicPlayer.isPlaying() &&
+        mWaveformView.isOnPrepared()) {
+      startMusic();
+    }
   }
 
   @Override
@@ -129,7 +133,7 @@ public class MusicCutDialogFragment extends DialogFragment {
 
     builder.setView(view)
         .setPositiveButton(android.R.string.ok, (dialog, id) -> {
-          LibraryActivity.get(this).completeSelection(mMusic.uri().toString(), mOffset, 15);
+          LibraryActivity.get(this).completeMusicSelection(mMusic.uri().toString(), mOffset, 15);
         })
         .setNegativeButton(android.R.string.cancel, (dialog, id) -> dismiss());
 
@@ -162,7 +166,6 @@ public class MusicCutDialogFragment extends DialogFragment {
 
   private void startMusic() {
     mOffset = UnitConversionUtil.secToMillisec(mWaveformView.fixOffset());
-    Timber.e("mOffset : %d", mOffset);
     mMusicPlayer.setOffset(mOffset);
     RxUtil.unsubscribe(mSubscription);
 
@@ -171,7 +174,7 @@ public class MusicCutDialogFragment extends DialogFragment {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribeOn(Schedulers.newThread())
         .map(UnitConversionUtil::millisecToSec)
-        .filter(currentSec -> {
+        .filter(currentSec -> { // check 15 sec limit.
           if (mWaveformView.isValidRunningAt(currentSec)) {
             return true;
           } else {
@@ -180,10 +183,13 @@ public class MusicCutDialogFragment extends DialogFragment {
             return false;
           }
         })
-        .subscribe(
+        .subscribe( //
             mWaveformView::updateUi,
             Throwable::printStackTrace,
-            () -> RxUtil.unsubscribe(mSubscription)
+            () -> { // when subscription is stop
+              RxUtil.unsubscribe(mSubscription);
+              mMusicPlayer.pausePlayer();
+            }
         );
   }
 

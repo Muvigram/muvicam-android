@@ -30,8 +30,7 @@ public class EditorResultMediaPlayer extends MediaPlayer {
     private MediaPlayer.OnCompletionListener completionListener = new OnCompletionListener() {
         @Override
         public void onCompletion(MediaPlayer mediaPlayer) {
-
-                    }
+        }
     };
 
     public EditorResultMediaPlayer(Activity activity, int offset, boolean isFirst, boolean isMusicPlayer) {

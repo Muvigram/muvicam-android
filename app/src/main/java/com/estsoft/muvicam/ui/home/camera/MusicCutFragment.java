@@ -25,6 +25,7 @@ import butterknife.Unbinder;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by jaylim on 12/17/2016.
@@ -130,6 +131,16 @@ public class MusicCutFragment extends Fragment {
   }
 
   @Override
+  public void onResume() {
+    super.onResume();
+    Timber.e("MP.isPlaying : %b, WV.isPrepared : %b", mMusicPlayer.isPlaying(), mWaveformView.isOnPrepared());
+    if (!mMusicPlayer.isPlaying() &&
+        mWaveformView.isOnPrepared()) {
+      startMusic();
+    }
+  }
+
+  @Override
   public void onPause() {
     mMusicPlayer.stopSubscribePlayer();
     super.onPause();
@@ -193,7 +204,10 @@ public class MusicCutFragment extends Fragment {
         .subscribe(
             mWaveformView::updateUi,
             Throwable::printStackTrace,
-            () -> RxUtil.unsubscribe(mSubscription)
+            () -> {
+              RxUtil.unsubscribe(mSubscription);
+              mMusicPlayer.pausePlayer();
+            }
         );
   }
 

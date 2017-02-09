@@ -3,6 +3,7 @@ package com.estsoft.muvicam.data.local;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.provider.MediaStore;
 
@@ -95,7 +96,4 @@ public class VideoService {
 
     return bmp;
   }
-
-
-
 }

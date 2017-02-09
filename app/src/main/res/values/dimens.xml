@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <!-- EditorResult -->
+    <dimen name="resultbar_height">20dp</dimen>
+    <dimen name="resultbar_line">1dp</dimen>
+
+    <!-- EditorEdit -->
+    <dimen name="editbar_seek_height">77dp</dimen>
+    <dimen name="editbar_seek_width">3dp</dimen>
+    <dimen name="editbar_padding">5dp</dimen>
+</resources>

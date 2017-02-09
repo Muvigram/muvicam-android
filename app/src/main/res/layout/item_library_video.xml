@@ -14,14 +14,14 @@
         android:layout_height="match_parent"
         android:visibility="gone">
 
-        <com.estsoft.muvicam.ui.library.videolibrary.ThumbnailImageView
+        <com.estsoft.muvicam.util.ThumbnailImageView
             android:id="@+id/library_video_item_main_thumbnail"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
             android:scaleType="centerCrop"/>
 
-        <com.estsoft.muvicam.ui.library.videolibrary.ThumbnailImageView
+        <com.estsoft.muvicam.util.ThumbnailImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:adjustViewBounds="true"

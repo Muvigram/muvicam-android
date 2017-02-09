@@ -1,36 +1,22 @@
 package com.estsoft.muvicam.ui.share;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
-import android.view.WindowManager;
-import android.widget.TextView;
 
 import com.estsoft.muvicam.R;
-import com.estsoft.muvicam.injection.component.ActivityComponent;
-import com.estsoft.muvicam.model.Music;
-import com.estsoft.muvicam.ui.base.BaseActivity;
+import com.estsoft.muvicam.injection.component.DaggerShareComponent;
+import com.estsoft.muvicam.injection.component.ShareComponent;
+import com.estsoft.muvicam.ui.base.BaseSingleFragmentActivity;
 import com.estsoft.muvicam.ui.common.BackToHomeDialogFragment;
-import com.estsoft.muvicam.ui.home.HomeActivity;
-import com.estsoft.muvicam.ui.share.injection.ShareComponent;
-import com.estsoft.muvicam.util.DialogFactory;
-
-import java.io.File;
-import java.util.Locale;
-import java.util.Stack;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by jaylim on 12/15/2016.
  */
 
-public class ShareActivity extends BaseActivity {
+public class ShareActivity extends BaseSingleFragmentActivity {
   private static final String TAG = "ShareActivity";
 
   private final static String EXTRA_VIDEO_PATHS = "ShareActivity.videoPaths";
@@ -54,8 +40,8 @@ public class ShareActivity extends BaseActivity {
     intent.putExtra(EXTRA_MUSIC_OFFSET, musicOffset);
     intent.putExtra(EXTRA_MUSIC_LENGTH, musicLength);
     intent.putExtra(EXTRA_FROM_CAMERA, fromEditor);
-
-    return intent;
+    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    return intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
   }
 
@@ -69,7 +55,7 @@ public class ShareActivity extends BaseActivity {
     intent.putExtra(EXTRA_MUSIC_LENGTH, musicLength);
     intent.putExtra(EXTRA_FROM_CAMERA, false);
 
-    return intent;
+    return intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
   }
 
   private String[] mVideoPaths;
@@ -82,42 +68,26 @@ public class ShareActivity extends BaseActivity {
   private int[] mVideoStarts;
   private int[] mVideoEnds;
 
+  private ShareComponent mShareComponent;
+
   public static ShareActivity get(Fragment fragment) {
     return (ShareActivity)fragment.getActivity();
   }
 
-  public ActivityComponent getComponent() { return getActivityComponent(); }
+  public ShareComponent getComponent() { return mShareComponent; }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_share);
 
-    FragmentManager fragmentManager = getSupportFragmentManager();
-    Fragment fragment = fragmentManager.findFragmentById( R.id.fragment_activity_share );
+    mShareComponent = DaggerShareComponent.builder()
+            .activityComponent( getActivityComponent() ).build();
+    mShareComponent.inject( this );
 
-    if (fragment == null) {
-      fragment = createDefaultFragment();
-      fragmentManager.beginTransaction()
-              .add( R.id.fragment_activity_share, fragment )
-              .commit();
-    }
-
-//    StringBuilder sb = new StringBuilder("Video: \n");
-//    for (int i = 0; i < mVideoPaths.length; i++) {
-//      String s = String.format(Locale.US,
-//          "Path : %30s, [offset : %5d]\n", mVideoPaths[i], mVideoOffsets[i]);
-//      sb.append(s);
-//    }
-//    sb.append("\nMusic: \n");
-//    String s = String.format(Locale.US,
-//        "Path : %30s, [offset : %5d, len : %5d]\n", mMusicPath, mMusicOffset, mMusicLength);
-//    sb.append(s);
-//
-//    mTestTextView.setText(sb.toString());
   }
 
-  private Fragment createDefaultFragment() {
+  @Override
+  protected Fragment createDefaultFragment() {
     mVideoPaths = getIntent().getStringArrayExtra(EXTRA_VIDEO_PATHS);
     mVideoOffsets = getIntent().getIntArrayExtra(EXTRA_VIDEO_OFFSETS);
     mVideoStarts = getIntent().getIntArrayExtra(EXTRA_VIDEO_START_TIMES);
