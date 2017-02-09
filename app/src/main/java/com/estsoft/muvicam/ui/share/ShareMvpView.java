@@ -11,6 +11,7 @@ import com.estsoft.muvicam.ui.base.MvpView;
 public interface ShareMvpView extends MvpView {
 
     void showToast( String msg );
+    void showShareBottomSheet();
     void updateProgress( float progress, boolean isFinished );
     void holdFirstThumbnail(Bitmap bitmap );
     void videoSetAndStart( String videoPath, int durationMs );

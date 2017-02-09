@@ -11,6 +11,7 @@ import android.graphics.Matrix;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
@@ -119,10 +120,6 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
 
     /* video control */
     public void doTranscode() {
-
-        if ( mTranscodeMode == MODE_TRANSCODE ) mView.showToast( "Transcoding" );
-        else mView.showToast( "Concating" );
-
         mView.holdFirstThumbnail( getFirstThumbnail(mVideoPaths[0]) );
 
         if (mEditor != null) mEditor = null;

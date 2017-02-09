@@ -19,7 +19,15 @@
         <item name="android:textColorPrimary">@color/colorPrimaryDark</item>
         <!--dialog background-->
         <item name="android:windowBackground">@color/colorPrimary</item>
+    </style>
+    <style name="MuvicamBottomSheetDialog" parent="Theme.Design.BottomSheetDialog">
 
+        <!--buttons color-->
+        <item name="colorAccent">@color/colorAccent</item>
+        <!--title and message color-->
+        <item name="android:textColorPrimary">@color/colorPrimaryDark</item>
+        <!--dialog background-->
+        <item name="android:windowBackground">@color/colorPrimary</item>
 
     </style>
 

@@ -35,29 +35,39 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="0dp"
+            android:orientation="vertical"
             android:layout_weight="1"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginEnd="3dp"
             android:gravity="center">
+
             <ImageView
                 android:background="@drawable/ic_share_home"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
+                android:layout_margin="3dp"
                 android:id="@+id/share_camera_home"/>
-        </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginTop="10dp"
-            android:gravity="center">
             <ImageView
-                android:id="@+id/share_save"
+                android:id="@+id/share_sns"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:background="@drawable/ic_share_save"/>
+                android:layout_margin="3dp"
+                android:background="@drawable/ic_share_share"/>
         </LinearLayout>
+
+        <!--<LinearLayout-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="0dp"-->
+            <!--android:layout_weight="1"-->
+            <!--android:layout_marginTop="10dp"-->
+            <!--android:gravity="center">-->
+            <!--<ImageView-->
+                <!--android:id="@+id/share_save"-->
+                <!--android:layout_width="50dp"-->
+                <!--android:layout_height="50dp"-->
+                <!--android:background="@drawable/ic_share_save"/>-->
+        <!--</LinearLayout>-->
 
     </LinearLayout>
 
@@ -67,62 +77,9 @@
         android:layout_gravity="bottom"
         android:layout_marginBottom="10dp"
         android:padding="10dp"
-        android:gravity="center"
+        android:gravity="end"
         android:baselineAligned="false"
         android:id="@+id/icon_container">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center">
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ic_sns_grey_facebook"
-                android:alpha="0.6"
-                android:id="@+id/share_sns_facebook"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ic_sns_grey_twitter"
-                android:alpha="0.6"
-                android:id="@+id/share_sns_twitter"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center">
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ic_sns_grey_instagram"
-                android:alpha="0.6"
-                android:id="@+id/share_sns_instagram"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center">
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ic_sns_grey_storage"
-                android:alpha="0.6"
-                android:id="@+id/share_sns_local_store"/>
-        </LinearLayout>
 
 
     </LinearLayout>
