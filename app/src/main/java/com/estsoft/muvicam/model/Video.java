@@ -40,6 +40,10 @@ public abstract class Video implements Comparable<Video>, Parcelable {
     this.selectionOrder = selectionOrder;
   }
 
+  public void decreaseSelectionOrder() {
+    this.selectionOrder--;
+  }
+
   public abstract Uri uri();
   public abstract int width();
   public abstract int height();

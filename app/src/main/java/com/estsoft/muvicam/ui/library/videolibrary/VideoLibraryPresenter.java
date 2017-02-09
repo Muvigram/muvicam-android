@@ -72,41 +72,4 @@ public class VideoLibraryPresenter extends BasePresenter<VideoLibraryMvpView> {
             }
         );
   }
-
-  public void onItemSelected(Video video) {
-    video.selected();
-    pushVideo(video);
-    getMvpView().selectVideo(mSelectedVideos);
-  }
-
-  public void onItemReleased(Video video) {
-    video.released();
-    getMvpView().releaseVideo(mSelectedVideos);
-    removeVideo(video);
-  }
-
-  public List<Video> getVideos() {
-    return mSelectedVideos;
-  }
-
-  private static final int MAX_SELECTION = 5;
-  private List<Video> mSelectedVideos = new ArrayList<>();
-
-  private void pushVideo(Video item) {
-    if (mSelectedVideos.size() == MAX_SELECTION) {
-      Timber.i("Selected video array is full.");
-      return;
-    }
-    item.setSelectionOrder(mSelectedVideos.size());
-    mSelectedVideos.add(item);
-  }
-
-  private Video removeVideo(Video item) {
-    if (mSelectedVideos.size() == 0) {
-      Timber.i("Selected video array is empty.");
-      return null;
-    }
-    int i = mSelectedVideos.indexOf(item);
-    return i == -1 ? null : mSelectedVideos.remove(i);
-  }
 }

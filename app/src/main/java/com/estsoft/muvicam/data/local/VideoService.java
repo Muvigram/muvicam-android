@@ -3,6 +3,7 @@ package com.estsoft.muvicam.data.local;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.provider.MediaStore;
 
@@ -95,30 +96,4 @@ public class VideoService {
 
     return bmp;
   }
-
-    public static class VideoMetaData {
-        public Bitmap thumbnailBitmap;
-        public String videoPath;
-        public long durationMs;
-        public int durationSec;
-        public int position;
-        public int width;
-        public int height;
-
-        private VideoMetaData(Bitmap thumbnailBitmap, int width, int height, long durationMs, int durationSec, String videoPath, int position) {
-            this.thumbnailBitmap = thumbnailBitmap;
-            this.width = width;
-            this.height = height;
-            this.durationMs = durationMs;
-            this.durationSec = durationSec;
-            this.videoPath = videoPath;
-            this.position = position;
-        }
-
-        @Override
-        public String toString() {
-            return videoPath + " - " + durationMs + " = " + durationSec + " - " + position + " " + width + " . " + height;
-        }
-    }
-
 }
