@@ -88,6 +88,12 @@
     <string name="instagram_package">com.instagram.android</string>
     <string name="export_hashtag">#Muvicam</string>
 
+    <!-- sharing -->
+    <string name="facebook_name"> Facebook </string>
+    <string name="instagram_name"> Instargam </string>
+    <string name="twitter_name"> Twitter </string>
+    <string name="gallery_name"> Gallery </string>
+
 
     <!-- video selector -->
     <string name="selector_home">Home</string>

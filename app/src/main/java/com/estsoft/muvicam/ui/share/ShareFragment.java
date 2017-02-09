@@ -1,11 +1,16 @@
 package com.estsoft.muvicam.ui.share;
 
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
+import com.estsoft.muvicam.ui.common.ShareBottomSheetDialogFragment;
 import com.estsoft.muvicam.ui.share.injection.ShareMediaComponent;
 import com.estsoft.muvicam.ui.common.BackToHomeDialogFragment;
 import com.estsoft.muvicam.ui.share.injection.ShareMediaModule;
@@ -51,23 +57,17 @@ public class ShareFragment extends Fragment implements ShareMvpView {
     @BindView(R.id.share_result_video) ShareVideoView mVideoView;
     @BindView(R.id.share_camera_home) ImageView mHome;
     @BindView(R.id.share_save) ImageView mSave;
-    @BindView(R.id.share_sns_facebook) ImageView mFacebook;
-    @BindView(R.id.share_sns_twitter) ImageView mTwitter;
-    @BindView(R.id.share_sns_instagram) ImageView mInstagram;
-    @BindView(R.id.share_sns_local_store) ImageView mLocalStore;
     @BindView(R.id.share_custom_progress) CircularProgressBar mProgressbar;
     @BindView(R.id.share_progress_container) FrameLayout mProgressContainer;
     @BindView(R.id.share_thumbnail_holder) ImageView mThumbnailHolder;
 
-    @OnClick(R.id.share_sns_facebook) public void onFacebookClicked() { mPresenter.facebookConnect(); }
-    @OnClick(R.id.share_sns_twitter) public void onTwitterClicked() { mPresenter.twitterConnect(); }
-    @OnClick(R.id.share_sns_instagram) public void onInstagramClicked() { mPresenter.instagramConnect(); }
-    @OnClick(R.id.share_sns_local_store) public void onLocalstoreClicked() { mPresenter.storeToGallery(); }
-    @OnClick(R.id.share_save) public void onSaveClicked() { mPresenter.storeToGallery(); }
     @OnClick(R.id.share_camera_home) public void OnHomeClicked() {
         BackToHomeDialogFragment fragment = BackToHomeDialogFragment.newInstance(
                 getResources().getString(R.string.dialog_discard_video));
         fragment.show(ShareActivity.get(this).getSupportFragmentManager(), BackToHomeDialogFragment.TAG);
+    }
+    @OnClick(R.id.share_sns) public void onShareClicked() {
+        showShareBottomSheet();
     }
 
     Unbinder mUnbinder;
@@ -157,9 +157,43 @@ public class ShareFragment extends Fragment implements ShareMvpView {
     }
 
     @Override
-    public void showToast( String msg ) {
-//        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT ).show();
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, "onActivityResult: ");
+        if ( requestCode == ShareBottomSheetDialogFragment.SELECTION_REQUEST ) {
+            int selected = data.getIntExtra(ShareBottomSheetDialogFragment.SELECTION_CODE, -1);
+            Log.d(TAG, "onActivityResult: " + selected);
+            switch (selected) {
+                case ShareBottomSheetDialogFragment.SELECTION_FACEBOOK:
+                    mPresenter.facebookConnect();
+                    break;
+                case ShareBottomSheetDialogFragment.SELECTION_INSTAGRAM:
+                    mPresenter.instagramConnect();
+                    break;
+                case ShareBottomSheetDialogFragment.SELECTION_TWITTER:
+                    mPresenter.twitterConnect();
+                    break;
+                case ShareBottomSheetDialogFragment.SELECTION_GALLERY:
+                    mPresenter.storeToGallery();
+                    break;
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
+
+    @Override
+    public void showToast( String msg ) {
+        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT ).show();
+    }
+
+    @Override
+    public void showShareBottomSheet() {
+        BottomSheetDialogFragment fragment =
+                ShareBottomSheetDialogFragment.newInstance();
+        fragment.setTargetFragment(this, ShareBottomSheetDialogFragment.SELECTION_REQUEST);
+        fragment.show( getActivity().getSupportFragmentManager(), fragment.getTag() );
+    }
+
+
 
     @Override
     public void holdFirstThumbnail(Bitmap bitmap) {
