@@ -1,13 +1,18 @@
 package com.estsoft.muvicam.ui.splash;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.ui.base.BaseActivity;
@@ -24,12 +29,17 @@ public class SplashActivity extends BaseActivity {
   private PermissionManager mPermissionManager;
   final String PERMISSION_DIALOG = "permissionDialog";
 
+  private static final int SPLASH_TIME_OUT = 1000;
+
   private boolean isRequestIgnored = false;
 
   @Override
-  public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
-    super.onCreate(savedInstanceState, persistentState);
+  protected void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_splash);
+    //ImageView logoImage = (ImageView) findViewById(R.id.splash_logo_image);
+    //logoImage.setBackgroundResource(R.drawable.splash_w);
+
   }
 
   @Override
@@ -79,11 +89,16 @@ public class SplashActivity extends BaseActivity {
       }
 
     } else {
-      startActivity(HomeActivity.newIntent(this));
+      startMainActivity();
     }
   }
 
-
+  public void startMainActivity() {
+    final Activity activity = this;
+    new Handler().postDelayed(() -> {
+      startActivity(HomeActivity.newIntent(SplashActivity.this));
+    }, SPLASH_TIME_OUT);
+  }
 
   @Override
   public void onRequestPermissionsResult(int requestCode,
@@ -98,7 +113,7 @@ public class SplashActivity extends BaseActivity {
           return;
         }
       }
-      startActivity(HomeActivity.newIntent(this));
+      startMainActivity();
     }
   }
 }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Muvicam</string>
+    <string name="app_name">muvicam</string>
 
     <!-- splash package -->
     <string name="splash_request_permission_detail">

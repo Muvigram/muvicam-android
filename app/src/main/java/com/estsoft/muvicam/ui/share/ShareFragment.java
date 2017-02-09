@@ -5,9 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -19,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.estsoft.muvicam.R;
-import com.estsoft.muvicam.ui.common.ShareBottomSheetDialogFragment;
 import com.estsoft.muvicam.ui.share.injection.ShareMediaComponent;
 import com.estsoft.muvicam.ui.common.BackToHomeDialogFragment;
 import com.estsoft.muvicam.ui.share.injection.ShareMediaModule;

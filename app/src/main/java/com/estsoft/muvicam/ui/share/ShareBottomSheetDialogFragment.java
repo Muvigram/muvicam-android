@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.common;
+package com.estsoft.muvicam.ui.share;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -15,9 +15,7 @@ import android.view.ViewGroup;
 
 import com.estsoft.muvicam.R;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import butterknife.Unbinder;
 
 /**
