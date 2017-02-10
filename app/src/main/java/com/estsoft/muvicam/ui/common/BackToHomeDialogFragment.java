@@ -4,23 +4,16 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.estsoft.muvicam.R;
-import com.estsoft.muvicam.ui.base.BaseActivity;
-import com.estsoft.muvicam.ui.home.HomeActivity;
-import com.estsoft.muvicam.ui.share.ShareActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -56,7 +49,7 @@ public class BackToHomeDialogFragment extends DialogFragment {
         mMassage = getArguments().getString(ARG_MSG, "MSG_EMPTY");
 
         View view = LayoutInflater.from(getActivity())
-                .inflate(R.layout.fragment_dalog_back_home, null);
+                .inflate(R.layout.dialog_back_home, null);
         mUnbinder = ButterKnife.bind(this, view);
 
 //        mTitle.setText(getResources().getString(R.string.app_name));

@@ -205,7 +205,7 @@ public class VideoEditorEditFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_video_editor_edit, container, false);
+        View v = inflater.inflate(R.layout.fragment_editor_edit, container, false);
         resultSpaceLinearLayout = (FrameLayout) v.findViewById(R.id.editor_edit_result_space_linear);
         //     Log.d(TAG, "onCreateView: edit rvt" + resultVideosTotalTime);
         ResultBarView resultBarView;

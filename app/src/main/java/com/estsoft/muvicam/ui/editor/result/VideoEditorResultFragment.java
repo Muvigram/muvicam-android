@@ -249,7 +249,7 @@ public class VideoEditorResultFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_video_editor_result, container, false);
+        View v = inflater.inflate(R.layout.fragment_editor_result, container, false);
         videoSpaceFrameLayout = (FrameLayout) v.findViewById(R.id.editor_result_frame_layout);
         selectedVideoButtons = (RecyclerView) v.findViewById(R.id.editor_result_buttons);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);

@@ -19,7 +19,7 @@ public abstract class BaseSingleFragmentActivity extends BaseActivity {
     super.onCreate(savedInstanceState);
 
     // Inflate activity fragment layout
-    setContentView(R.layout.activity_single_fragment_container);
+    setContentView(R.layout.activity_fragment_container);
 
     // Get fragment manager and find fragment view object
     FragmentManager fragmentManager = getSupportFragmentManager();

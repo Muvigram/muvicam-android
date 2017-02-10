@@ -42,7 +42,7 @@ public class MusicSearchAdapter extends RecyclerView.Adapter<MusicSearchAdapter.
   @Override
   public MusicViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     View itemView = LayoutInflater.from(parent.getContext())
-        .inflate(R.layout.item_music, parent, false);
+        .inflate(R.layout.item_library_music, parent, false);
     return new MusicViewHolder(itemView);
 
   }

@@ -25,7 +25,7 @@ public abstract class BaseMultiFragmentActivity extends BaseActivity {
     mFragments = setFragments();
 
     // Inflate activity fragment layout
-    setContentView(R.layout.activity_single_fragment_container);
+    setContentView(R.layout.activity_fragment_container);
 
     // Initially, inflate 0th fragment layout.
     FragmentManager fragmentManager = getSupportFragmentManager();

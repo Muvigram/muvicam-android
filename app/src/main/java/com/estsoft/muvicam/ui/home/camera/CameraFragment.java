@@ -17,7 +17,6 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -260,7 +259,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   @Nullable
   @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-    View view = inflater.inflate(R.layout.fragment_camera, container, false);
+    View view = inflater.inflate(R.layout.fragment_home_camera, container, false);
     mUnbinder = ButterKnife.bind(this, view);
 
     final Observable<MotionEvent> sharedObservable = RxView.touches(mShootButton).share();

@@ -1,11 +1,7 @@
 package com.estsoft.muvicam.ui.editor.edit;
 
-import android.graphics.Point;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +32,7 @@ public class VideoEditorEditAdapter extends RecyclerView.Adapter<VideoEditorEdit
     @Override
     public VideoEditorEditAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater mInflater = LayoutInflater.from(parent.getContext());
-        View view = mInflater.inflate(R.layout.layout_recyclerview_editor_video, parent, false);
+        View view = mInflater.inflate(R.layout.item_editor_thumbnail, parent, false);
 
         return new ViewHolder(view);
     }

@@ -1,6 +1,5 @@
 package com.estsoft.muvicam.ui.library.musiclibrary;
 
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,9 +10,6 @@ import android.widget.TextView;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Music;
-import com.estsoft.muvicam.ui.editor.EditorActivity;
-import com.estsoft.muvicam.ui.home.HomeActivity;
-import com.estsoft.muvicam.ui.library.LibraryActivity;
 import com.estsoft.muvicam.ui.library.musiclibrary.injection.MusicLibraryScope;
 
 import java.util.ArrayList;
@@ -49,7 +45,7 @@ public class MusicLibraryAdapter extends RecyclerView.Adapter<MusicLibraryAdapte
   @Override
   public MusicLibraryViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     View itemView = LayoutInflater.from(parent.getContext())
-        .inflate(R.layout.item_music, parent, false);
+        .inflate(R.layout.item_library_music, parent, false);
     return new MusicLibraryViewHolder(itemView);
   }
 

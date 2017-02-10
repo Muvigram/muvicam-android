@@ -29,7 +29,7 @@ public class VideoEditSelectedNumberAdapter extends RecyclerView.Adapter<VideoEd
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater mInflater = LayoutInflater.from(parent.getContext());
-        View view = mInflater.inflate(R.layout.layout_recyclerview_video_numbers, parent, false);
+        View view = mInflater.inflate(R.layout.item_editor_number, parent, false);
         return new ViewHolder(view);
     }
 
