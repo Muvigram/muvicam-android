@@ -33,6 +33,7 @@ public class VideoService {
   private int mHeightColumn;
   private int mWidthColumn;
   private int mDurationColumn;
+  private int mResolutionColumn;
 
   public void initColumnIndex(Cursor cursor) {
     mIdColumn = cursor.getColumnIndex(MediaStore.Video.Media._ID);
@@ -40,14 +41,17 @@ public class VideoService {
     mHeightColumn = cursor.getColumnIndex(MediaStore.Video.Media.HEIGHT);
     mWidthColumn = cursor.getColumnIndex(MediaStore.Video.Media.WIDTH);
     mDurationColumn = cursor.getColumnIndex(MediaStore.Video.Media.DURATION);
+    mResolutionColumn = cursor.getColumnIndex(MediaStore.Video.Media.RESOLUTION);
   }
 
   public Observable<Video> getVideos() {
 
     Cursor videoCursor = mContext.getContentResolver().query(
         MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-        null, null, null, null
+        null, null, null,
+        MediaStore.Video.Media._ID + " ASC"
     );
+
     initColumnIndex(videoCursor);
 
     if (videoCursor == null || !videoCursor.moveToFirst()) {
@@ -55,7 +59,7 @@ public class VideoService {
     }
 
     return CursorObservable.create(videoCursor, false)
-        .filter(this::isValid)
+        .filter(this::isSupported)
         .map(cursor -> Video.builder()
             .setUri(getUri(cursor))
             .setDuration(getDuration(cursor))
@@ -66,8 +70,28 @@ public class VideoService {
         .doOnCompleted(videoCursor::close);
   }
 
-  private boolean isValid(Cursor cursor) {
-    return Integer.parseInt(cursor.getString(mDurationColumn)) < 180000;
+  private boolean isSupported(Cursor cursor) {
+    return isSupportedFormat(cursor) &&
+           isSupportedLength(cursor) &&
+           isSupportedResolution(cursor);
+  }
+
+  private boolean isSupportedFormat(Cursor cursor) {
+    return cursor.getString(mPathColumn).endsWith(".mp4");
+  }
+
+  private boolean isSupportedLength(Cursor cursor) {
+    int duration = Integer.parseInt(cursor.getString(mDurationColumn));
+    return duration >= 1000 && duration < 180000;
+  }
+
+  private boolean isSupportedResolution(Cursor cursor) {
+    String resolution = cursor.getString(mResolutionColumn);
+    String[] dimen = resolution.split("x");
+    int x = Integer.parseInt(dimen[0]);
+    int y = Integer.parseInt(dimen[1]);
+
+    return Math.min(x, y) <= 1080;
   }
 
   public Uri getUri(Cursor cursor) {
@@ -88,12 +112,9 @@ public class VideoService {
 
   public Bitmap getThumbnail(Cursor cursor) {
     long id = cursor.getLong(mIdColumn);
-    Timber.e("PATH : %s", id);
-    Bitmap bmp = MediaStore.Video.Thumbnails.getThumbnail(
+    return MediaStore.Video.Thumbnails.getThumbnail(
         mContext.getContentResolver(),
         id, MediaStore.Video.Thumbnails.MINI_KIND,
         null);
-
-    return bmp;
   }
 }
