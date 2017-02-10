@@ -5,7 +5,7 @@
     android:background="@color/editorTrimmer"
     >
 
-    <com.estsoft.muvicam.ui.selector.videoselector.ThumbnailImageView
+    <com.estsoft.muvicam.util.ThumbnailImageView
         android:id="@+id/video_edit_thumbnail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

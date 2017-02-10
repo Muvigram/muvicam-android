@@ -23,7 +23,7 @@ public class ThumbnailImageView extends ImageView {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int measuredWidth = getMeasuredWidth();
-        setMeasuredDimension(measuredWidth, measuredWidth);
+        int sideLength = getMeasuredWidth();
+        setMeasuredDimension(sideLength, sideLength);
     }
 }

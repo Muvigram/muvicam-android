@@ -3,12 +3,16 @@ package com.estsoft.muvicam.model;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Parcelable;
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Created by jaylim on 12/01/2017.

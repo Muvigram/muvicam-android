@@ -1,5 +1,6 @@
 package com.estsoft.muvicam.ui.library;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
@@ -29,9 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class LibraryActivity extends BaseSingleFragmentActivity {
-
-  private static final String EXTRA_VIDEOS = "library.LibraryActivity.editorVideos";
+public class LibraryActivity extends BaseMultiFragmentActivity {
 
   public static Intent newIntent(Context packageContext) {
     return new Intent(packageContext, LibraryActivity.class);
@@ -51,10 +50,12 @@ public class LibraryActivity extends BaseSingleFragmentActivity {
     return (LibraryActivity) view.getContext();
   }
 
-
   @Override
-  protected Fragment createDefaultFragment() {
-    return VideoLibraryFragment.newInstance();
+  protected Fragment[] setFragments() {
+    Fragment[] fragments = new Fragment[2];
+    fragments[0] = VideoLibraryFragment.newInstance();
+    fragments[1] = MusicLibraryFragment.newInstance();
+    return fragments;
   }
 
   @Override
@@ -70,8 +71,9 @@ public class LibraryActivity extends BaseSingleFragmentActivity {
 
   private List<Video> mVideos;
 
-  public void completeVideoSelection(@NonNull List<Video> videos) {
+  public LibraryActivity completeVideoSelection(@NonNull List<Video> videos) {
     mVideos = videos;
+    return this;
   }
 
   /**

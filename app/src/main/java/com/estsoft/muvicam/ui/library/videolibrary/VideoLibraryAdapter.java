@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Video;
 import com.estsoft.muvicam.ui.library.videolibrary.injection.VideoLibraryScope;
+import com.estsoft.muvicam.util.DialogFactory;
 import com.estsoft.muvicam.util.ThumbnailImageView;
 
 import java.util.ArrayList;
@@ -24,19 +25,23 @@ import butterknife.ButterKnife;
 import timber.log.Timber;
 
 @VideoLibraryScope
-public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdapter.VideoViewHolder> {
+public class VideoLibraryAdapter extends RecyclerView.Adapter<VideoLibraryAdapter.VideoViewHolder> {
 
   private List<Video> mVideos;
 
   private VideoLibraryFragment mFragment;
 
   @Inject
-  public VideoSelectorAdapter() {
+  public VideoLibraryAdapter() {
     mVideos = new ArrayList<>();
   }
 
   public void register(VideoLibraryFragment fragment) {
     mFragment = fragment;
+  }
+
+  public void deregister() {
+    mFragment = null;
   }
 
   public void setVideos(List<Video> videos) {
@@ -95,18 +100,18 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
       // Supported aspect ratio (16:9)
       if (isSupportedRatio(video.width(), video.height())) {
         mLayoutUnsupported.setVisibility(View.INVISIBLE);
+        mLayoutMain.setOnClickListener(v -> {
+          if (video.isSelected()) onItemReleased(position);
+          else onItemSelected(position);
+        });
       } else { // unsupported aspect ratio (NOT 16:9)
         mLayoutUnsupported.setVisibility(View.VISIBLE);
+        mLayoutMain.setOnClickListener(v -> {
+          DialogFactory.createSimpleOkErrorDialog(mFragment.getActivity(),
+              R.string.library_video_title_text, R.string.library_video_item_unsupported)
+              .show();
+        });
       }
-
-      mLayoutMain.setOnClickListener(v -> {
-        if (video.isSelected()) {
-          onItemReleased(position);
-        } else /* if not selected */ {
-          onItemSelected(position);
-        }
-
-      });
     }
 
     public VideoViewHolder(View itemView) {
@@ -125,29 +130,31 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
   }
 
   /* Update specific views */
-  public void updateView() {
-    for (int pos : mSelected) {
+  private void updateView() {
+    //noinspection Convert2streamapi
+    for (int pos : mSelectedPosition) {
       notifyItemChanged(pos);
     }
   }
 
-  public void updateView(int removed) {
-    for (int pos : mSelected) {
+  private void updateView(int removed) {
+    //noinspection Convert2streamapi
+    for (int pos : mSelectedPosition) {
       notifyItemChanged(pos);
     }
     notifyItemChanged(removed);
   }
 
-  public void onItemSelected(int pos) {
-    // push items
+  private void onItemSelected(int pos) {
+    // push item
     pushPos(pos);
 
     // update view
     updateView();
   }
 
-  public void onItemReleased(int pos) {
-    // pop items
+  private void onItemReleased(int pos) {
+    // remove item
     removePos(pos);
 
     // update view
@@ -155,55 +162,64 @@ public class VideoSelectorAdapter extends RecyclerView.Adapter<VideoSelectorAdap
   }
 
   public List<Video> getVideos() {
-    return null;
+    List<Video> videos = new ArrayList<>();
+    for (int i = 0; i < mSelectedPosition.size(); i++) {
+      videos.add(mVideos.get(mSelectedPosition.get(i)));
+    }
+    return videos;
   }
 
+  //
+
   private static final int MAX_SELECTION = 5;
-  private List<Integer> mSelected = new ArrayList<>();
+  private List<Integer> mSelectedPosition = new ArrayList<>();
 
   private void pushPos(Integer pos) {
     if (isFull()) {
-      Timber.e("Selected video array is full.");
+      Timber.i("Selected video array is full.");
+      DialogFactory.createSimpleOkErrorDialog(mFragment.getActivity(),
+          R.string.library_video_title_text, R.string.library_video_selection_is_full)
+          .show();
       return;
     }
 
-    int idx = mSelected.indexOf(pos);
+    int idx = mSelectedPosition.indexOf(pos);
     if (idx != -1) {
-      Timber.e("Already matching item exists in the list.");
+      Timber.w("Already matching item exists in the list.");
       return;
     }
 
     mVideos.get(pos).selected();
-    mVideos.get(pos).setSelectionOrder(mSelected.size());
+    mVideos.get(pos).setSelectionOrder(mSelectedPosition.size());
 
-    mSelected.add(pos);
+    mSelectedPosition.add(pos);
   }
 
   private void removePos(Integer pos) {
     if (isEmpty()) {
-      Timber.e("Selected video array is empty.");
+      Timber.i("Selected video array is empty.");
       return;
     }
 
-    int idx = mSelected.indexOf(pos);
+    int idx = mSelectedPosition.indexOf(pos);
     if (idx == -1) {
-      Timber.e("There is no matching item in the list.");
+      Timber.w("There is no matching item in the list.");
       return;
     }
 
     mVideos.get(pos).released();
-    for (int i = idx + 1; i < mSelected.size(); i++) {
-      mVideos.get(mSelected.get(i)).decreaseSelectionOrder();
+    for (int i = idx + 1; i < mSelectedPosition.size(); i++) {
+      mVideos.get(mSelectedPosition.get(i)).decreaseSelectionOrder();
     }
 
-    mSelected.remove(idx);
+    mSelectedPosition.remove(idx);
   }
 
   private boolean isEmpty() {
-    return mSelected.size() == 0;
+    return mSelectedPosition.size() == 0;
   }
 
   private boolean isFull() {
-    return mSelected.size() == MAX_SELECTION;
+    return mSelectedPosition.size() == MAX_SELECTION;
   }
 }

@@ -11,12 +11,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="10dp"
         android:paddingBottom="10dp"
-        android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        app:behavior_peekHeight="280dp"
+        android:paddingStart="20dp"
+        android:paddingTop="10dp"
         app:behavior_hideable="false"
+        app:behavior_peekHeight="280dp"
         app:layout_behavior="@string/bottom_sheet_behavior">
 
         <LinearLayout
@@ -25,44 +25,29 @@
             android:layout_marginBottom="15dp"
             android:orientation="horizontal">
 
-            <LinearLayout
+            <TextView
                 android:id="@+id/share_bottom_facebook"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1">
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="@drawable/ic_sns_facebook_60dp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
-                android:layout_gravity="center"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_sns_facebook_60dp"
+                android:gravity="center"
                 android:text="@string/facebook_name"/>
-            </LinearLayout>
 
-            <LinearLayout
+            <TextView
                 android:id="@+id/share_bottom_instagram"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1">
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="@drawable/ic_sns_instagram_60dp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
-                android:layout_gravity="center"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_sns_instagram_60dp"
+                android:gravity="center"
                 android:text="@string/instagram_name"/>
-            </LinearLayout>
-
         </LinearLayout>
 
         <LinearLayout
@@ -70,49 +55,29 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <LinearLayout
+            <TextView
                 android:id="@+id/share_bottom_twitter"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1">
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:background="@drawable/ic_sns_twitter_60dp"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:layout_gravity="center"
-                    android:text="@string/twitter_name"/>
-            </LinearLayout>
+                android:layout_marginEnd="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_sns_twitter_60dp"
+                android:gravity="center"
+                android:text="@string/twitter_name"/>
 
-            <LinearLayout
+            <TextView
                 android:id="@+id/share_bottom_gallery"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1">
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:background="@drawable/ic_sns_gallery_60dp"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:layout_gravity="center"
-                    android:text="@string/gallery_name"/>
-            </LinearLayout>
-
+                android:layout_marginEnd="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_sns_gallery_60dp"
+                android:gravity="center"
+                android:text="@string/gallery_name"/>
         </LinearLayout>
-
-
-     </LinearLayout>
-
-
-
+    </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>

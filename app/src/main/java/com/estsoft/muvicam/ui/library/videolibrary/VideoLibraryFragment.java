@@ -5,16 +5,17 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SimpleItemAnimator;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Video;
 import com.estsoft.muvicam.ui.library.LibraryActivity;
+import com.estsoft.muvicam.ui.library.musiclibrary.MusicLibraryFragment;
 import com.estsoft.muvicam.ui.library.videolibrary.injection.VideoLibraryComponent;
 import com.estsoft.muvicam.ui.library.videolibrary.injection.VideoLibraryModule;
 import com.estsoft.muvicam.util.DialogFactory;
@@ -39,18 +40,16 @@ public class VideoLibraryFragment extends Fragment implements VideoLibraryMvpVie
   VideoLibraryComponent mVideoLibraryComponent;
 
   @Inject VideoLibraryPresenter mPresenter;
-  @Inject VideoSelectorAdapter mAdapter;
+  @Inject VideoLibraryAdapter   mAdapter;
 
   @Inject
-  public void registerVideoLibraryFragment(VideoSelectorAdapter adapter) {
+  public void registerFragment(VideoLibraryAdapter adapter) {
     adapter.register(this);
   }
 
   Unbinder mUnbinder;
 
   @BindView(R.id.library_video_recyclerview) RecyclerView mRecyclerView;
-  @BindView(R.id.library_video_home_button)  TextView mHomeButton;
-  @BindView(R.id.library_video_next_button)  TextView mNextButton;
 
   @OnClick(R.id.library_video_home_button)
   public void backToHome(View v) {
@@ -59,7 +58,15 @@ public class VideoLibraryFragment extends Fragment implements VideoLibraryMvpVie
 
   @OnClick(R.id.library_video_next_button)
   public void goToNext(View v) {
-    LibraryActivity.get(this).completeVideoSelection(mAdapter.getVideos());
+    List<Video> videos = mAdapter.getVideos();
+    if (videos.size() <= 0) {
+      DialogFactory.createSimpleOkErrorDialog(getActivity(),
+          R.string.library_video_title_text, R.string.library_video_selection_is_empty).show();
+      return;
+    }
+    LibraryActivity.get(this)
+        .completeVideoSelection(videos)
+        .navigate(MusicLibraryFragment.class);
   }
 
   @Override
@@ -89,6 +96,7 @@ public class VideoLibraryFragment extends Fragment implements VideoLibraryMvpVie
   public void onActivityCreated(@Nullable Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
     // Set up recycler view with GridLayoutManager
+    ((SimpleItemAnimator) mRecyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
     mRecyclerView.setAdapter(mAdapter);
     mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
 
@@ -110,6 +118,10 @@ public class VideoLibraryFragment extends Fragment implements VideoLibraryMvpVie
     mPresenter.detachView();
     if (mPresenter != null) {
       mPresenter = null;
+    }
+    if (mAdapter != null) {
+      mAdapter.deregister();
+      mAdapter = null;
     }
     if (mVideoLibraryComponent != null) {
       mVideoLibraryComponent = null;

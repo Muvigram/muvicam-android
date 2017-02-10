@@ -52,6 +52,7 @@
     <string name="dialog_back_to_home">Are you sure you want to discard this session?</string>
     <string name="dialog_test">test</string>
     <string name="dialog_empty_title">empty-title</string>
+    <string name="dialog_music_title">Cut Music</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -80,7 +81,9 @@
 
     <string name="library_video_empty_videos">There arn\'t any videos</string>
     <string name="library_video_error_loading">There was a problem loading the videos.</string>
-    <string name="dialog_music_title">Cut Music</string>
+
+    <string name="library_video_selection_is_full">All five videos have been selected.</string>
+    <string name="library_video_selection_is_empty">Any videos have not been selected yet.</string>
 
     <!-- video export app packages -->
     <string name="facebook_package">com.facebook.katana</string>

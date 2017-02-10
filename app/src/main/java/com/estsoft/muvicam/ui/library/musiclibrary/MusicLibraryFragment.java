@@ -18,6 +18,7 @@ import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.ui.library.LibraryActivity;
 import com.estsoft.muvicam.ui.library.musiclibrary.injection.MusicLibraryComponent;
 import com.estsoft.muvicam.ui.library.musiclibrary.injection.MusicLibraryModule;
+import com.estsoft.muvicam.ui.library.videolibrary.VideoLibraryFragment;
 import com.estsoft.muvicam.util.DialogFactory;
 
 import java.util.Collections;
@@ -43,8 +44,6 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
 
   Unbinder mUnbinder;
 
-  // @BindView(R.id.library_music_search_bar_skip) TextView mSkipButton;
-  // @BindView(R.id.library_music_search_bar_back) TextView mBackButton;
   @BindView(R.id.library_music_search_bar_edit_text) EditText mSearchTextBar;
   @BindView(R.id.library_music_search_recyclerview) RecyclerView mRecyclerView;
 
@@ -66,8 +65,7 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
 
   @OnClick(R.id.library_music_search_bar_back)
   public void backToPrevious(View v) {
-
-    LibraryActivity.get(this).onBackPressed();
+    LibraryActivity.get(this).navigate(VideoLibraryFragment.class);
   }
 
   @OnClick(R.id.library_music_search_bar_skip)
