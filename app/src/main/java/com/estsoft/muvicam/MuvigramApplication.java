@@ -15,12 +15,12 @@ import timber.log.Timber;
  * Created by jaylim on 12/12/2016.
  */
 
-public class MuvicamApplication extends Application {
+public class MuvigramApplication extends Application {
 
   ApplicationComponent mApplicationComponent;
 
-  public static MuvicamApplication get(Context context) {
-    return (MuvicamApplication) context.getApplicationContext();
+  public static MuvigramApplication get(Context context) {
+    return (MuvigramApplication) context.getApplicationContext();
   }
 
   @Override
