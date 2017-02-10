@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.estsoft.muvicam.MuvicamApplication;
+import com.estsoft.muvicam.MuvigramApplication;
 import com.estsoft.muvicam.injection.component.ActivityComponent;
 import com.estsoft.muvicam.injection.module.ActivityModule;
 import com.jakewharton.rxbinding.view.RxView;
@@ -36,7 +36,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     super.onCreate(savedInstanceState);
 
-    mActivityComponent = MuvicamApplication.get(this)
+    mActivityComponent = MuvigramApplication.get(this)
         .getApplicationComponent()
         .plus(new ActivityModule(this));
   }
