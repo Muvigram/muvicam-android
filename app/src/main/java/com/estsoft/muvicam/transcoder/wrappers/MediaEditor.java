@@ -14,13 +14,14 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import timber.log.Timber;
+
 /**
  * Created by estsoft on 2016-12-21.
  */
 
 public
 class MediaEditor implements MediaTranscoder {
-    private static final String TAG = "MediaEditor";
     public static final int NORMAL = -12;
     public static final int MUTE_AND_ADD_MUSIC = -13;
     public static final int ADD_MUSIC = -14;
@@ -82,9 +83,9 @@ class MediaEditor implements MediaTranscoder {
         if ( segment.getStartTimeUs() < segment.getEndTimeUs() ) {
             mSegmentLists.add(segment);
             mTotalEstimatedDuration += segment.getEndTimeUs() - segment.getStartTimeUs();
-            Log.e(TAG, "addSegment: Adding segment ... " + inputFilePath + " / " + segment.getStartTimeUs() + " to " + segment.getEndTimeUs() );
+            Timber.d("addSegment: Adding segment ... %s/%ld/%ld", inputFilePath, segment.getStartTimeUs(), segment.getEndTimeUs() );
         } else {
-            Log.e(TAG, "addSegment: Skipping segment ... " + inputFilePath + " / " + segment.getStartTimeUs() + " to " + segment.getEndTimeUs());
+            Timber.d("addSegment: Skipping segment ... %s/%ld/%ld", inputFilePath, segment.getStartTimeUs(), segment.getEndTimeUs());
         }
     }
 
@@ -101,9 +102,9 @@ class MediaEditor implements MediaTranscoder {
         if ( segment.getStartTimeUs() < segment.getEndTimeUs() ) {
             mSegmentLists.add(segment);
 //            mTotalEstimatedDuration += segment.getEndTimeUs() - segment.getStartTimeUs();
-            Log.e(TAG, "addSegment: Adding segment as logo ... " + inputFile.toString() + " / " + segment.getStartTimeUs() + " to " + segment.getEndTimeUs() );
+            Timber.d("addSegment: Adding segment as logo ... %s/%ld/%ld", inputFile.toString(), segment.getStartTimeUs(), segment.getEndTimeUs() );
         } else {
-            Log.e(TAG, "addSegment: Skipping segment ... " + inputFile.toString() + " / " + segment.getStartTimeUs() + " to " + segment.getEndTimeUs() );
+            Timber.d("addSegment: Skipping segment ... %s/%ld/%ld", inputFile.toString(), segment.getStartTimeUs(), segment.getEndTimeUs() );
         }
     }
 
@@ -116,7 +117,7 @@ class MediaEditor implements MediaTranscoder {
 //                offset,-1, audioVolume, MediaSegment.AUDIO_ONLY);
         mMusicSegment = new MediaSegment( mTarget, inputFilePath, mBufferListener,
                 offset, mTotalEstimatedDuration + offset, audioVolume, MediaSegment.AUDIO_ONLY);
-        Log.d(TAG, "addMusicSegment: " + mTotalEstimatedDuration);
+        Timber.d("addMusicSegment: %ld", mTotalEstimatedDuration);
     }
     @Override
     public void startWork() {
@@ -127,7 +128,7 @@ class MediaEditor implements MediaTranscoder {
         long videoSyncBufferTimeUs = 0;
         long audioSyncBufferTimeUs = 0;
         for ( MediaSegment segment : mSegmentLists ) {
-            Log.d(TAG, "start: Start of new segment");
+            Timber.v("start: Start of new segment");
             segment.prepare();
             segment.setSmallSync( videoSyncBufferTimeUs, audioSyncBufferTimeUs );
 
@@ -142,14 +143,14 @@ class MediaEditor implements MediaTranscoder {
                     musicSegmentStepping( segment.getVideoCurrentWrittenTimeUs() + mSegmentTargetDuration - segment.getEndTimeUs());
                 }
                 if (mListener != null) callListener( ProgressListener.PROGRESS );
-                Log.d(TAG, "stepOnce: ");
+                Timber.v("stepOnce: ");
 
             }
 
             videoSyncBufferTimeUs = (mMuxer.getVideoPresentationTimeUs() - mSegmentTargetDuration);
             audioSyncBufferTimeUs = (mMuxer.getAudioPresentationTimeUs() - mSegmentTargetDuration);
 
-            Log.d(TAG, "start: End of this segment ... target Duration is " + mSegmentTargetDuration );
+            Timber.d("start: End of this segment ... target Duration is %ld", mSegmentTargetDuration );
             segment.release();
         }
 
@@ -180,7 +181,7 @@ class MediaEditor implements MediaTranscoder {
     }
     private void flushMusicSegment() {
         while ( !mMusicSegment.checkFinished() ) {
-            Log.e(TAG, "flushMusicSegment: FLUSHING");
+            Timber.v("flushMusicSegment: FLUSHING");
             boolean stepped = mMusicSegment.stepOnce();
             if (!stepped) sleepWhile( 20 );
         }

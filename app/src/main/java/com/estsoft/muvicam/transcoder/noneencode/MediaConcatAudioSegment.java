@@ -11,12 +11,13 @@ import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
 
 import java.io.IOException;
 
+import timber.log.Timber;
+
 /**
  * Created by estsoft on 2017-01-04.
  */
 
 public class MediaConcatAudioSegment {
-    private static final String TAG = "MediaConcatAudioSegment";
     public static final String AAC_MIME_TYPE = "audio/mp4a-latm";
 
     private AudioTrackTranscoder mAudioTranscoder;
@@ -46,7 +47,7 @@ public class MediaConcatAudioSegment {
     public void prepare() {
         mExtractor.seekTo( mStartOffsetUs, MediaExtractor.SEEK_TO_CLOSEST_SYNC);
         mExtractor.advance();
-        Log.d(TAG, "prepare: " + mExtractor.getSampleTime());
+        Timber.d("prepare: %d", mExtractor.getSampleTime());
         mActualFirstExtractedTimeUs = mExtractor.getSampleTime();
 //        mExtractor.seekTo( mStartOffsetUs, MediaExtractor.SEEK_TO_CLOSEST_SYNC);
 //        mExtractor.advance();

@@ -34,11 +34,12 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 
+import timber.log.Timber;
+
 /*
  * will show edit view
   * */
 public class VideoEditorResultFragment extends Fragment {
-    String TAG = "VideoEditorResultF";
     public final static String EXTRA_FRAGMENT_NUM = "VideoEditorResultFragment.fragmentNum";
     public final static String EXTRA_VIDEOS = "VideoEditorResultFragment.videoList";
     public final static String EXTRA_RESULT_VIDEOS = "VideoEditorResultFragment.resultVideoList";
@@ -71,7 +72,7 @@ public class VideoEditorResultFragment extends Fragment {
         @Override
         public void onItemClick(View view, int position) {
             selectedVideoButtons.setClickable(false);
-            Log.d(TAG, "onCreateView: resultVideosTotalTime6" + resultVideosTotalTime);
+            Timber.d("onCreateView: resultVideosTotalTime6 %d", resultVideosTotalTime);
 
             flag = false;
             mCallBack.passDataFToF(position + 1, selectedVideos, resultVideos, resultVideosTotalTime, musicPath, musicOffset, musicLength);
@@ -119,14 +120,14 @@ public class VideoEditorResultFragment extends Fragment {
         videoResultPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
-                Log.d(TAG, "onCompletion1: nowVideoNum " + nowVideoNum);
+                Timber.d("onCompletion1: nowVideoNum %d", nowVideoNum);
                 if (!isFirstNumChanged) {
                     nowVideoNum = nowVideoNum + 1;
                     isFirstNumChanged = true;
                 } else {
                     isFirstNumChanged = false;
                 }
-                Log.d(TAG, "run: nowVideoNum1 " + nowVideoNum + "/" + resultVideos.size());
+                Timber.d("run: nowVideoNum1 %d/%d", nowVideoNum, resultVideos.size());
 
                 if (nowVideoNum < resultVideos.size()) {
                     //     Log.d(TAG, "run sec: " + nowVideoNum + " / " + resultVideos.size());
@@ -158,14 +159,14 @@ public class VideoEditorResultFragment extends Fragment {
         videoResultPlayer2.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
-                Log.d(TAG, "onCompletion2: nowVideoNum " + nowVideoNum);
+                Timber.d("onCompletion2: nowVideoNum %d", nowVideoNum);
                 if (!isSecondNumChanged) {
                     nowVideoNum = nowVideoNum + 1;
                     isSecondNumChanged = true;
                 } else {
                     isSecondNumChanged = false;
                 }
-                Log.d(TAG, "run: nowVideoNum2 " + nowVideoNum + "/" + resultVideos.size());
+                Timber.d("run: nowVideoNum2 %d/%d", nowVideoNum, resultVideos.size());
 
                 if (nowVideoNum < resultVideos.size()) {
                     videoResultPlayer.start();
@@ -259,13 +260,13 @@ public class VideoEditorResultFragment extends Fragment {
 
         buttonsGone = (ImageView) v.findViewById(R.id.editor_result_buttons_gone);
         ResultBarView resultBarView;
-        Log.d(TAG, "onCreateView: resultVideosTotalTime1" + resultVideosTotalTime);
+        Timber.d("onCreateView: resultVideosTotalTime1 %d", resultVideosTotalTime);
         int resultTime = 0;
         for (int i = 0; i < resultVideos.size(); i++) {
 
             int nowVideoTime = resultVideos.get(i).getEnd() - resultVideos.get(i).getStart();
             int remainTime = 15000 - resultVideosTotalTime;
-            Log.d(TAG, "onCreateView: resultTime " + resultTime);
+            Timber.d("onCreateView: resultTime %d", resultTime);
             if (i == resultVideos.size() - 1 && remainTime < 1000) {
                 resultBarView = new ResultBarView(getContext(), resultTime, 15000 - resultTime, false);
             } else {
@@ -281,7 +282,7 @@ public class VideoEditorResultFragment extends Fragment {
         homeButton = (ImageView) v.findViewById(R.id.editor_home);
 
         if (resultVideosTotalTime > 0) {
-            Log.d(TAG, "onCreateView: resultVideosTotalTime2" + resultVideosTotalTime);
+            Timber.d("onCreateView: resultVideosTotalTime2 %d", resultVideosTotalTime);
             deleteButton.setTranslationX(deleteButtonLocation(resultVideosTotalTime));
         }
         int remainTime = 15000 - resultVideosTotalTime;
@@ -335,7 +336,7 @@ public class VideoEditorResultFragment extends Fragment {
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);
                 io.printStackTrace(pw);
-                Log.d(TAG, "editadaptor exception" + sw.toString());
+                Timber.d("editadaptor exception %s", sw.toString());
             }
 
         }
@@ -345,7 +346,7 @@ public class VideoEditorResultFragment extends Fragment {
             public void onClick(View view) {
                 EditorVideo removedVideo = resultVideos.get(resultVideos.size() - 1);
                 resultVideosTotalTime = resultVideosTotalTime - (removedVideo.getEnd() - removedVideo.getStart());
-                Log.d(TAG, "onCreateView: resultVideosTotalTime3" + resultVideosTotalTime);
+                Timber.d("onCreateView: resultVideosTotalTime3 %d", resultVideosTotalTime);
                 if (videoResultPlayer.isPlaying()) {
                     videoResultPlayer.pause();
                 }
@@ -364,7 +365,7 @@ public class VideoEditorResultFragment extends Fragment {
                 linearResultSpace.removeView(resultBarViews.get(resultBarViews.size() - 1));
                 resultBarViews.remove(resultBarViews.get(resultBarViews.size() - 1));
                 deleteButton.setTranslationX(deleteButtonLocation(resultVideosTotalTime));
-                Log.d(TAG, "onCreateView: resultVideosTotalTime5" + resultVideosTotalTime);
+                Timber.d("onCreateView: resultVideosTotalTime5 %d", resultVideosTotalTime);
                 nowVideoNum = 0;
 
                 if (selectedVideoButtons.getVisibility() == View.GONE) {
@@ -494,14 +495,14 @@ public class VideoEditorResultFragment extends Fragment {
                             }
                         });
                         if (nowVideoNum % 2 == 0 && flag && videoResultPlayer.isPlaying()) {
-                            Log.d(TAG, "run first: " + nowVideoNum + " / " + resultVideos.size());
+                            Timber.v("run first: %d/%d", nowVideoNum, resultVideos.size());
                             if (videoResultPlayer.getCurrentPosition() >= resultVideos.get(nowVideoNum).getEnd()) {
                                 videoResultPlayer.pause();
                                 videoResultPlayer.stop();
-                                Log.d(TAG, "run: isplaying" + videoResultPlayer.isPlaying());
+                                Timber.v("run: isplaying %s", videoResultPlayer.isPlaying() ? "true" : "false");
                                 nowVideoNum = nowVideoNum + 1;
                                 isFirstNumChanged = true;
-                                Log.d(TAG, "run: nowVideoNum " + nowVideoNum);
+                                Timber.v("run: nowVideoNum %d", nowVideoNum);
                                 if (nowVideoNum < resultVideos.size()) {
                                     //     Log.d(TAG, "run sec: " + nowVideoNum + " / " + resultVideos.size());
                                     videoResultPlayer2.start();
@@ -520,7 +521,7 @@ public class VideoEditorResultFragment extends Fragment {
                                 } else {
                                     isMusicComplition = true;
                                     musicResultPlayer.pause();
-                                    Log.d(TAG, "run: isMusicResultPlayer playing?" + musicResultPlayer.isPlaying());
+                                    Timber.v("run: isMusicResultPlayer playing? %s", musicResultPlayer.isPlaying() ? "true" : "false");
                                     nowVideoNum = 0;
 
 
@@ -550,7 +551,7 @@ public class VideoEditorResultFragment extends Fragment {
                                 videoResultPlayer2.stop();
                                 nowVideoNum = nowVideoNum + 1;
                                 isSecondNumChanged = true;
-                                Log.d(TAG, "run: nowVideoNum " + nowVideoNum);
+                                Timber.d("run: nowVideoNum %d", nowVideoNum);
                                 if (nowVideoNum < resultVideos.size()) {
                                     videoResultPlayer.start();
                                     getActivity().runOnUiThread(new Runnable() {
@@ -600,12 +601,8 @@ public class VideoEditorResultFragment extends Fragment {
                             }
                         });
                     }
-                } catch (InterruptedException e) {
-                    e.getStackTrace();
-                    StringWriter sw = new StringWriter();
-                    PrintWriter pw = new PrintWriter(sw);
-                    e.printStackTrace(pw);
-                    Log.d(TAG, "thread got exception :\n" + sw.toString());
+                } catch (InterruptedException ie) {
+                    Timber.e(ie, "thread got exception");
                 }
             }
 
@@ -653,11 +650,7 @@ public class VideoEditorResultFragment extends Fragment {
             fis.close();
 
         } catch (FileNotFoundException ex) {
-            ex.getStackTrace();
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            ex.printStackTrace(pw);
-            Log.d(TAG, "prepare got exception :\n" + sw.toString());
+            Timber.e(ex, "prepare got exception");
         } catch (IOException e) {
             e.printStackTrace();
         }

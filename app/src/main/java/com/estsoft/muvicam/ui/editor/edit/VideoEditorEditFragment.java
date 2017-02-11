@@ -34,8 +34,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import timber.log.Timber;
+
 public class VideoEditorEditFragment extends Fragment {
-    String TAG = "VideoEditorEditFragment";
     private ArrayList<EditorVideo> resultVideos;
     private ArrayList<EditorVideo> selectedVideos = new ArrayList<>();
     private ArrayList<EditorVideo> videoThumbnails = new ArrayList<>();
@@ -85,7 +86,7 @@ public class VideoEditorEditFragment extends Fragment {
             ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
             float disPlayWidth = outMetrics.widthPixels;
             float dpi = getResources().getDimension(R.dimen.resultbar_line);
-            Log.d(TAG, "onComplete: " + videoThumbnailendTime);
+            Timber.d("onComplete: %d", videoThumbnailendTime);
             int remainTotalTime = 15000 - resultVideosTotalTime;
 
             if (videoThumbnailendTime < 15000) {
@@ -187,7 +188,6 @@ public class VideoEditorEditFragment extends Fragment {
             selectedVideos = args.getParcelableArrayList(VideoEditorResultFragment.EXTRA_VIDEOS);
             resultVideos = args.getParcelableArrayList(VideoEditorResultFragment.EXTRA_RESULT_VIDEOS);
             resultVideosTotalTime = args.getInt(VideoEditorResultFragment.EXTRA_RESULT_VIDEO_TOTAL_TIME, 0);
-            //    Log.d(TAG, "onCreate: edit rvt" + resultVideosTotalTime);
             musicPath = args.getString(VideoEditorResultFragment.EXTRA_MUSIC_PATH);
             musicOffset = args.getInt(VideoEditorResultFragment.EXTRA_MUSIC_OFFSET, 0);
             musicLength = args.getInt(VideoEditorResultFragment.EXTRA_MUSIC_LENGTH, 0);
@@ -207,13 +207,12 @@ public class VideoEditorEditFragment extends Fragment {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_editor_edit, container, false);
         resultSpaceLinearLayout = (FrameLayout) v.findViewById(R.id.editor_edit_result_space_linear);
-        //     Log.d(TAG, "onCreateView: edit rvt" + resultVideosTotalTime);
         ResultBarView resultBarView;
         int resultTime = 0;
         for (int i = 0; i < resultVideos.size(); i++) {
 
             int nowVideoTime = resultVideos.get(i).getEnd() - resultVideos.get(i).getStart();
-            Log.d(TAG, "onCreateView: nowV" + nowVideoTime);
+            Timber.d("onCreateView: nowV%d", nowVideoTime);
             int remainTime = 15000 - resultVideosTotalTime;
             if (i == resultVideos.size() - 1 && remainTime < 1000) {
                 resultBarView = new ResultBarView(getContext(), resultTime, 15000 - resultTime, false);
@@ -365,7 +364,7 @@ public class VideoEditorEditFragment extends Fragment {
 
                                                        if (lX1 > lX2 && position <= -view.getWidth() + 10 * dpi) {
                                                            position = -view.getWidth() + 10 * dpi;
-                                                           Log.d(TAG, "seekBarLeft: distance less than 0: " + position);
+                                                           Timber.d("seekBarLeft: distance less than 0: %d", position);
                                                        }
 
                                                        view.setTranslationX(position);
@@ -676,7 +675,6 @@ public class VideoEditorEditFragment extends Fragment {
                                     }
                                 });
                                 if (!isMaxLength || (isMaxLength && musicPlayer.getCurrentPosition() < musicPlayer.getDuration())) {
-//                                Log.d(TAG, "run: " + " / nowvideo: " + (nowVideo.getEnd() - nowVideo.getStartX()));
                                     videoPlayer.seekTo(nowVideo.getStart());
                                     musicPlayer.seekTo(musicOffset + resultVideosTotalTime);
                                 }
@@ -716,7 +714,7 @@ public class VideoEditorEditFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         for (EditorVideo e : videoThumbnails){
-            Log.d(TAG, "onDestroy: "+e.getThumbnailBitmap());
+            Timber.d("onDestroy: %s", e.getThumbnailBitmap().toString());
             if(e.getThumbnailBitmap() != null) e.getThumbnailBitmap().recycle();
         }
     }

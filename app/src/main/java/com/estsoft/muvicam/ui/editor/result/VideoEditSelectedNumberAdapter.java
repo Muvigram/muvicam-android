@@ -14,8 +14,9 @@ import com.estsoft.muvicam.model.EditorVideo;
 
 import java.util.List;
 
+import timber.log.Timber;
+
 public class VideoEditSelectedNumberAdapter extends RecyclerView.Adapter<VideoEditSelectedNumberAdapter.ViewHolder> {
-    String TAG = "EditSelectedNumAdapter";
     private final FragmentActivity mActivity;
     OnItemClickListener itemClickListener;
     List<EditorVideo>selectedVideos, resultVideos;
@@ -42,7 +43,7 @@ public class VideoEditSelectedNumberAdapter extends RecyclerView.Adapter<VideoEd
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         int fragmentNumber = position + 1;
-        Log.d(TAG, "onBindViewHolder: "+fragmentNumber);
+        Timber.d("onBindViewHolder: %d", fragmentNumber);
         holder.videoNumber.setText("" + fragmentNumber);
         holder.videoNumber.setTextColor(ContextCompat.getColor(mActivity, R.color.White));
       }

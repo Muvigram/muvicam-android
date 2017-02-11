@@ -30,6 +30,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import rx.Subscription;
+import timber.log.Timber;
 
 /**
  * Created by estsoft on 2017-01-19.
@@ -37,7 +38,6 @@ import rx.Subscription;
 
 @ShareMediaScope
 public class SharePresenter extends BasePresenter<ShareMvpView>{
-    private static final String TAG = "SharePresenter";
     private final String EXPORT_VIDEO_TYPE = "video/*";
     private final int REAR_ROTATION = 90;
     private final int FRONT_ROTATION = 270;
@@ -81,7 +81,7 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
         mTmpStoredPath = TranscodeUtils.getAppCashingFile( mContext );
         mLogoVideoFile = mContext.getResources().openRawResourceFd(R.raw.logo_sound_0d_1s);
 //        Toast.makeText(mContext, mTmpStoredPath, Toast.LENGTH_LONG).show();
-        Log.e(TAG, "SharePresenter: " + mTmpStoredPath );
+        Timber.e("SharePresenter: %s", mTmpStoredPath );
     }
 
     @Override
@@ -99,7 +99,7 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
                                 String musicPath, int musicOffset, int musicLength, boolean fromEditor ) {
         mVideoPaths = videoPaths;
         mMusicPath = musicPath;
-        Log.d(TAG, "setVideoParams: " + musicPath);
+        Timber.d("setVideoParams: %s", musicPath);
         mMusicOffset = musicOffset;
         mMusicLength = musicLength;
         mTranscodeMode = fromEditor ? MODE_TRANSCODE : MODE_CONCATENATION;
@@ -144,7 +144,7 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource( mTmpStoredPath );
         int duration = Integer.parseInt(retriever.extractMetadata( MediaMetadataRetriever.METADATA_KEY_DURATION ));
-        Log.d(TAG, "videoSetAndStart: " + duration);
+        Timber.d("videoSetAndStart: %d", duration);
         retriever.setDataSource(mLogoVideoFile.getFileDescriptor(), mLogoVideoFile.getStartOffset(), mLogoVideoFile.getLength());
         int logoDuration = Integer.parseInt(
                         retriever.extractMetadata(  MediaMetadataRetriever.METADATA_KEY_DURATION ));
@@ -234,7 +234,7 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
         for ( int i = 0; i < mVideoOffsets.length; i ++ ) {
             int startTimeMs = 0;
             int endTimeMs = i == mVideoOffsets.length - 1 ? mMusicLength - mVideoOffsets[i] : mVideoOffsets[i + 1] - mVideoOffsets[i];
-            Log.e(TAG, "translate: [" + i + "] ... "  + startTimeMs + " / " + endTimeMs );
+            Timber.i("translate: [%d] ... %d/%d", i, startTimeMs, endTimeMs);
             mVideoStarts[i] = startTimeMs;
             mVideoEnds[i] = endTimeMs;
         }
@@ -247,7 +247,7 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
         editor.initAudioTarget(44100, 2, 128 * 1000);
         for (int i = 0; i < mVideoPaths.length; i++) {
             editor.addSegment(mVideoPaths[i], mVideoStarts[i] * MILLI_TO_MICRO, mVideoEnds[i] * MILLI_TO_MICRO, 100);
-            Log.d(TAG, "getTranscoder: [" + i + "] ... " + mVideoStarts[i] * MILLI_TO_MICRO + " / " + mVideoEnds[i] * MILLI_TO_MICRO);
+            Timber.d("getTranscoder: [%d] ... %d/%d", i, mVideoStarts[i] * MILLI_TO_MICRO, mVideoEnds[i] * MILLI_TO_MICRO);
         }
 
         editor.addLogoSegment(mLogoVideoFile, -1, -1, 100);
@@ -262,14 +262,14 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
         int concatMode = mMusicPath.equals("") ? MediaConcater.NORMAL : MediaConcater.MUTE_AND_ADD_MUSIC;
         MediaConcater concater = new MediaConcater(mTmpStoredPath, concatMode, mTranscodeProgressListener);
         for ( int i = 0; i < mVideoPaths.length; i ++ ) {
-            long startTImeUs = 0;
+            long startTimeUs = 0;
             long endTimeUs = i == mVideoOffsets.length - 1 ? mMusicLength - mVideoOffsets[i] : mVideoOffsets[i + 1] - mVideoOffsets[i];
             endTimeUs *= MILLI_TO_MICRO;
-            Log.e(TAG, "concatTranslater: [" + i + "] ... "  + startTImeUs + " / " + endTimeUs );
-            concater.addSegment( mVideoPaths[i], startTImeUs, endTimeUs, 100);
+            Timber.i("translate: [%d] ... %d/%d", i, startTimeUs, endTimeUs);
+            concater.addSegment( mVideoPaths[i], startTimeUs, endTimeUs, 100);
         }
         if (concatMode == MediaConcater.MUTE_AND_ADD_MUSIC) {
-            Log.e(TAG, "concatTranslater: [music] ... "  + mMusicOffset + " / " + mMusicLength + " / " + (mMusicLength - mMusicOffset) );
+            Timber.i("concatTranslater: [music] ... %d/%d/%d", mMusicOffset, mMusicLength, (mMusicLength - mMusicOffset) );
             concater.addMusicSegment( mMusicPath, (long)(mMusicOffset * MILLI_TO_MICRO), 100 );
         }
 

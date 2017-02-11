@@ -27,6 +27,8 @@ import android.opengl.EGLSurface;
 import android.util.Log;
 import android.view.Surface;
 
+import timber.log.Timber;
+
 /**
  * Holds state associated with a Surface used for MediaCodec decoder output.
  * <p>
@@ -43,8 +45,6 @@ import android.view.Surface;
  * can potentially drop frames.
  */
 public class OutputSurface implements SurfaceTexture.OnFrameAvailableListener {
-    private static final String TAG = "OutputSurface";
-    private static final boolean VERBOSE = false;
     private EGLDisplay mEGLDisplay = EGL14.EGL_NO_DISPLAY;
     private EGLContext mEGLContext = EGL14.EGL_NO_CONTEXT;
     private EGLSurface mEGLSurface = EGL14.EGL_NO_SURFACE;
@@ -84,7 +84,7 @@ public class OutputSurface implements SurfaceTexture.OnFrameAvailableListener {
         // still need to keep a reference to it.  The Surface doesn't retain a reference
         // at the Java level, so if we don't either then the object can get GCed, which
         // causes the native finalizer to run.
-        if (VERBOSE) Log.d(TAG, "textureID=" + mTextureRender.getTextureId());
+        Timber.v("textureID=%d", mTextureRender.getTextureId());
         mSurfaceTexture = new SurfaceTexture(mTextureRender.getTextureId());
         // This doesn't work if OutputSurface is created on the thread that CTS started for
         // these test cases.
@@ -265,7 +265,7 @@ public class OutputSurface implements SurfaceTexture.OnFrameAvailableListener {
     }
     @Override
     public void onFrameAvailable(SurfaceTexture st) {
-        if (VERBOSE) Log.d(TAG, "new frame available");
+        Timber.v("new frame available");
         synchronized (mFrameSyncObject) {
             if (mFrameAvailable) {
                 throw new RuntimeException("mFrameAvailable already set, frame could be dropped");

@@ -1,4 +1,4 @@
-package com.estsoft.muvicam.ui.home.camera;
+package com.estsoft.muvicam.ui.home.camera.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;

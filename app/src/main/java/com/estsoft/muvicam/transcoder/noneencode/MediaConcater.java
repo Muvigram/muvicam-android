@@ -18,12 +18,13 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import timber.log.Timber;
+
 /**
  * Created by estsoft on 2017-01-03.
  */
 
 public class MediaConcater implements MediaTranscoder {
-    private static final String TAG = "MediaConcater";
     public static final String AAC_MIME_TYPE = "audio/mp4a-latm";
     public static final int NORMAL = -98;
     public static final int MUTE_AND_ADD_MUSIC = -99;
@@ -65,8 +66,8 @@ public class MediaConcater implements MediaTranscoder {
                 endTimeUs, audioVolume, mode );
         mSegments.add( segment );
         mTotalEstimatedDuration += segment.getEndTimeUs() - segment.getStartTimeUs();
-        Log.e(TAG, "addSegment: segment max duration ... " + segment.getmShorestDurationUs() );
-        Log.e(TAG, "addSegment: total EstimatedDuration ... " + mTotalEstimatedDuration );
+        Timber.d("addSegment: segment max duration ... %ld", segment.getmShorestDurationUs() );
+        Timber.d("addSegment: total EstimatedDuration ... %ld", mTotalEstimatedDuration );
         setVideoTrackToMuxer( inputFilePath );
         if ( currentMode == NORMAL ) setAudioTrackToMuxer( inputFilePath );
     }
@@ -79,8 +80,8 @@ public class MediaConcater implements MediaTranscoder {
                 endTimeUs, audioVolume, mode );
         mSegments.add( segment );
         mTotalEstimatedDuration += segment.getEndTimeUs() - segment.getStartTimeUs();
-        Log.e(TAG, "addSegment: segment max duration ... " + segment.getmShorestDurationUs() );
-        Log.e(TAG, "addSegment: total EstimatedDuration ... " + mTotalEstimatedDuration );
+        Timber.d("addSegment: segment max duration ... %ld", segment.getmShorestDurationUs() );
+        Timber.d("addSegment: total EstimatedDuration ... %ld", mTotalEstimatedDuration );
         setVideoTrackToMuxer( inputFile );
         if ( currentMode == NORMAL ) setAudioTrackToMuxer( inputFile );
     }
@@ -174,7 +175,7 @@ public class MediaConcater implements MediaTranscoder {
                 if (mListener != null) callListener( ProgressListener.PROGRESS );
             }
             mSegmentFinishedDuration += segment.getEndTimeUs() - segment.getStartTimeUs();
-            Log.d(TAG, "onBufferAvailable: " + " _______________________________________ " +mSegmentFinishedDuration);
+            Timber.v("onBufferAvailable: _______________________________________ %ld", mSegmentFinishedDuration);
             segment.release();
             if (mMusicSegment != null) followMusicSegment();
 
@@ -247,9 +248,9 @@ public class MediaConcater implements MediaTranscoder {
             }
             if ( type == BufferType.VIDEO ) videoCurrent = bufferInfo.presentationTimeUs;
             else audioCurrent = bufferInfo.presentationTimeUs;
-            Log.d( TAG, "onBufferAvailable: " + type
-                    + " / " + bufferInfo.presentationTimeUs + " / " + bufferInfo.size
-                    + (bufferInfo.flags == MediaCodec.BUFFER_FLAG_KEY_FRAME ? " /  ** KEY" : " " + bufferInfo.flags ) );
+            Timber.v("onBufferAvailable: %s/%ld/%ld/%s/%d",
+                type.toString(), bufferInfo.presentationTimeUs, bufferInfo.size,
+                bufferInfo.flags == MediaCodec.BUFFER_FLAG_KEY_FRAME ? " /  ** KEY" : " ", bufferInfo.flags);
             mMuxer.writeSampleData(
                     type == BufferType.VIDEO ? mMuxerVideoIndex : mMuxerAudioIndex,
                     buffer,
@@ -259,7 +260,7 @@ public class MediaConcater implements MediaTranscoder {
         //NOTE MUSIC ONLY
         @Override
         public void onOutputFormat(BufferType type, MediaFormat format) {
-            Log.d(TAG, "onOutputFormat: " + format.toString());
+            Timber.v("onOutputFormat: %s", format.toString());
             mOutAudioFormat = format;
             mMuxerAudioIndex = mMuxer.addTrack( format );
             mMuxerStarted = true;

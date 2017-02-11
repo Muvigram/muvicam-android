@@ -5,9 +5,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import timber.log.Timber;
+
 public class EditorVideo implements Parcelable {
     private static int index = 0;
-    private static final String TAG = "EditorVideo";
 
     private String videoPath;
     private int durationMiliSec;
@@ -26,7 +27,7 @@ public class EditorVideo implements Parcelable {
 
     public EditorVideo() {
         index ++;
-        Log.d(TAG, "EditorVideo: " + index);
+        Timber.d("EditorVideo: %d", index);
         isSelected = false;
         numSelected = -1;
         resolutionAcceptable = false;

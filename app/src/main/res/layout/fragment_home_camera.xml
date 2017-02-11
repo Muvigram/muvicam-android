@@ -4,14 +4,14 @@
     android:layout_height="match_parent"
     xmlns:custom="http://schemas.android.com/apk/res-auto">
 
-    <com.estsoft.muvicam.ui.home.camera.ResizableTextureView
+    <com.estsoft.muvicam.ui.home.camera.view.ResizableTextureView
         android:id="@+id/camera_texture_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"/>
 
-    <com.estsoft.muvicam.ui.home.camera.StackBar
+    <com.estsoft.muvicam.ui.home.camera.view.StackBar
         android:id="@+id/camera_stack_bar"
         android:layout_width="match_parent"
         android:layout_height="15dp"
@@ -40,7 +40,7 @@
         android:contentDescription="@string/camera_shoot_button_desc"
         android:src="@drawable/camera_shoot_button_release_70dp"/>
 
-    <com.estsoft.muvicam.ui.home.camera.AlbumArtButton
+    <com.estsoft.muvicam.ui.home.camera.view.AlbumArtButton
         android:id="@+id/camera_music_button"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -51,7 +51,7 @@
         android:background="#00000000"
         android:contentDescription="@string/camera_music_button_desc"/>
 
-    <com.estsoft.muvicam.ui.home.camera.LibraryThumbnailButton
+    <com.estsoft.muvicam.ui.home.camera.view.LibraryThumbnailButton
         android:id="@+id/camera_library_button"
         android:layout_width="50dp"
         android:layout_height="50dp"

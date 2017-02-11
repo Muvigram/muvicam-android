@@ -61,7 +61,6 @@ public final class DialogFactory {
   // clickListener : ok = -1; cancel = -2;
     public static AlertDialog createOkCancelDialog( Context context, String title, String message,
                                                     DialogInterface.OnClickListener clickListener) {
-        Log.d("test", "createOkCancelDialog: " + title + " / " + message);
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setMessage(message);
         builder.setPositiveButton(context.getString(R.string.dialog_action_ok), clickListener);

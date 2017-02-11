@@ -17,10 +17,11 @@ import com.estsoft.muvicam.ui.common.BackToHomeDialogFragment;
 
 import java.util.ArrayList;
 
+import timber.log.Timber;
+
 public class EditorActivity extends BaseActivity implements VideoEditorResultFragment.DataPassListener {
     Fragment fragment;
     private BasePresenter presenter;
-    String TAG = "EditorActicity";
     private final static String EXTRA_VIDEOS = "EditorActivity.videoList";
     private final static String EXTRA_MUSIC_PATH = "EditorActivity.musicPath";
     private final static String EXTRA_MUSIC_OFFSET = "EditorActivity.musicOffset";
@@ -65,9 +66,9 @@ public class EditorActivity extends BaseActivity implements VideoEditorResultFra
         }
 
         for (EditorVideo e : resultEditorVideos) {
-            Log.d(TAG, "passDataFToF: EV" + e.toString());
+            Timber.v("passDataFToF: EV%s", e.toString());
         }
-        Log.d(TAG, "passDataFToF: T" + resultVideosTotalTime);
+        Timber.d("passDataFToF: T%d", resultVideosTotalTime);
 
 
         args.putParcelableArrayList(VideoEditorResultFragment.EXTRA_VIDEOS, selectedVideos);

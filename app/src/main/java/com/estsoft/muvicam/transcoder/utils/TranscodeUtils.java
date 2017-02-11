@@ -20,12 +20,13 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
+import timber.log.Timber;
+
 /**
  * Created by estsoft on 2016-12-06.
  */
 
 public class TranscodeUtils {
-    private static final String TAG = "TranscodeUtils";
     private static final String CASHING_FILE_NAME = "transcoded.mp4";
     private static final String VIDEO = "video/";
     private static final String AUIDO = "audio/";
@@ -93,7 +94,7 @@ public class TranscodeUtils {
     public static String getAppCashingFile(Context context, String fileName ) {
         File cashingDir = context.getExternalFilesDir(null);
         File cashingFile = new File( cashingDir, fileName );
-        Log.d(TAG, "getAppCashingFile: " + cashingFile.getAbsolutePath());
+        Timber.d("getAppCashingFile: %s", cashingFile.getAbsolutePath());
         return cashingFile.getAbsolutePath();
     }
 
@@ -107,7 +108,7 @@ public class TranscodeUtils {
         name += String.format(Locale.US, "%02d", calendar.get( Calendar.HOUR_OF_DAY))
                 + String.format(Locale.US, "%02d", calendar.get( Calendar.MINUTE ))
                 + String.format(Locale.US, "%02d", calendar.get( Calendar.SECOND ));
-        Log.d(TAG, "distinctCodeByCurrentTime: " + name);
+        Timber.d("distinctCodeByCurrentTime: %s", name);
         return name + surfix;
     }
 
@@ -145,8 +146,8 @@ public class TranscodeUtils {
     }
 
     public static void printInformationOf( MediaFormat format ) {
-        Log.d(TAG, "printInformationOf: " + format.toString());
-        Log.d(TAG, "printInformationOf: ----------------------------------------------------------- ");
+        Timber.d("printInformationOf: %s", format.toString());
+        Timber.d("printInformationOf: ----------------------------------------------------------- ");
 //        Log.d(TAG, "printInformationOf: " + format.getString( MediaFormat.KEY_MIME));
 //        Log.d(TAG, "printInformationOf: " + format.getInteger( MediaFormat.KEY_MAX_INPUT_SIZE));
 //        Log.d(TAG, "printInformationOf: " + format.getInteger( MediaFormat.KEY_BIT_RATE));

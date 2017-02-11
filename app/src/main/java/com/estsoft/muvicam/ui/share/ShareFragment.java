@@ -27,6 +27,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
+import timber.log.Timber;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -37,7 +38,6 @@ import butterknife.Unbinder;
  * create an instance of this fragment.
  */
 public class ShareFragment extends Fragment implements ShareMvpView {
-    private static final String TAG = "ShareFragment";
     private final static String EXTRA_VIDEO_PATHS = "ShareFragment.videoPaths";
     private final static String EXTRA_VIDEO_OFFSETS = "ShareFragment.videoOffsets";
     private final static String EXTRA_MUSIC_PATH = "ShareFragment.musicPath";
@@ -155,10 +155,10 @@ public class ShareFragment extends Fragment implements ShareMvpView {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG, "onActivityResult: ");
+        Timber.i("onActivityResult: ");
         if ( requestCode == ShareBottomSheetDialogFragment.SELECTION_REQUEST ) {
             int selected = data.getIntExtra(ShareBottomSheetDialogFragment.SELECTION_CODE, -1);
-            Log.d(TAG, "onActivityResult: " + selected);
+            Timber.i("onActivityResult: %d", selected);
             switch (selected) {
                 case ShareBottomSheetDialogFragment.SELECTION_FACEBOOK:
                     mPresenter.facebookConnect();

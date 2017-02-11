@@ -11,13 +11,13 @@ import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import timber.log.Timber;
+
 /**
  * Created by estsoft on 2016-12-07.
  */
 
 public class AudioTrackTranscoder implements TrackTranscoder {
-    private static final String TAG = "AudioTrackTranscoder";
-    private static final boolean VERBOSE = false;
     private static final int DRAIN_STATE_NONE = 0;
     private static final int DRAIN_STATE_SHOULD_RETRY_IMMEDIATELY = 1;
     private static final int DRAIN_STATE_CONSUMED = 2;
@@ -140,8 +140,8 @@ public class AudioTrackTranscoder implements TrackTranscoder {
         final int index = mDecoder.dequeueInputBuffer( timeoutUs );
         if ( index < 0 ) return DRAIN_STATE_NONE;
         if ( track < 0 || forceExtractingStop) {
-            Log.d(TAG, "permitEncode: release! AUDIO " + mExtractedPresentationTimeUs + " / " + mExtractor.getSampleTrackIndex());
-            if (VERBOSE) Log.d(TAG, "drainExtractor: END OF EXTRACTING");
+            Timber.d("permitEncode: release! AUDIO %ld/%d", mExtractedPresentationTimeUs, mExtractor.getSampleTrackIndex());
+            Timber.v("drainExtractor: END OF EXTRACTING");
             sawExtractorEOS = true;
             mDecoder.queueInputBuffer( index, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM );
             return DRAIN_STATE_NONE;
@@ -200,9 +200,9 @@ public class AudioTrackTranscoder implements TrackTranscoder {
         }
         if (mActualOutputFormat == null) throw new RuntimeException("Could not determine actual output format.");
         if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-            if (VERBOSE)  Log.d(TAG, "drainEncoder: END OF TASK ... saw Encoder EOS");
+            Timber.v("drainEncoder: END OF TASK ... saw Encoder EOS");
             sawEncoderEOS = true;
-            Log.d(TAG, "drainEncoder: END OF TASK ... saw Encoder EOS");
+            Timber.d("drainEncoder: END OF TASK ... saw Encoder EOS");
             mBufferInfo.set( 0, 0, 0,mBufferInfo.flags );
         }
         if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
@@ -214,7 +214,7 @@ public class AudioTrackTranscoder implements TrackTranscoder {
         mBufferListener.onBufferAvailable( BufferListener.BufferType.AUDIO, mEncoderOutputBuffers[index], mBufferInfo );
 //        mMuxerWrapper.writeSampleData(MuxerWrapper.SampleType.AUDIO, mEncoderOutputBuffers[index], mBufferInfo);
         mEncoder.releaseOutputBuffer( index, false );
-        if (VERBOSE) Log.d(TAG, "drainEncoder:  _____________________________________________________ " + "AUDIO DRAIN_STATE_CONSUMED");
+        Timber.v("drainEncoder:  _____________________________________________________ AUDIO DRAIN_STATE_CONSUMED");
         return DRAIN_STATE_CONSUMED;
     }
 
@@ -230,7 +230,7 @@ public class AudioTrackTranscoder implements TrackTranscoder {
 
     public void encodeStart() {
         this.mEncodeStartPresentationTimeUs = mExtractedPresentationTimeUs;
-        Log.d(TAG, "permitEncode: AUDIO Start at " + mEncodeStartPresentationTimeUs);
+        Timber.d("permitEncode: AUDIO Start at %ld", mEncodeStartPresentationTimeUs);
         this.mEncodePermitted = true;
     }
 }

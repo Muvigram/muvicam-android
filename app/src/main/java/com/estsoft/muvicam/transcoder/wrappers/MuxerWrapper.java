@@ -10,6 +10,8 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
+import timber.log.Timber;
+
 /**
  * Created by estsoft on 2016-12-06.
  */
@@ -17,8 +19,6 @@ import java.util.List;
 // NOTE 원본에 비어있는 Audio or Video Buffer 채워줘야함
 
 public class MuxerWrapper {
-    private static final String TAG = "MuxerWrapper";
-    private static final boolean VERBOSE = false;
     private static final int BUFFER_SIZE = 64 * 1024; // I have no idea whether this value is appropriate or not...
     private static final long MICROSECS_PER_SEC = 1000000;
 
@@ -67,7 +67,7 @@ public class MuxerWrapper {
     public void setVideoParams( int frameRate ) {
         mVideoDefaultTimeGap = MICROSECS_PER_SEC / frameRate;
         mVideoTimeGapThreshold = mVideoDefaultTimeGap * 2;
-        Log.d(TAG, "setVideoParams: " + mVideoDefaultTimeGap);
+        Timber.d("setVideoParams: %ld", mVideoDefaultTimeGap);
     }
     public void setAudioParams( int sampleRate ) {
 //        mAudioDefaultTimeGap = MICROSECS_PER_SEC / sampleRate;
@@ -83,8 +83,8 @@ public class MuxerWrapper {
 
         if (mBuffer == null) mBuffer = ByteBuffer.allocate(0);
         mBuffer.flip();
-        Log.v(TAG, "Output format determined, writing " + mSampleInfoList.size() +
-                " samples / " + mBuffer.limit() + " bytes to muxer.");
+        Timber.v("Output format determined, writing %d samples / %d bytes to muxer.",
+            mSampleInfoList.size(), mBuffer.limit());
         MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
         int offset = 0;
         for (SampleInfo sampleInfo : mSampleInfoList) {
@@ -100,9 +100,9 @@ public class MuxerWrapper {
 
         if (mVideoFormat == null || mAudioFormat == null) return false;
         mVideoTrack = mMuxer.addTrack(mVideoFormat);
-        Log.d(TAG, "Added track #" + mVideoTrack + " with " + mVideoFormat.getString(MediaFormat.KEY_MIME) + " to muxer");
+        Timber.d("Added track #%d with %s to muxer.", mVideoTrack, mVideoFormat.getString(MediaFormat.KEY_MIME));
         mAudioTrack = mMuxer.addTrack(mAudioFormat);
-        Log.v(TAG, "Added track #" + mAudioTrack + " with " + mAudioFormat.getString(MediaFormat.KEY_MIME) + " to muxer");
+        Timber.d("Added track #%d with %s to muxer.", mAudioTrack, mAudioFormat.getString(MediaFormat.KEY_MIME));
         return true;
 
 //        switch ( CURRENT_MODE ) {
@@ -141,7 +141,7 @@ public class MuxerWrapper {
             // NOTE When another media inserted
             if ( Math.abs( receivedTimeUs - mVideoLastPresentationTimeUs ) > mVideoTimeGapThreshold ) {
                 tmpUs = mVideoPresentationTimeUs + mVideoDefaultTimeGap;
-                Log.d(TAG, "writeSampleData: -------------------------------------------------------- added default Time gap to Video" );
+                Timber.d("writeSampleData: -------------------------------------------------------- added default Time gap to Video" );
 
             }
             else {
@@ -154,7 +154,7 @@ public class MuxerWrapper {
             // NOTE When another media inserted
             if ( Math.abs( receivedTimeUs - mAudioLastPresentationTimeUs ) > mAudioTimeGapThreshold ) {
                 tmpUs = mAudioPresentationTimeUs + mAudioDefaultTimeGap;
-                Log.d(TAG, "writeSampleData: -------------------------------------------------------- added default Time gap to Audio" );
+                Timber.d("writeSampleData: -------------------------------------------------------- added default Time gap to Audio" );
             }
             else {
                 tmpUs = mAudioPresentationTimeUs + Math.abs( receivedTimeUs - mAudioLastPresentationTimeUs );
@@ -169,7 +169,8 @@ public class MuxerWrapper {
     public long writeSampleData(SampleType type, ByteBuffer byteBuffer, MediaCodec.BufferInfo bufferInfo ) {
 
         long presentationTimeUs = calculatePresentationTime( type, bufferInfo.presentationTimeUs );
-        if (VERBOSE) Log.d(TAG, "writeSampleData: " + type + " ... " + presentationTimeUs + " ... source ? " + bufferInfo.presentationTimeUs + " / " + byteBuffer.remaining() + " / " + byteBuffer.capacity());
+        Timber.v("writeSampleData: %s ... %ld ... source ? %ld / %d / %d",
+            type.toString(), presentationTimeUs, bufferInfo.presentationTimeUs, byteBuffer.remaining(), byteBuffer.capacity());
         bufferInfo.set(bufferInfo.offset, bufferInfo.size, presentationTimeUs, bufferInfo.flags);
         if (mMuxerStarted) {
             mMuxer.writeSampleData( getTrackIndex(type), byteBuffer, bufferInfo );
@@ -198,7 +199,7 @@ public class MuxerWrapper {
 
 
     public void stop() {
-        Log.d(TAG, "stop: " + mMuxerStarted);
+        Timber.v("stop: %s", mMuxerStarted ? "true" : "false");
         mMuxer.stop();
         mMuxerStarted = false;
     }

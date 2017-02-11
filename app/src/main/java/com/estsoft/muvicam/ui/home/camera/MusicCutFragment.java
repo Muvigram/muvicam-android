@@ -17,6 +17,7 @@ import com.estsoft.muvicam.util.DialogFactory;
 import com.estsoft.muvicam.util.MusicPlayer;
 import com.estsoft.muvicam.util.RxUtil;
 import com.estsoft.muvicam.util.UnitConversionUtil;
+import com.estsoft.muvicam.util.WaveformView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

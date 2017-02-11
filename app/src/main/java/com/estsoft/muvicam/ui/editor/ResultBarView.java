@@ -13,12 +13,13 @@ import android.view.View;
 
 import com.estsoft.muvicam.R;
 
+import timber.log.Timber;
+
 public class ResultBarView extends View {
     private Paint paint;
     // ms
     private int nowVideoTime;
     private int totalTime;
-    String TAG = "ResultBarView";
     private boolean isProgressBar;
     private int width;
 
@@ -40,7 +41,7 @@ public class ResultBarView extends View {
 
     public ResultBarView(Context context, int totalTime, int nowVideoTime, boolean isProgressBar) {
         super(context);
-        Log.d(TAG, "onCreate: rbv rvt" + totalTime);
+        Timber.d("onCreate: rbv rvt%d", totalTime);
         paint = new Paint();
         this.nowVideoTime = nowVideoTime;
         this.totalTime = totalTime;
@@ -51,7 +52,7 @@ public class ResultBarView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         width = MeasureSpec.getSize(widthMeasureSpec);
-        Log.d(TAG, "onMeasure: "+width);
+        Timber.d("onMeasure: %d", width);
 
     }
 

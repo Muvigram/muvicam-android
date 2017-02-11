@@ -9,13 +9,13 @@ import android.util.Log;
 
 import com.estsoft.muvicam.transcoder.transcoders.VideoTrackDecoder;
 
+import timber.log.Timber;
+
 /**
  * Created by estsoft on 2016-12-09.
  */
 
 public class ThumbnailUtil {
-    private static final String TAG = "ThumbnailUser";
-    private static final boolean VERBOSE = false;
     private static final long US_WEIGHT = 1000000;
 
     private VideoTrackDecoder mDecoder;
@@ -36,7 +36,7 @@ public class ThumbnailUtil {
         this.userBitmapListener = userBitmapListener;
         this.isIFrameMode = iFrameExtractingMode;
         this.mAct = act;
-        Log.d(TAG, "ThumbnailUtil: " + mAct.toString());
+        Timber.d("ThumbnailUtil: %s", mAct.toString());
     }
 
     public synchronized void release() {
@@ -118,7 +118,7 @@ public class ThumbnailUtil {
         @Override
         public void onComplete( long totalUs ) {
             if (threadKiller) return;
-            if (VERBOSE) Log.d(TAG, "onComplete: End of Task");
+            Timber.v("onComplete: End of Task");
             userBitmapListener.onComplete( totalUs );
             mDecoder.release();
         }

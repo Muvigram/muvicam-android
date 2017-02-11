@@ -13,13 +13,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import timber.log.Timber;
+
 /**
  * Created by estsoft on 2017-01-11.
  */
 
 public class MuvicamMediaPlayer extends MediaPlayer {
-    private static final String TAG = "MuvicamMediaPlayer";
-    private static final boolean VERBOSE = true;
     private static final boolean asyncFrameInfoExtracting = true;
 
     private final String VIDEO = "video/";
@@ -70,13 +70,13 @@ public class MuvicamMediaPlayer extends MediaPlayer {
 
     @Override
     public void seekTo(int i) throws IllegalStateException {
-        if (VERBOSE) Log.d(TAG, "seekTo: requested ... " + i * MICRO_TO_MILLI );
+        Timber.v("seekTo: requested ... %d", i * MICRO_TO_MILLI );
         long userSeek = getClosestPositionInIFrames( i );
-        if (VERBOSE) Log.d(TAG, "seekTo: resulted ... " + userSeek);
+        Timber.v("seekTo: resulted ... %d", userSeek);
         long ceilingMilliSec = (long)Math.ceil( userSeek / (double) MICRO_TO_MILLI );
-        if (VERBOSE) Log.d(TAG, "seekTo: roundedMilliSec ... " + ceilingMilliSec);
-        Log.d(TAG, "seekTo: seetTest1 request ... " + i);
-        Log.d(TAG, "seekTo: seekTest1 " + ceilingMilliSec);
+        Timber.v("seekTo: roundedMilliSec ... %d", ceilingMilliSec);
+        Timber.d("seekTo: seetTest1 request ... %d", i);
+        Timber.d("seekTo: seekTest1 %d", ceilingMilliSec);
         super.seekTo( (int) ceilingMilliSec);
     }
 
@@ -113,13 +113,13 @@ public class MuvicamMediaPlayer extends MediaPlayer {
         while ( mExtractor.getSampleTime() >= 0 ) {
             if ( mExtractor.getSampleFlags() == MediaExtractor.SAMPLE_FLAG_SYNC) {
                 IFrameMarkers.add( (mExtractor.getSampleTime()) );
-                if (VERBOSE) Log.d(TAG, "setupIFrameInformation: " + mExtractor.getSampleTime());
+                Timber.v("setupIFrameInformation: %d", mExtractor.getSampleTime());
             }
             mExtractor.advance();
         }
         long delayedTime = System.currentTimeMillis() - startTime;
-        Log.e(TAG, getClass().getSimpleName() + ": I-Frame Time extracting ended in \t" + ((float)delayedTime / MICRO_TO_MILLI) + " seconds.");
-        Log.e(TAG, getClass().getSimpleName() + ": I-Frame Time total List Size is \t" + IFrameMarkers.size() );
+        Timber.d("%s: I-Frame Time extracting ended in %f seconds.",getClass().getSimpleName(), ((float)delayedTime / MICRO_TO_MILLI));
+        Timber.d("%s: I-Frame Time total List Size is %d",getClass().getSimpleName(), IFrameMarkers.size() );
         mExtractor.release();
     }
     private int getVideoTrack() throws IllegalStateException {

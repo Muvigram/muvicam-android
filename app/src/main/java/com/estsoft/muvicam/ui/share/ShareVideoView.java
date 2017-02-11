@@ -6,12 +6,13 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.VideoView;
 
+import timber.log.Timber;
+
 /**
  * Created by estsoft on 2017-01-23.
  */
 
 public class ShareVideoView extends VideoView {
-    private static final String TAG = "ShareVideoView";
     private final int WATCH_INTERVAL_STANDARD = 500;
     private final int WATCH_INTERVAL_BUSY = 50;
     private int WATCH_INTERVAL_MS = WATCH_INTERVAL_STANDARD;
@@ -67,7 +68,7 @@ public class ShareVideoView extends VideoView {
                }
            }
             killThread();
-            Log.d(TAG, "setupWatcher: killed ... " + Thread.currentThread().getName() + " / "  + isThreadAlive() );
+            Timber.d("setupWatcher: killed ... %s/%s", Thread.currentThread().getName(), isThreadAlive() ? "true" : "false" );
         });
     }
 

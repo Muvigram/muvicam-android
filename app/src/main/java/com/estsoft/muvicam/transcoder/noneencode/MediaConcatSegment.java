@@ -13,12 +13,13 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import timber.log.Timber;
+
 /**
  * Created by estsoft on 2017-01-03.
  */
 
 public class MediaConcatSegment {
-    private static final String TAG = "MediaConcatSegment";
     public static final int VIDEO_ONLY = -11;
     public static final int NORMAL = -12;
     private int currentMode;
@@ -47,7 +48,7 @@ public class MediaConcatSegment {
         this.mBufferListener = bufferListener;
         this.mInputFile = inputFile;
         this.mExtractor = new MediaExtractor();
-        Log.d(TAG, "SharePresenter: " + mInputFile.toString());
+        Timber.v("SharePresenter: %s", mInputFile.toString());
         try {
             mExtractor.setDataSource( mInputFile.getFileDescriptor(), mInputFile.getStartOffset(), mInputFile.getLength() );
         } catch (IOException e ) {
@@ -90,7 +91,7 @@ public class MediaConcatSegment {
         // NOTE seeking start time
         mExtractor.seekTo( mStartTimeUs, MediaExtractor.SEEK_TO_CLOSEST_SYNC );
         mActualFirstExtractedTimeUs = mExtractor.getSampleTime();
-        Log.d(TAG, "prepare: Extractor seek ... " + mExtractor.getSampleTime());
+        Timber.v("prepare: Extractor seek ... %ld", mExtractor.getSampleTime());
     }
 
     private boolean stepVideo() {

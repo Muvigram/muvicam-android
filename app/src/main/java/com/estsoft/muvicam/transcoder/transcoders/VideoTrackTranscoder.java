@@ -14,13 +14,13 @@ import com.estsoft.muvicam.transcoder.utils.TranscodeUtils;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import timber.log.Timber;
+
 /**
  * Created by estsoft on 2016-12-07.
  */
 
 public class VideoTrackTranscoder implements TrackTranscoder {
-    private static final String TAG = "VideoTrackTranscoder";
-    private static final boolean VERBOSE = false;
     private static final int DRAIN_STATE_NONE = 0;
     private static final int DRAIN_STATE_SHOULD_RETRY_IMMEDIATELY = 1;
     private static final int DRAIN_STATE_CONSUMED = 2;
@@ -66,7 +66,7 @@ public class VideoTrackTranscoder implements TrackTranscoder {
         } catch ( IOException e ) {
             throw new IllegalStateException( e );
         }
-        Log.d(TAG, "setup: " + mOutputFormat);
+        Timber.d("setup: %s", mOutputFormat.toString());
         mEncoder.configure(mOutputFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE );
         // making EGLContext using encoder's input surface
         mEncoderInputSurfaceWrapper = new InputSurface( mEncoder.createInputSurface() );
@@ -83,7 +83,7 @@ public class VideoTrackTranscoder implements TrackTranscoder {
         if (inputFormat.containsKey( MediaFormatExtraInfo.KEY_ROTATION_DEGREES )) {
             originRotation = inputFormat.getInteger( MediaFormatExtraInfo.KEY_ROTATION_DEGREES);
         }
-        Log.d(TAG, "setup ... : " + originRotation);
+        Timber.d("setup ... : %d", originRotation);
         // NOTE is from front camera ?
         if ( originRotation == 270 ) mFlipping = true;
         int rotation = getProperRotation(
@@ -92,7 +92,7 @@ public class VideoTrackTranscoder implements TrackTranscoder {
                 originRotation
         );
 
-        Log.d(TAG, "setup: ... re-rotation  " + rotation);
+        Timber.d("setup: ... re-rotation  %d", rotation);
 
         inputFormat.setInteger( MediaFormatExtraInfo.KEY_ROTATION_DEGREES, rotation < 0 ? rotation + 360 : rotation );
 
@@ -110,7 +110,7 @@ public class VideoTrackTranscoder implements TrackTranscoder {
     }
 
     private int getProperRotation(int width, int height, int originRotation ) {
-        Log.d(TAG, "getProperRotation: " + originRotation);
+        Timber.d("getProperRotation: %d", originRotation);
         if ( originRotation == 90 ) {
             if ( width > height ) return 0;
             else return 0;
@@ -183,8 +183,9 @@ public class VideoTrackTranscoder implements TrackTranscoder {
         int index = mDecoder.dequeueInputBuffer( timeoutUs );
         if ( index < 0 ) return DRAIN_STATE_NONE;
         if ( track < 0 || forceExtractingStop) {
-            Log.d(TAG, "permitEncode: release! VIDEO " + mExtractedPresentationTimeUs + " / " + mExtractor.getSampleTrackIndex());
-            if (VERBOSE) Log.d(TAG, "permitEncode: END OF EXTRACTING " + mExtractedPresentationTimeUs);
+            Timber.d("permitEncode: release! VIDEO %ld/%d",
+                mExtractedPresentationTimeUs, mExtractor.getSampleTrackIndex());
+            Timber.v("permitEncode: END OF EXTRACTING %ld", mExtractedPresentationTimeUs);
             sawExtractorEOS = true;
             mDecoder.queueInputBuffer( index, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM );
             return DRAIN_STATE_NONE;
@@ -250,7 +251,7 @@ public class VideoTrackTranscoder implements TrackTranscoder {
         }
         if (mActualOutputFormat == null) throw new RuntimeException( "Could not determine actual output format." );
         if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-            if (VERBOSE)  Log.d(TAG, "drainEncoder: END OF TASK ... saw Encoder EOS");
+            Timber.v("drainEncoder: END OF TASK ... saw Encoder EOS");
             sawEncoderEOS = true;
             mBufferInfo.set( 0, 0, 0,mBufferInfo.flags );
         }
@@ -264,7 +265,7 @@ public class VideoTrackTranscoder implements TrackTranscoder {
 //        mMuxerWrapper.writeSampleData( MuxerWrapper.SampleType.VIDEO, mEncoderOutputBuffers[index], mBufferInfo );
         mEncoder.releaseOutputBuffer( index, false );
         // Since runPipeline wait for only DRAIN_STATE_NONE, timeoutUs must not be negative.
-        if (VERBOSE) Log.d(TAG, "drainEncoder:  _____________________________________________________ " + "VIDEO DRAIN_STATE_CONSUMED");
+        Timber.v("drainEncoder:  _____________________________________________________ VIDEO DRAIN_STATE_CONSUMED");
         return DRAIN_STATE_CONSUMED;
     }
 
@@ -280,7 +281,7 @@ public class VideoTrackTranscoder implements TrackTranscoder {
     }
     public void encodeStart() {
         this.mEncodeStartPresentationTimeUs = mExtractedPresentationTimeUs;
-        Log.d(TAG, "permitEncode: VIDEO Start at " + mEncodeStartPresentationTimeUs);
+        Timber.d("permitEncode: VIDEO Start at %ld", mEncodeStartPresentationTimeUs);
         this.mEncodePermitted = true;
     }
 }

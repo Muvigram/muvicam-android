@@ -3,26 +3,19 @@ package com.estsoft.muvicam.ui.home;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 
 import com.estsoft.muvicam.injection.component.DaggerHomeComponent;
 import com.estsoft.muvicam.injection.component.HomeComponent;
 import com.estsoft.muvicam.R;
-import com.estsoft.muvicam.injection.qualifier.ActivityContext;
 import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.ui.base.BaseActivity;
 import com.estsoft.muvicam.ui.home.camera.CameraFragment;
-import com.estsoft.muvicam.ui.home.camera.ControllableViewPager;
 import com.estsoft.muvicam.ui.home.camera.MusicCutFragment;
 import com.estsoft.muvicam.ui.home.music.MusicFragment;
-import com.estsoft.muvicam.util.RxEventBus;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,7 +24,6 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import timber.log.Timber;
 
 /**
  *

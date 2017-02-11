@@ -12,14 +12,13 @@ import java.nio.ShortBuffer;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+import timber.log.Timber;
+
 /**
  * Created by estsoft on 2016-12-08.
  */
 
 public class AudioChannel {
-    private static final String TAG = "AudioChannel";
-    private static final boolean VERBOSE = false;
-
     private static class AudioSample {
         int bufferIndex;
         long presentationTimeUs;
@@ -63,7 +62,7 @@ public class AudioChannel {
         mEncodeSampleRate = mEncodeFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE);
         if (mInputSampleRate != mEncodeSampleRate) {
             mResampleRequired = true;
-            Log.e(TAG, "setActualDecodeFormat: Audio Resampling required" + "\tsource : " + mInputSampleRate + "\t target : " + mEncodeFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE) );
+            Timber.e("setActualDecodeFormat: Audio Resampling required source : %d, target : %d", mInputSampleRate, mEncodeFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE) );
 //            throw new UnsupportedOperationException("Audio sample rate conversion not supported yet." + " ||| source : " + mInputSampleRate + " / target : " + mEncodeFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE));
         }
         mInputChannelCount = mActualDecodeFormat.getInteger( MediaFormat.KEY_CHANNEL_COUNT );
@@ -78,13 +77,13 @@ public class AudioChannel {
         }
 
         if ( mInputChannelCount > mOutputChannelCount ) {
-            if (VERBOSE) Log.d(TAG, "setActualDecodeFormat: DOWNMIX");
+            Timber.v("setActualDecodeFormat: DOWNMIX");
             mRemixer = AudioRemixer.DOWNMIX;
         } else if ( mInputChannelCount < mOutputChannelCount ) {
-            if (VERBOSE) Log.d(TAG, "setActualDecodeFormat: UPMIX");
+            Timber.v("setActualDecodeFormat: UPMIX");
             mRemixer = AudioRemixer.UPMIX;
         } else {
-            if (VERBOSE) Log.d(TAG, "setActualDecodeFormat: PASSTHROUGH");
+            Timber.v("setActualDecodeFormat: PASSTHROUGH");
             mRemixer = AudioRemixer.PASSTHROUGH;
         }
     }
@@ -97,7 +96,7 @@ public class AudioChannel {
         AudioSample sample = new AudioSample();
         sample.bufferIndex = bufferIndex;
         sample.presentationTimeUs = presentationTimeUs;
-        if (VERBOSE) Log.d(TAG, "drainDecoderBufferAndQueue: index ... " + bufferIndex  + " / time ... " + presentationTimeUs + " ???? " + DECODER_END_OF_STREAM);
+        Timber.v("drainDecoderBufferAndQueue: index ... %d / time ... %ld ???? %d", bufferIndex, presentationTimeUs, DECODER_END_OF_STREAM);
         sample.data = data == null ? null : data.asShortBuffer();
 
         if (mOverFlowSample.data == null){
@@ -106,11 +105,11 @@ public class AudioChannel {
                     .order(ByteOrder.nativeOrder())
                     .asShortBuffer();
             mOverFlowSample.data.clear().flip();
-            Log.d(TAG, "remix: start : " + mOverFlowSample.data.position() + " / " + mOverFlowSample.data.limit());
+            Timber.d("remix: start : %d/%d", mOverFlowSample.data.position(), mOverFlowSample.data.limit());
         }
 
         mFilledSamples.add( sample );
-        if (VERBOSE) Log.d(TAG, "drainDecoderBufferAndQueue: inqueue ... " + mFilledSamples.size());
+        Timber.v("drainDecoderBufferAndQueue: inqueue ... %d", mFilledSamples.size());
     }
 
     public boolean throwDecoder( final MediaCodec decoder ) {
@@ -126,7 +125,7 @@ public class AudioChannel {
         if (mFilledSamples.isEmpty() && !hasOverFlow) return false;
 
         final int index = encoder.dequeueInputBuffer(timeoutUs);
-        if (VERBOSE) Log.d(TAG, "feedEncoder: encoder input index ... " + index);
+        Timber.v("feedEncoder: encoder input index ... %d", index);
         if (index < 0) return false;
 
 
@@ -138,7 +137,7 @@ public class AudioChannel {
         }
 
         final AudioSample inSample = mFilledSamples.poll();
-        if (VERBOSE) Log.d(TAG, "drainDecoderBufferAndQueue: dequeue ... " + mFilledSamples.size());
+        Timber.v("drainDecoderBufferAndQueue: dequeue ... %d", mFilledSamples.size());
         if (inSample.bufferIndex == DECODER_END_OF_STREAM) {
             encoder.queueInputBuffer(index, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
             return false;
@@ -166,7 +165,7 @@ public class AudioChannel {
                                                 final boolean fromSample) {
         if ( timePerSample < 0 ) {
             timePerSample = ((float)MICROSECS_PER_SEC / sampleRate);
-            if (VERBOSE) Log.d(TAG, "sampleCountToDurationUs: " + timePerSample);
+            Timber.v("sampleCountToDurationUs: %d", timePerSample);
         }
 
         return (long)(sampleCount * timePerSample );

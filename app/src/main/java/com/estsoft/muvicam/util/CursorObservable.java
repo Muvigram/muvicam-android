@@ -37,7 +37,6 @@ public class CursorObservable {
         sub.onError(e);
       } finally {
         if (autoClose && !cursor.isClosed()) {
-          Log.d("test","create: Closed");
           cursor.close();
         }
       }

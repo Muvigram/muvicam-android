@@ -17,13 +17,13 @@ import com.estsoft.muvicam.R;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import timber.log.Timber;
 
 /**
  * Created by estsoft on 2017-02-08.
  */
 
 public class ShareBottomSheetDialogFragment extends BottomSheetDialogFragment {
-    private static final String TAG = "ShareBottomSheetDialogF";
 
     public static final String SELECTION_CODE = "ShareBottomSheetDialogFragment.selection";
     public static final int SELECTION_REQUEST = 1;
@@ -44,7 +44,7 @@ public class ShareBottomSheetDialogFragment extends BottomSheetDialogFragment {
     private BottomSheetBehavior.BottomSheetCallback mBottomSheetCallback = new BottomSheetBehavior.BottomSheetCallback() {
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            Log.d(TAG, "onStateChanged: " + newState );
+            Timber.i("onStateChanged: %d", newState );
             switch ( newState ) {
                 case BottomSheetBehavior.STATE_HIDDEN : dismiss(); break;
                 case BottomSheetBehavior.STATE_COLLAPSED : dismiss(); break;

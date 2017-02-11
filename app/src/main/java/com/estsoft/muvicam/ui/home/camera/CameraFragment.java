@@ -37,11 +37,15 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
+import com.estsoft.muvicam.BuildConfig;
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Music;
 import com.estsoft.muvicam.ui.home.HomeActivity;
+import com.estsoft.muvicam.ui.home.camera.view.AlbumArtButton;
+import com.estsoft.muvicam.ui.home.camera.view.LibraryThumbnailButton;
+import com.estsoft.muvicam.ui.home.camera.view.ResizableTextureView;
+import com.estsoft.muvicam.ui.home.camera.view.StackBar;
 import com.estsoft.muvicam.ui.library.LibraryActivity;
 import com.estsoft.muvicam.ui.share.ShareActivity;
 import com.estsoft.muvicam.util.MusicPlayer;
@@ -92,15 +96,19 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   private Unbinder mUnbinder;
 
   @BindView(R.id.camera_shoot_button)             ImageButton mShootButton;
-  @BindView(R.id.camera_music_button)             AlbumArtButton mMusicButton;
-  @BindView(R.id.camera_library_button)           LibraryThumbnailButton mLibraryButton;
+  @BindView(R.id.camera_music_button)
+  AlbumArtButton mMusicButton;
+  @BindView(R.id.camera_library_button)
+  LibraryThumbnailButton mLibraryButton;
   @BindView(R.id.camera_selfie_button)            ImageButton mSelfieButton;
   @BindView(R.id.camera_cut_button)               ImageButton mCutButton;
   @BindView(R.id.camera_ok_button)                ImageButton mOkButton;
-  @BindView(R.id.camera_texture_view)             ResizableTextureView mTextureView;
+  @BindView(R.id.camera_texture_view)
+  ResizableTextureView mTextureView;
   @BindView(R.id.camera_container_music_cut)      FrameLayout mMusicCutContainer;
   @BindView(R.id.camera_base_line)                View mBaseLineView;
-  @BindView(R.id.camera_stack_bar)                StackBar mStackBar;
+  @BindView(R.id.camera_stack_bar)
+  StackBar mStackBar;
   @BindView(R.id.camera_stack_trashbin_container) FrameLayout mStackTrashbinContainer;
 
   @OnClick(R.id.camera_cut_button)
@@ -201,9 +209,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     for (File file : mVideoStack.toArray(new File[mVideoStack.size()])) {
       // If required to download each video segment, uncomment this codes.
       // //////////////////////////////////////////////////////////////////////////////////////
-      //
-      //
-      //
       //  String fileName = String.format(Locale.US, "%d_%d.mp4",
       //      System.currentTimeMillis(), j++);
       //  File newFile = new File(mDir, fileName);
@@ -216,8 +221,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       //      } catch (IOException e) {
       //        e.printStackTrace();
       //      } finally {
-      //        Toast.makeText(getActivity(), "SAVE : " + mDir.toString() + fileName, Toast.LENGTH_SHORT).show();
-      //        Timber.e("Save the file $$ dir : %s, file : %s\n", mDir.toString(), fileName);
+      //        Timber.d("Save the file $$ dir : %s, file : %s\n", mDir.toString(), fileName);
       //      }
       //    }
       //  }.run();
@@ -407,8 +411,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   private void createVideoFile() {
     try {
       mVideoFile = File.createTempFile("muvicam", null, getContext().getCacheDir());
-      Toast.makeText(getActivity(), "CREATE : " + mVideoFile.toString(), Toast.LENGTH_SHORT).show();
-      Timber.e("Create file %s\n", mVideoFile.toString());
+      if(BuildConfig.DEBUG) Timber.d("Create file %s\n", mVideoFile.toString());
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -455,11 +458,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     if (mVideoFile != null) {
       mVideoStack.push(mVideoFile);
       mOffsetStack.push(mVideoOffset);
-//      Toast.makeText(getActivity(),
-//          "PUSH : " + mVideoStack.peek().toString() + "[ms : " + mOffsetStack.peek() + "]",
-//          Toast.LENGTH_SHORT).show();
-//      Timber.e("Push the file into the stack %s [ms : %d]\n",
-//          mVideoStack.peek().toString(), mOffsetStack.peek());
+      Timber.d("Push the file into the stack %s [ms : %d]\n", mVideoStack.peek().toString(), mOffsetStack.peek());
     }
     if (!mVideoStack.isEmpty()) {
       mUiThreadHandler.post(this::updateTrashbin);
@@ -472,10 +471,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     if (!mVideoStack.isEmpty()) {
       File oldVideo = mVideoStack.pop();
       int oldOffset = mOffsetStack.pop();
-      Toast.makeText(getActivity(),
-          "POP : " + oldVideo.toString() + "[ms : " + oldOffset + "]",
-          Toast.LENGTH_SHORT).show();
-      Timber.e("Pop the file file the stack %s [ms : %d]\n", oldVideo, oldOffset);
+      Timber.d("Pop the file file the stack %s [ms : %d]\n", oldVideo, oldOffset);
     }
     if (mVideoStack.isEmpty()) {
       mUiThreadHandler.post(this::updateTrashbin);
@@ -711,7 +707,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       int w = displaySize.x;
       int h = displaySize.y;
 
-      Timber.e("[w : %d, h : %d]", w, h);
+      Timber.d("[w : %d, h : %d]", w, h);
       Size aspectRatio = !isOrthogonal ? new Size(w, h) : new Size(h, w);
 
       int baseDimension = !isOrthogonal ? BASE_DIMENSION_WIDTH : BASE_DIMENSION_HEIGHT;

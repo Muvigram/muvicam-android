@@ -13,13 +13,13 @@ import com.estsoft.muvicam.transcoder.eglsurface.OutputSurface;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import timber.log.Timber;
+
 /**
  * Created by estsoft on 2016-12-09.
  */
 
 public class VideoTrackDecoder implements TrackTranscoder {
-    private static final String TAG = "VideoTrackDecoder";
-    private static final boolean VERBOSE = true;
     private static final int DRAIN_STATE_NONE = 0;
     private static final int DRAIN_STATE_SHOULD_RETRY_IMMEDIATELY = 1;
     private static final int DRAIN_STATE_CONSUMED = 2;
@@ -53,7 +53,7 @@ public class VideoTrackDecoder implements TrackTranscoder {
         this.mExtractor = extractor;
         this.mTrackIndex = trackIndex;
         this.mTotalDuration = mExtractor.getTrackFormat( mTrackIndex ).getLong( MediaFormat.KEY_DURATION );
-        if (VERBOSE) Log.d(TAG, "VideoTrackDecoder: " + mTotalDuration);
+        Timber.v("VideoTrackDecoder: %ld", mTotalDuration);
         this.mOutputFormat = outputFormat;
         this.mFrameIntervalUs = frameIntervalUs;
         this.mBitmapListener = listener;
@@ -142,7 +142,7 @@ public class VideoTrackDecoder implements TrackTranscoder {
         // need to confirm
         if ( mExtractor.getSampleTime() < 0 || lastOneFlag >= 1 || forceStop ) {
             sawExtractorEOS = true;
-            if (VERBOSE) Log.d(TAG, "drainExtractor: Extractor ended " + extractedCount);
+            Timber.v("drainExtractor: Extractor ended %d", extractedCount);
             mDecoder.queueInputBuffer( index, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM );
             return DRAIN_STATE_NONE;
         }
@@ -153,7 +153,7 @@ public class VideoTrackDecoder implements TrackTranscoder {
         mCurrentPositionUs += mFrameIntervalUs;
         if (mCurrentPositionUs >= mTotalDuration) {
             mCurrentPositionUs = mTotalDuration;
-            Log.d(TAG, "drainExtractor: " + mCurrentPositionUs + " / " + mTotalDuration);
+            Timber.d("drainExtractor: %ld/%d", mCurrentPositionUs, mTotalDuration);
             lastOneFlag ++;
         }
         if ( I_FRAME_EXTRACTING ) {
@@ -165,9 +165,9 @@ public class VideoTrackDecoder implements TrackTranscoder {
 //                    && mExtractor.getSampleTrackIndex() >= 0
                     && mExtractor.getSampleTime() < mTotalDuration - 100000) {
                 mExtractor.advance();
-                if (VERBOSE) Log.d(TAG, "drainExtractor: " + mExtractor.getSampleTime() +  " / " + mTotalDuration);
+                Timber.v("drainExtractor: %ld/%ld", mExtractor.getSampleTime(), mTotalDuration);
             }
-            if (VERBOSE) Log.d(TAG, "drainExtractor:-------------------------------------------------------------- " + mExtractor.getSampleTime());
+            Timber.v("drainExtractor:-------------------------------------------------------------- %ld", mExtractor.getSampleTime());
         }
         return DRAIN_STATE_CONSUMED;
     }
@@ -194,7 +194,8 @@ public class VideoTrackDecoder implements TrackTranscoder {
             decodedCount ++;
             mDecoderOutputSurfaceWrapper.awaitNewImage();
             mDecoderOutputSurfaceWrapper.drawImage( false );
-            if (VERBOSE) Log.d(TAG, "drainDecoder: drained Position ... " + mBufferInfo.presentationTimeUs + " / e:" + extractedCount + " / d:" + decodedCount);
+            Timber.v("drainDecoder: drained Position ... %ld/ e:%d / d:%d",
+                mBufferInfo.presentationTimeUs, extractedCount, decodedCount);
             ByteBuffer buffer = ByteBuffer.allocateDirect( 4 * mWidth * mHeight );
             buffer.rewind();
             GLES20.glReadPixels( 0, 0, mWidth, mHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, buffer);
@@ -209,7 +210,6 @@ public class VideoTrackDecoder implements TrackTranscoder {
         if ( sawDecoderEOS ) {
             sawDecoderEOS = true;
             mBitmapListener.onBitmapSupply( null, mTotalDuration, true);
-//            Log.d(TAG, "drainDecoder: " + mBufferInfo.presentationTimeUs + " / " + mTotalDuration);
             mBitmapListener.onComplete( mTotalDuration );
         }
         return DRAIN_STATE_CONSUMED;

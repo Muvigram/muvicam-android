@@ -17,8 +17,6 @@ import com.estsoft.muvicam.ui.common.BackToHomeDialogFragment;
  */
 
 public class ShareActivity extends BaseSingleFragmentActivity {
-  private static final String TAG = "ShareActivity";
-
   private final static String EXTRA_VIDEO_PATHS = "ShareActivity.videoPaths";
   private final static String EXTRA_VIDEO_OFFSETS = "ShareActivity.videoOffsets";
   private final static String EXTRA_MUSIC_PATH = "ShareActivity.musicPath";

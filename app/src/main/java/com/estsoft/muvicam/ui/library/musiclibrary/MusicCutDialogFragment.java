@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.estsoft.muvicam.R;
 import com.estsoft.muvicam.model.Music;
-import com.estsoft.muvicam.ui.home.camera.WaveformView;
+import com.estsoft.muvicam.util.WaveformView;
 import com.estsoft.muvicam.ui.library.LibraryActivity;
 import com.estsoft.muvicam.util.MusicPlayer;
 import com.estsoft.muvicam.util.RxUtil;
@@ -26,7 +26,6 @@ import butterknife.Unbinder;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import timber.log.Timber;
 
 /**
  * Created by jaylim on 21/01/2017.

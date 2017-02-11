@@ -3,10 +3,14 @@ package com.estsoft.muvicam;
 import android.app.Application;
 import android.content.Context;
 
+import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.core.CrashlyticsCore;
 import com.estsoft.muvicam.injection.component.ApplicationComponent;
 import com.estsoft.muvicam.injection.component.DaggerApplicationComponent;
 import com.estsoft.muvicam.injection.module.ApplicationModule;
+import com.estsoft.muvicam.util.CrashlythicsTree;
 
+import io.fabric.sdk.android.Fabric;
 import timber.log.Timber;
 
 /**
@@ -27,8 +31,17 @@ public class MuvigramApplication extends Application {
   public void onCreate() {
     super.onCreate();
 
+    // Crashlytics
+    CrashlyticsCore core = new CrashlyticsCore.Builder()
+        .disabled(BuildConfig.DEBUG)
+        .build();
+    Fabric.with(this, new Crashlytics.Builder().core(core).build());
+
     // Timber
-    Timber.plant(new Timber.DebugTree());
+    if (BuildConfig.DEBUG) {
+      Timber.plant(new Timber.DebugTree());
+    }
+    Timber.plant(new CrashlythicsTree());
 
   }
 

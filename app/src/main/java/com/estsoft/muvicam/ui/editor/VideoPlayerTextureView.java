@@ -17,6 +17,8 @@ import com.estsoft.muvicam.ui.editor.result.EditorResultMediaPlayer;
 
 import java.io.IOException;
 
+import timber.log.Timber;
+
 public class VideoPlayerTextureView extends TextureView implements TextureView.SurfaceTextureListener {
     String TAG = "VideoTextureView";
     MuvicamMediaPlayer muvicamMediaPlayer;
@@ -35,7 +37,7 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
         this.muvicamMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
-                Log.d(TAG, "onCompletion: ");
+                Timber.d("onCompletion: ");
                 mediaPlayer.seekTo(nowVideo.getStart());
             }
         });
@@ -43,7 +45,7 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
         this.muvicamMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
-                Log.d(TAG, "onPrepared: ");
+                Timber.d("onPrepared: ");
                 if (nowVideo != null) mediaPlayer.seekTo(nowVideo.getStart());
             }
         });
@@ -51,7 +53,7 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
         this.muvicamMediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
             @Override
             public void onSeekComplete(MediaPlayer mediaPlayer) {
-                Log.d(TAG, "seekTest1 c: " + mediaPlayer.getCurrentPosition());
+                Timber.d("seekTest1 c: %d", mediaPlayer.getCurrentPosition());
                 nowVideo.setStart(mediaPlayer.getCurrentPosition());
                 mediaPlayer.start();
             }
@@ -103,7 +105,7 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        Log.d(TAG, "onMeasure: w " + editorvideoWidth + "/ h " + editorVideoHeight + "r " + rotation);
+        Timber.d("onMeasure: w %d / h %d r %d",editorvideoWidth, editorVideoHeight, rotation);
 
         if ((editorvideoWidth > editorVideoHeight && rotation == 0) || (editorvideoWidth < editorVideoHeight && rotation != 0)) {
             this.setRotation(90);
