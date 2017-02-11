@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VideoEditorEditAdapter extends RecyclerView.Adapter<VideoEditorEditAdapter.ViewHolder> {
-    String TAG = "";
     private final FragmentActivity mActivity;
     OnItemClickListener itemClickListener;
     List<EditorVideo> videoThumbnails = new ArrayList<>();

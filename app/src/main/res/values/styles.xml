@@ -20,7 +20,7 @@
         <!--dialog background-->
         <item name="android:windowBackground">@color/colorPrimary</item>
     </style>
-    <style name="MuvicamBottomSheetDialog" parent="Theme.Design.BottomSheetDialog">
+    <style name="MuvigramBottomSheetDialog" parent="Theme.Design.BottomSheetDialog">
 
         <!--buttons color-->
         <item name="colorAccent">@color/colorAccent</item>

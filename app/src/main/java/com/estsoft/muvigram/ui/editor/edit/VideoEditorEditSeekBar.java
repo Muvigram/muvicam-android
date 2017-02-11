@@ -14,7 +14,6 @@ public class VideoEditorEditSeekBar extends View {
     private Paint paint;
     // ms
     private int startX;
-    String TAG = "VideoEditorEditSeekBar";
 
     public VideoEditorEditSeekBar(Context context) {
         super(context);

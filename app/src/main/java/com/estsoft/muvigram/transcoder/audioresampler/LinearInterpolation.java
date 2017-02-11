@@ -22,7 +22,6 @@ package com.estsoft.muvigram.transcoder.audioresampler;
  * @author Jacquet Wong
  */
 public class LinearInterpolation implements Interpolation {
-    private static final String TAG = "LinearInterpolation";
 
     public LinearInterpolation(){
 

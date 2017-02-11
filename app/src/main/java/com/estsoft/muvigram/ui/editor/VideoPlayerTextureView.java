@@ -18,7 +18,6 @@ import java.io.IOException;
 import timber.log.Timber;
 
 public class VideoPlayerTextureView extends TextureView implements TextureView.SurfaceTextureListener {
-    String TAG = "VideoTextureView";
     MuvicamMediaPlayer muvicamMediaPlayer;
     EditorResultMediaPlayer editorResultMediaPlayer;
     int rotation, editorvideoWidth, editorVideoHeight;

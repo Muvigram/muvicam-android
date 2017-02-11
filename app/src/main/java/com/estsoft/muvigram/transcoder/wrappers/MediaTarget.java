@@ -13,7 +13,6 @@ import java.nio.ByteBuffer;
  */
 
 public class MediaTarget {
-    private static final String TAG = "MediaTarget";
 
     MediaFormat videoOutputFormat;
     private final String videoCodec = MediaFormatExtraInfo.MIMETYPE_VIDEO_AVC;

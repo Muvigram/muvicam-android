@@ -163,8 +163,6 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
     ).show();
   }
 
-  private final static String TAG_MUSIC_CUT_DIALOG =
-      "musiclibrary.MusicLibraryFragment.music_cut_dialog";
 
   @Override
   public void showMusicCutDialog(Music music) {
@@ -175,7 +173,7 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
     dialog.setOnPreparedListener(() -> {
       getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     });
-    dialog.show(getFragmentManager(), TAG_MUSIC_CUT_DIALOG);
+    dialog.show(getFragmentManager(), MusicCutDialogFragment.TAG);
   }
 
   public void preventKeyboardPopup() {

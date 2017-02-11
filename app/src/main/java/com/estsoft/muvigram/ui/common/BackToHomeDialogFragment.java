@@ -24,67 +24,74 @@ import butterknife.Unbinder;
  */
 
 public class BackToHomeDialogFragment extends DialogFragment {
-    public static final String TAG = "BackToHoment";
-    private static final String ARG_MSG = "BackToHomeDialogFragment.arg_msg";
 
-    public static BackToHomeDialogFragment newInstance( String msg ) {
-        BackToHomeDialogFragment fragment = new BackToHomeDialogFragment();
-        Bundle args = new Bundle();
-        args.putString( ARG_MSG, msg );
-        fragment.setArguments( args );
-        return fragment;
-    }
+  /**
+   * To display the dialog fragment, this tag should might be provided
+   * to add this fragment to transaction.
+   */
+  public static final String TAG = BackToHomeDialogFragment.class.getName();
 
-    private String mMassage;
+  private static final String ARG_MSG = "BackToHomeDialogFragment.arg_msg";
 
-//    @BindView(R.id.fragment_tohome_dialog_title)      TextView mTitle;
-    @BindView(R.id.fragment_tohome_dialog_msg)      TextView mMsg;
+  public static BackToHomeDialogFragment newInstance(String msg) {
+    BackToHomeDialogFragment fragment = new BackToHomeDialogFragment();
+    Bundle args = new Bundle();
+    args.putString(ARG_MSG, msg);
+    fragment.setArguments(args);
+    return fragment;
+  }
 
-    Unbinder mUnbinder;
+  private String mMassage;
 
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+  //    @BindView(R.id.fragment_tohome_dialog_title)      TextView mTitle;
+  @BindView(R.id.fragment_tohome_dialog_msg)
+  TextView mMsg;
 
-        mMassage = getArguments().getString(ARG_MSG, "MSG_EMPTY");
+  Unbinder mUnbinder;
 
-        View view = LayoutInflater.from(getActivity())
-                .inflate(R.layout.dialog_back_home, null);
-        mUnbinder = ButterKnife.bind(this, view);
+  @NonNull
+  @Override
+  public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+    mMassage = getArguments().getString(ARG_MSG, "MSG_EMPTY");
+
+    View view = LayoutInflater.from(getActivity())
+        .inflate(R.layout.dialog_back_home, null);
+    mUnbinder = ButterKnife.bind(this, view);
 
 //        mTitle.setText(getResources().getString(R.string.app_name));
-        mMsg.setText( mMassage );
+    mMsg.setText(mMassage);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder( getActivity() )
-                .setView(view)
-                .setPositiveButton(R.string.dialog_action_ok, this::onPositive)
-                .setNegativeButton(R.string.dialog_action_cancel, this::onNegative);
+    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+        .setView(view)
+        .setPositiveButton(R.string.dialog_action_ok, this::onPositive)
+        .setNegativeButton(R.string.dialog_action_cancel, this::onNegative);
 
-        Dialog dialog = builder.create();
+    Dialog dialog = builder.create();
 
-        dialog.setOnShowListener(dialogInterface -> {
-            float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 300, getResources().getDisplayMetrics());
-            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
-            params.width = (int)px;
-            dialog.getWindow().setAttributes( params );
-        });
+    dialog.setOnShowListener(dialogInterface -> {
+      float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 300, getResources().getDisplayMetrics());
+      WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+      params.width = (int) px;
+      dialog.getWindow().setAttributes(params);
+    });
 
 
-        return dialog;
-    }
+    return dialog;
+  }
 
-    @Override
-    public void onDestroyView() {
-        mUnbinder.unbind();
-        super.onDestroyView();
-    }
+  @Override
+  public void onDestroyView() {
+    mUnbinder.unbind();
+    super.onDestroyView();
+  }
 
-    private void onPositive(DialogInterface dialogInterface, int i) {
-        Intent intent = StackRemoverActivity.getIntent( getContext() );
-        startActivity( intent );
-    }
+  private void onPositive(DialogInterface dialogInterface, int i) {
+    Intent intent = StackRemoverActivity.getIntent(getContext());
+    startActivity(intent);
+  }
 
-    private void onNegative(DialogInterface dialogInterface, int i) {
-        dismiss();
-    }
+  private void onNegative(DialogInterface dialogInterface, int i) {
+    dismiss();
+  }
 }

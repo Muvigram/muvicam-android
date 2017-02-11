@@ -4,7 +4,6 @@ package com.estsoft.muvigram.transcoder.audiosurface;
 import java.nio.ShortBuffer;
 
 public interface AudioRemixer {
-    String TAG = "AudioRemixer";
     void remix(final ShortBuffer inSBuff, final ShortBuffer outSBuff, final float volume);
 
     AudioRemixer DOWNMIX = new AudioRemixer() {

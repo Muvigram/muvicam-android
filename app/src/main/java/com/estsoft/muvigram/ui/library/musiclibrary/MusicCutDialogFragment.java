@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.estsoft.muvigram.R;
 import com.estsoft.muvigram.model.Music;
+import com.estsoft.muvigram.ui.common.BackToHomeDialogFragment;
 import com.estsoft.muvigram.util.WaveformView;
 import com.estsoft.muvigram.ui.library.LibraryActivity;
 import com.estsoft.muvigram.util.MusicPlayer;
@@ -32,6 +33,12 @@ import rx.schedulers.Schedulers;
  */
 
 public class MusicCutDialogFragment extends DialogFragment {
+
+  /**
+   * To display the dialog fragment, this tag should might be provided
+   * to add this fragment to transaction.
+   */
+  public static final String TAG = MusicCutDialogFragment.class.getName();
 
   private static final String ARG_MUSIC = "librarymusic.MusicCutDialogFragment.arg_music";
   private static final String ARG_OFFSET = "librarymusic.MusicCutDialogFragment.arg_offset";

@@ -33,7 +33,6 @@ import android.view.Surface;
  * to the video encoder.
  */
 public class InputSurface {
-    private static final String TAG = "InputSurface";
     private static final int EGL_RECORDABLE_ANDROID = 0x3142;
     private EGLDisplay mEGLDisplay = EGL14.EGL_NO_DISPLAY;
     private EGLContext mEGLContext = EGL14.EGL_NO_CONTEXT;
