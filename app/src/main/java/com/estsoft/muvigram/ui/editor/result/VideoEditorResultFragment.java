@@ -601,7 +601,7 @@ public class VideoEditorResultFragment extends Fragment {
                         });
                     }
                 } catch (InterruptedException ie) {
-                    Timber.e(ie, "thread got exception");
+                    Timber.w(ie, "thread got exception");
                 }
             }
 
@@ -649,7 +649,7 @@ public class VideoEditorResultFragment extends Fragment {
             fis.close();
 
         } catch (FileNotFoundException ex) {
-            Timber.e(ex, "prepare got exception");
+            Timber.w(ex, "prepare got exception");
         } catch (IOException e) {
             e.printStackTrace();
         }

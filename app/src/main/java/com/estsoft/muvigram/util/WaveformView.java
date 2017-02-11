@@ -85,14 +85,14 @@ public class WaveformView extends View {
   // fix offset
   public float fixOffset() {
     invalidate();
-    Timber.e("[fixOffset] frameOffset : %d", mFrameOffset);
+    Timber.v("[fixOffset] frameOffset : %d", mFrameOffset);
     return getOffset(mFrameOffset, mSampleRate, mSamplesPerFrame);
   }
 
   // move offset
   public void moveOffset(float displacement) {
     int frameOffset = getFrameNumber(displacement, mScaledInterval, mFrameOffset);
-    Timber.e("[moveOffset] displacement : %10.4f, frameOffset : %d", displacement, frameOffset);
+    Timber.v("[moveOffset] displacement : %10.4f, frameOffset : %d", displacement, frameOffset);
     if (frameOffset < 0 || frameOffset + mFrameLength > mSoundFile.getTotalFrameNum()) {
       return;
     }
@@ -151,7 +151,7 @@ public class WaveformView extends View {
 
     if (mMusicUpdated) {
       mScaledInterval = getScaledInterval(mFrameLength, getMeasuredWidth());
-      Timber.e("mScaledInterval %f [%d, %d]", mScaledInterval, mFrameLength, getMeasuredWidth());
+      Timber.v("mScaledInterval %f [%d, %d]", mScaledInterval, mFrameLength, getMeasuredWidth());
 //      float strokeWidth = getScaledStrokeWidth(mScaledInterval);
 //      mAfterHeadPaint.setStrokeWidth(strokeWidth);
 //      mBeforeHeadPaint.setStrokeWidth(strokeWidth);
@@ -240,7 +240,7 @@ public class WaveformView extends View {
 
   public boolean isValidRunningAt(float sec) {
     int curFrame = getFrameNumber(sec, mSampleRate, mSamplesPerFrame) + 1;
-    Timber.e("offset : %d, cur : %d, end : %d\n", mFrameOffset, curFrame, mFrameOffset + mFrameLength);
+    Timber.v("offset : %d, cur : %d, end : %d\n", mFrameOffset, curFrame, mFrameOffset + mFrameLength);
     return (curFrame >= (mFrameOffset) && curFrame <= (mFrameOffset + mFrameLength));
   }
 

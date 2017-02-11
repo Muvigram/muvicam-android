@@ -61,7 +61,7 @@ public class MusicPresenter extends BasePresenter<MusicMvpView> {
               getMvpView().showMusics(stock);
             },
             e -> {
-              Timber.e(e, "There was an error loading the music");
+              Timber.w(e, "m/loadMusics There was an error loading the music");
               getMvpView().showError();
             },
             () -> {

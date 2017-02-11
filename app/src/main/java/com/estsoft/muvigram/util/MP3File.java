@@ -42,9 +42,9 @@ public class MP3File extends SoundFile {
   public MP3File(File inputFile) throws IllegalStateException {
     super(inputFile);
     if (!isMP3(mInputFile.getName().toLowerCase())) {
-      IllegalArgumentException e = new IllegalArgumentException();
-      Timber.e(e, "File has illegal extension name.");
-      throw e;
+      IllegalArgumentException iae = new IllegalArgumentException();
+      Timber.e(iae, "File has illegal extension name.");
+      throw iae;
     } else {
       try {
         readFile();
@@ -280,9 +280,9 @@ public class MP3File extends SoundFile {
       mBitrateSum += bitRate;
 
       if (globalGain < 0 || globalGain > 255) {
-        RuntimeException e = new RuntimeException();
-        Timber.e(e, "Global gain, in frame #%d, is out of bound : %d", mTotalFrameNum, globalGain);
-        throw e;
+        RuntimeException re = new RuntimeException();
+        Timber.e(re, "m/readFile Global gain, in frame #%d, is out of bound : %d", mTotalFrameNum, globalGain);
+        throw re;
       }
       mGlobalGains[mTotalFrameNum] = globalGain;
 
@@ -346,9 +346,9 @@ public class MP3File extends SoundFile {
   public static boolean isMP3(String lowercaseName) throws IllegalStateException {
     String[] tokens = lowercaseName.toLowerCase().split("\\.");
     if (tokens.length < 2) {
-      IllegalArgumentException e = new IllegalArgumentException();
-      Timber.e(e, "Cannot resolve the file name.");
-      throw e;
+      IllegalArgumentException iae = new IllegalArgumentException();
+      Timber.e(iae, "m/isMP3 Cannot resolve the file name.");
+      throw iae;
     }
     return "mp3".equals(tokens[tokens.length - 1]);
   }

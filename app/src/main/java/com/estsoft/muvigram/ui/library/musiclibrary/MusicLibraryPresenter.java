@@ -41,6 +41,10 @@ public class MusicLibraryPresenter extends BasePresenter<MusicLibraryMvpView> {
 
   @Override
   public void detachView() {
+    RxUtil.unsubscribe(mSubscription);
+    if (mSubscription != null) {
+      mSubscription = null;
+    }
     super.detachView();
   }
 
@@ -57,7 +61,7 @@ public class MusicLibraryPresenter extends BasePresenter<MusicLibraryMvpView> {
               getMvpView().showMusics(stock);
             },
             e -> {
-              Timber.e(e, "There was an error loading the music");
+              Timber.w(e, "m/loadMusics There was an error loading the music");
               getMvpView().showError();
             },
             () -> {

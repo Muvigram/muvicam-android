@@ -205,7 +205,7 @@ public class MusicPlayer {
         throw new RuntimeException("There is neither music nor default asset.");
       }
     } catch (IOException e) {
-      Timber.e(e, "setDataSource failed");
+      Timber.e(e, "m/setDataSource setDataSource failed");
     }
   }
 }

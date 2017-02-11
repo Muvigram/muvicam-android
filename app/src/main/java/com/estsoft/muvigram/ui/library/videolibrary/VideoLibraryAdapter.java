@@ -176,7 +176,7 @@ public class VideoLibraryAdapter extends RecyclerView.Adapter<VideoLibraryAdapte
 
   private void pushPos(Integer pos) {
     if (isFull()) {
-      Timber.i("Selected video array is full.");
+      Timber.d("Selected video array is full.");
       DialogFactory.createSimpleOkErrorDialog(mFragment.getActivity(),
           R.string.library_video_title_text, R.string.library_video_selection_is_full)
           .show();
@@ -185,7 +185,7 @@ public class VideoLibraryAdapter extends RecyclerView.Adapter<VideoLibraryAdapte
 
     int idx = mSelectedPosition.indexOf(pos);
     if (idx != -1) {
-      Timber.w("Already matching item exists in the list.");
+      Timber.w("m/pushPos Already matching item exists in the list.");
       return;
     }
 
@@ -197,13 +197,13 @@ public class VideoLibraryAdapter extends RecyclerView.Adapter<VideoLibraryAdapte
 
   private void removePos(Integer pos) {
     if (isEmpty()) {
-      Timber.i("Selected video array is empty.");
+      Timber.d("Selected video array is empty.");
       return;
     }
 
     int idx = mSelectedPosition.indexOf(pos);
     if (idx == -1) {
-      Timber.w("There is no matching item in the list.");
+      Timber.w("m/removePos There is no matching item in the list.");
       return;
     }
 

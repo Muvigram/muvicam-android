@@ -61,7 +61,7 @@ public class VideoLibraryPresenter extends BasePresenter<VideoLibraryMvpView> {
               getMvpView().showVideos(stock);
             },
             e -> {
-              Timber.e(e, "There was an error loading the videos.");
+              Timber.w(e, "m/loadVideos There was an error loading the videos.");
               getMvpView().showError();
             },
             () -> {

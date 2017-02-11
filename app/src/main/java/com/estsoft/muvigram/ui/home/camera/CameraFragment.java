@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Stack;
 import java.util.concurrent.Semaphore;
@@ -754,7 +755,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       case Surface.ROTATION_270:
         return cameraSensorOrientation == 0 || cameraSensorOrientation == 180;
       default:
-        Timber.e("Invalid display rotation : %d\n", displayRotation);
+        Timber.w("Invalid display rotation : %d\n", displayRotation);
         return false;
     }
   }
@@ -768,7 +769,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     int h = aspectRatio.getHeight();
 
     for (Size option : choices) {
-      Timber.e("Image capture - %d : %d\n", option.getWidth(), option.getHeight());
+      Timber.v("Image capture - %d : %d\n", option.getWidth(), option.getHeight());
       if (option.getHeight() <= 1080 && option.getHeight() <= baseLength) {
         if (option.getHeight() == option.getWidth() * h / w) {
           feasibleSize.add(option);
@@ -783,14 +784,28 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     if (feasibleSize.size() > 0) {
       return Collections.max(feasibleSize, new SizeComparator());
     } else {
-      Timber.e("Couldn't find any suitable preview size.");
+
+      // WARN - There is not proper preview size
+      StringBuilder feasibleSizes = new StringBuilder("");
+      for (Size option : choices) {
+        feasibleSizes.append(
+            String.format(Locale.getDefault(),
+                "[%d:%d]\n", option.getWidth(), option.getHeight())
+        );
+      }
+      feasibleSizes.append(
+          String.format(Locale.getDefault(),
+              "Display Aspect Ratio [%d:%d]\n", aspectRatio.getWidth(), aspectRatio.getHeight())
+      );
+      Timber.w("Couldn't find any suitable video size.\n%s", feasibleSizes.toString());
+
       switch (baseDimension) {
         case BASE_DIMENSION_HEIGHT:
           return Collections.max(longerHeight, new SizeComparator());
         case BASE_DIMENSION_WIDTH:
           return Collections.max(longerWidth, new SizeComparator());
-        default:
-          Timber.e("Invalid value for baseSide parameter.");
+        default: // Unexpected case
+          Timber.w("Invalid value for baseSide parameter.");
           return choices[choices.length - 1];
       }
     }
@@ -816,10 +831,10 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       if (option.getHeight() == option.getWidth() * h / w) {
         // Big enough
         if (optionLength >= baseLength) {
-          Timber.e("Big enough - %d : %d\n", option.getWidth(), option.getHeight());
+          Timber.v("Big enough - %d : %d", option.getWidth(), option.getHeight());
           bigEnough.add(option);
         } else {
-          Timber.e("Not Big enough - %d : %d\n", option.getWidth(), option.getHeight());
+          Timber.v("Not Big enough - %d : %d", option.getWidth(), option.getHeight());
           notBigEnough.add(option);
         }
       }
@@ -830,7 +845,21 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     } else if (notBigEnough.size() > 0) {
       return Collections.max(notBigEnough, new SizeComparator());
     } else {
-      Timber.e("Couldn't find any suitable preview size.");
+
+      // WARN - There is not proper preview size
+      StringBuilder feasibleSizes = new StringBuilder("");
+      for (Size option : choices) {
+        feasibleSizes.append(
+            String.format(Locale.getDefault(),
+            "[%d:%d]\n", option.getWidth(), option.getHeight())
+        );
+      }
+      feasibleSizes.append(
+          String.format(Locale.getDefault(),
+              "Aspect Ratio [%d:%d]\n", aspectRatio.getWidth(), aspectRatio.getHeight())
+      );
+      Timber.w("Couldn't find any suitable preview size.\n%s", feasibleSizes.toString());
+
       return choices[0];
     }
   }
@@ -979,7 +1008,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
       mCameraDevice.createCaptureSession(surfaces, mRecordSessionStateCallback, mBackgroundHandler);
     } catch (CameraAccessException e) {
-      Timber.e(e, "CameraAccessException from creating capture session for recording.");
+      Timber.e(e, "m/createRecordSession Exception when creating capture session for recording.");
     }
   }
 
@@ -1113,7 +1142,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     } catch (IllegalStateException e) {
       e.printStackTrace();
     } catch (RuntimeException e) {
-      Timber.e(e, "Recording length was too short : ");
+      Timber.w(e, "m/stopRecorder Recording length was too short.");
     } finally {
       mRecorder.reset(); // If already stopped, reset recorder.
       setUpRecorder();

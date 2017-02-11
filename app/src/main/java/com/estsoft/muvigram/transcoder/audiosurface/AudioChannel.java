@@ -61,7 +61,7 @@ public class AudioChannel {
         mEncodeSampleRate = mEncodeFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE);
         if (mInputSampleRate != mEncodeSampleRate) {
             mResampleRequired = true;
-            Timber.e("setActualDecodeFormat: Audio Resampling required source : %d, target : %d", mInputSampleRate, mEncodeFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE) );
+            Timber.d("setActualDecodeFormat: Audio Resampling required source : %d, target : %d", mInputSampleRate, mEncodeFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE) );
 //            throw new UnsupportedOperationException("Audio sample rate conversion not supported yet." + " ||| source : " + mInputSampleRate + " / target : " + mEncodeFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE));
         }
         mInputChannelCount = mActualDecodeFormat.getInteger( MediaFormat.KEY_CHANNEL_COUNT );

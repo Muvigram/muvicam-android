@@ -134,7 +134,7 @@ public class MusicCutFragment extends Fragment {
   @Override
   public void onResume() {
     super.onResume();
-    Timber.e("MP.isPlaying : %b, WV.isPrepared : %b", mMusicPlayer.isPlaying(), mWaveformView.isOnPrepared());
+    Timber.v("MP.isPlaying : %b, WV.isPrepared : %b", mMusicPlayer.isPlaying(), mWaveformView.isOnPrepared());
     if (!mMusicPlayer.isPlaying() &&
         mWaveformView.isOnPrepared()) {
       startMusic();

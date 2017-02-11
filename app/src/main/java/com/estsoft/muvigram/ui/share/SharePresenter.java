@@ -77,8 +77,7 @@ public class SharePresenter extends BasePresenter<ShareMvpView>{
         mActivity = activity;
         mTmpStoredPath = TranscodeUtils.getAppCashingFile( mContext );
         mLogoVideoFile = mContext.getResources().openRawResourceFd(R.raw.logo_sound_0d_1s);
-//        Toast.makeText(mContext, mTmpStoredPath, Toast.LENGTH_LONG).show();
-        Timber.e("SharePresenter: %s", mTmpStoredPath );
+        Timber.v("SharePresenter: %s", mTmpStoredPath );
     }
 
     @Override

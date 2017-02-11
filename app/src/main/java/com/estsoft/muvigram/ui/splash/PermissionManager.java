@@ -127,7 +127,7 @@ public class PermissionManager {
       int requestCode = getArguments().getInt(ARG_REQUEST_CODE);
 
       if (permissions == null) {
-        Timber.e("No permission error.");
+        Timber.w("m/onCreateDialog There is no permission request.");
         return new AlertDialog.Builder(activity)
             .setMessage("There was an error to checking permissions.")
             .setPositiveButton(R.string.splash_button_ok, (dialogInterface, i) -> activity.finish())

@@ -74,7 +74,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     mDecorView = getWindow().getDecorView();
     RxView.systemUiVisibilityChanges(mDecorView)
         .map(visibility -> {
-          Timber.e("onSystemUiVisibilityChange %08x / %08x", visibility, DEFAULT_UI_SETTING);
+          Timber.v("onSystemUiVisibilityChange %08x / %08x", visibility, DEFAULT_UI_SETTING);
           return DEFAULT_UI_SETTING ^ visibility;
         })
         .filter(differ -> differ != 0 && mBackgroundHandler != null)
