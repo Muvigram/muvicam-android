@@ -64,7 +64,7 @@
 
     </RelativeLayout>
 
-    <com.estsoft.muvicam.util.WaveformView
+    <com.estsoft.muvigram.util.WaveformView
         android:id="@+id/music_dialog_cut_waveform"
         android:layout_width="match_parent"
         android:layout_height="120dp"
