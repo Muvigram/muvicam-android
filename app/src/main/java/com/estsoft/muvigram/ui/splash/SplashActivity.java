@@ -88,7 +88,7 @@ public class SplashActivity extends BaseActivity {
 
   public void startMainActivity() {
     new Handler().postDelayed(() -> {
-      startActivity(HomeActivity.newIntent(SplashActivity.this));
+      startActivity(HomeActivity.getIntent(SplashActivity.this));
     }, SPLASH_TIME_OUT);
   }
 

@@ -27,7 +27,7 @@ public class EditorActivity extends BaseActivity implements VideoEditorResultFra
     private final static String EXTRA_MUSIC_LENGTH = "EditorActivity.musicLength";
 
     //context, selected editorArray, music path, muscic offset, music length
-    public static Intent newIntent(Context packageContext, ArrayList<EditorVideo> selectedVideos,
+    public static Intent getIntent(Context packageContext, ArrayList<EditorVideo> selectedVideos,
                                    String musicPath, int musicOffset, int musicLength) {
         Intent intent = new Intent(packageContext, EditorActivity.class);
         Bundle args = new Bundle();

@@ -27,7 +27,7 @@ public class ShareActivity extends BaseSingleFragmentActivity {
   private final static String EXTRA_VIDEO_START_TIMES = "ShareActivity.videoStartTimes";
   private final static String EXTRA_VIDEO_END_TIMES = "ShareActivity.videoEndTimes";
 
-  public static Intent newIntent( Context packageContext, String[] videoPaths, int[] videoStartTimes, int[] videoEndTimes,
+  public static Intent getIntent( Context packageContext, String[] videoPaths, int[] videoStartTimes, int[] videoEndTimes,
                            String musicPath, int musicOffset, int musicLength, boolean fromEditor) {
     Intent intent = new Intent(packageContext, ShareActivity.class);
     intent.putExtra(EXTRA_VIDEO_PATHS, videoPaths);
@@ -43,7 +43,7 @@ public class ShareActivity extends BaseSingleFragmentActivity {
 
   }
 
-  public static Intent newIntent(Context packageContext, String[] videoPaths, int[] videoOffsets,
+  public static Intent getIntent(Context packageContext, String[] videoPaths, int[] videoOffsets,
                                  String musicPath, int musicOffset, int musicLength) {
     Intent intent = new Intent(packageContext, ShareActivity.class);
     intent.putExtra(EXTRA_VIDEO_PATHS, videoPaths);

@@ -30,7 +30,7 @@ import java.util.List;
 
 public class LibraryActivity extends BaseMultiFragmentActivity {
 
-  public static Intent newIntent(Context packageContext) {
+  public static Intent getIntent(Context packageContext) {
     Intent intent = new Intent(packageContext, LibraryActivity.class);
     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
     return intent;
@@ -88,7 +88,7 @@ public class LibraryActivity extends BaseMultiFragmentActivity {
    */
   public void completeMusicSelection(@Nullable String musicPath, int musicOffset, int musicLength) {
     ArrayList<EditorVideo> editorVideos = convertVideoObject(mVideos);
-    Intent intent = EditorActivity.newIntent(this, editorVideos, musicPath, musicOffset, musicLength);
+    Intent intent = EditorActivity.getIntent(this, editorVideos, musicPath, musicOffset, musicLength);
     startActivity(intent);
   }
 

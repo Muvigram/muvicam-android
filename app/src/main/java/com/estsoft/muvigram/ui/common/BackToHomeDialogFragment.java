@@ -14,6 +14,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.estsoft.muvigram.R;
+import com.estsoft.muvigram.ui.home.HomeActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -87,7 +88,7 @@ public class BackToHomeDialogFragment extends DialogFragment {
   }
 
   private void onPositive(DialogInterface dialogInterface, int i) {
-    Intent intent = StackRemoverActivity.getIntent(getContext());
+    Intent intent = HomeActivity.getIntent(getContext());
     startActivity(intent);
   }
 
