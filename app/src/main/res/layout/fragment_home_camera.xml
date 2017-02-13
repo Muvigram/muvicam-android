@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:custom="http://schemas.android.com/apk/res-auto">
+
+    <com.estsoft.muvigram.ui.home.camera.view.ResizableTextureView
+        android:id="@+id/camera_texture_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"/>
+
+    <com.estsoft.muvigram.ui.home.camera.view.StackBar
+        android:id="@+id/camera_stack_bar"
+        android:layout_width="match_parent"
+        android:layout_height="15dp"
+        android:layout_alignParentTop="true"
+
+        custom:backgroundColor="#7fd7dadb"
+        custom:stackColor="#FFFFFF"
+        custom:dividerColor="#E8474E"/>
+
+    <FrameLayout
+        android:id="@+id/camera_stack_trashbin_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_below="@id/camera_stack_bar"
+        android:orientation="vertical"/>
+
+    <ImageButton
+        android:id="@+id/camera_shoot_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="5dp"
+        android:background="#00000000"
+        android:contentDescription="@string/camera_shoot_button_desc"
+        android:src="@drawable/camera_shoot_button_release_70dp"/>
+
+    <com.estsoft.muvigram.ui.home.camera.view.AlbumArtButton
+        android:id="@+id/camera_music_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="15dp"
+        android:layout_marginStart="10dp"
+        android:background="#00000000"
+        android:contentDescription="@string/camera_music_button_desc"/>
+
+    <com.estsoft.muvigram.ui.home.camera.view.LibraryThumbnailButton
+        android:id="@+id/camera_library_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="15dp"
+        android:layout_marginEnd="10dp"
+        android:background="#00000000"
+        android:contentDescription="@string/camera_library_button_desc"/>
+
+    <View
+        android:id="@+id/camera_base_line"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="80dp"
+        android:background="#35FFFFFF"/>
+
+    <ImageButton
+        android:id="@+id/camera_selfie_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/camera_base_line"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:background="#00000000"
+        android:contentDescription="@string/camera_selfie_mode_button_desc"
+        android:src="@drawable/camera_selfie_button_active_30dp"/>
+
+    <ImageButton
+        android:id="@+id/camera_cut_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/camera_base_line"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_toStartOf="@id/camera_selfie_button"
+        android:background="#00000000"
+        android:contentDescription="@string/camera_selfie_mode_button_desc"
+        android:src="@drawable/camera_cut_button_inactive_30dp"/>
+
+    <ImageButton
+        android:id="@+id/camera_ok_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/camera_base_line"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_toEndOf="@id/camera_selfie_button"
+        android:background="#00000000"
+        android:contentDescription="@string/camera_selfie_mode_button_desc"
+        android:src="@drawable/camera_ok_button_inactive_30dp"/>
+
+    <FrameLayout
+        android:id="@+id/camera_container_music_cut"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+    </FrameLayout>
+</RelativeLayout>

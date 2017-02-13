@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_music_cut"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+
+        <RelativeLayout
+            android:id="@+id/music_cut_item"
+            android:background="@color/backgroundOpaqueWhite"
+            android:orientation="horizontal"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="4"
+            android:weightSum="1">
+
+            <ImageView
+                android:id="@+id/music_cut_item_thumbnail"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:background="@color/backgroundLightGrey"
+                android:layout_centerVertical="true"
+                android:contentDescription="@string/music_album_desc"/>
+
+            <TextView
+                android:id="@+id/music_cut_item_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textColor="@color/textBlack"
+                tools:text="Music title here"
+                android:gravity="center"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@id/music_cut_item_thumbnail"
+                />
+
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/music_cut_ok_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textColor="@color/textGrey"
+            android:text="@string/music_cut_ok_button"
+            android:background="@color/backgroundOpaqueWhite"/>
+
+        <Button
+            android:id="@+id/music_cut_cancel_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textColor="@color/textGrey"
+            android:text="@string/music_cut_cancel_button"
+            android:background="@color/backgroundOpaqueWhite"/>
+    </LinearLayout>
+
+    <com.estsoft.muvigram.util.WaveformView
+        android:id="@+id/music_cut_waveform"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@color/backgroundOpaqueGrey"/>
+</LinearLayout>

@@ -7,12 +7,12 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
 
-        <item name="alertDialogTheme">@style/MuvicamAlertDialog</item>
+        <item name="alertDialogTheme">@style/MuvigramAlertDialog</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
 
     </style>
 
-    <style name="MuvicamAlertDialog" parent="Theme.AppCompat.Dialog.Alert">
+    <style name="MuvigramAlertDialog" parent="Theme.AppCompat.Dialog.Alert">
         <!--buttons color-->
         <item name="colorAccent">@color/colorAccent</item>
         <!--title and message color-->
@@ -20,15 +20,15 @@
         <!--dialog background-->
         <item name="android:windowBackground">@color/colorPrimary</item>
     </style>
-    <style name="MuvicamBottomSheetDialog" parent="Theme.Design.BottomSheetDialog">
-        
+    <style name="MuvigramBottomSheetDialog" parent="Theme.Design.BottomSheetDialog">
+
         <!--buttons color-->
         <item name="colorAccent">@color/colorAccent</item>
         <!--title and message color-->
         <item name="android:textColorPrimary">@color/colorPrimaryDark</item>
         <!--dialog background-->
         <item name="android:windowBackground">@color/colorPrimary</item>
-        
+
     </style>
 
 

@@ -4,7 +4,7 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.estsoft.muvicam.ui.selector.SelectorActivity">
+    tools:context="com.estsoft.muvigram.ui.selector.SelectorActivity">
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

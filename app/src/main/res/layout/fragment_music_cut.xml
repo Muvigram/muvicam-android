@@ -66,7 +66,7 @@
             android:background="@color/backgroundOpaqueWhite"/>
     </LinearLayout>
 
-    <com.estsoft.muvicam.ui.home.camera.WaveformView
+    <com.estsoft.muvigram.ui.home.camera.WaveformView
         android:id="@+id/music_cut_waveform"
         android:layout_width="match_parent"
         android:layout_height="120dp"

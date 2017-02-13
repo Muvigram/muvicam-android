@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center">
-        <com.estsoft.muvicam.ui.share.ShareVideoView
+        <com.estsoft.muvigram.ui.share.ShareVideoView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/share_result_video"/>
@@ -99,7 +99,7 @@
             />
 
 
-        <com.estsoft.muvicam.ui.share.CircularProgressBar
+        <com.estsoft.muvigram.ui.share.CircularProgressBar
             android:layout_width="85dp"
             android:layout_height="85dp"
             android:layout_gravity="center"
