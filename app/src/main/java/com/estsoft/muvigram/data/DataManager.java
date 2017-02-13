@@ -1,5 +1,6 @@
 package com.estsoft.muvigram.data;
 
+import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 
 import javax.inject.Inject;

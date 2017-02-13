@@ -38,8 +38,18 @@ public class MusicLibraryAdapter extends RecyclerView.Adapter<MusicLibraryAdapte
     mFragment = fragment;
   }
 
+  public void deregister() {
+    mFragment = null;
+  }
+
   public void setMusics(List<Music> musics) {
     mMusics = musics;
+  }
+
+  public void clearMusics() {
+    int size = this.mMusics.size();
+    this.mMusics.clear();
+    notifyItemRangeRemoved(0, size);
   }
 
   @Override

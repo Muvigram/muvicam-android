@@ -39,6 +39,12 @@ public class MusicSearchAdapter extends RecyclerView.Adapter<MusicSearchAdapter.
     mMusics = musics;
   }
 
+  public void clearMusics() {
+    int size = this.mMusics.size();
+    this.mMusics.clear();
+    notifyItemRangeRemoved(0, size);
+  }
+
   @Override
   public MusicViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     View itemView = LayoutInflater.from(parent.getContext())

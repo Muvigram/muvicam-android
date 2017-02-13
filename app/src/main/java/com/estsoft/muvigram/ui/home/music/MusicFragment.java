@@ -114,6 +114,10 @@ public class MusicFragment extends Fragment implements MusicMvpView {
     if (mPresenter != null) {
       mPresenter = null;
     }
+    if (mAdapter != null) {
+      mAdapter.clearMusics();
+      mAdapter = null;
+    }
     if (mMusicComponent != null) {
       mMusicComponent = null;
     }

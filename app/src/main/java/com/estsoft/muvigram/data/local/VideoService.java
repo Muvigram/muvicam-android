@@ -47,7 +47,7 @@ public class VideoService {
     Cursor videoCursor = mContext.getContentResolver().query(
         MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
         null, null, null,
-        MediaStore.Video.Media._ID + " ASC"
+        MediaStore.Video.Media._ID + " DESC"
     );
 
     initColumnIndex(videoCursor);
@@ -59,11 +59,11 @@ public class VideoService {
     return CursorObservable.create(videoCursor, false)
         .filter(this::isSupported)
         .map(cursor -> Video.builder()
+            .setId(getId(cursor))
             .setUri(getUri(cursor))
             .setDuration(getDuration(cursor))
             .setWidth(getWidth(cursor))
             .setHeight(getHeight(cursor))
-            .setThumbnail(getThumbnail(cursor))
             .build())
         .doOnCompleted(videoCursor::close);
   }
@@ -92,6 +92,10 @@ public class VideoService {
     return Math.min(x, y) <= 1080;
   }
 
+  public long getId(Cursor cursor) {
+    return cursor.getLong(mIdColumn);
+  }
+
   public Uri getUri(Cursor cursor) {
     return Uri.parse(cursor.getString(mPathColumn));
   }
@@ -108,11 +112,4 @@ public class VideoService {
     return cursor.getInt(mHeightColumn);
   }
 
-  public Bitmap getThumbnail(Cursor cursor) {
-    long id = cursor.getLong(mIdColumn);
-    return MediaStore.Video.Thumbnails.getThumbnail(
-        mContext.getContentResolver(),
-        id, MediaStore.Video.Thumbnails.MINI_KIND,
-        null);
-  }
 }

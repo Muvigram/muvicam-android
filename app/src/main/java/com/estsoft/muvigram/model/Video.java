@@ -44,11 +44,11 @@ public abstract class Video implements Comparable<Video>, Parcelable {
     this.selectionOrder--;
   }
 
+  public abstract long id();
   public abstract Uri uri();
   public abstract int width();
   public abstract int height();
   public abstract int duration();
-  @Nullable public abstract Bitmap thumbnail();
 
   public static Video create(Video video) {
     return video;
@@ -62,7 +62,6 @@ public abstract class Video implements Comparable<Video>, Parcelable {
     return new AutoValue_Video.GsonTypeAdapter(gson);
   }
 
-
   @Override
   public int compareTo(@NonNull Video another) {
     return uri().compareTo(another.uri());
@@ -70,11 +69,11 @@ public abstract class Video implements Comparable<Video>, Parcelable {
 
   @AutoValue.Builder
   public abstract static class Builder {
+    public abstract Builder setId(long id);
     public abstract Builder setUri(Uri uri);
     public abstract Builder setWidth(int width);
     public abstract Builder setHeight(int height);
     public abstract Builder setDuration(int duration);
-    public abstract Builder setThumbnail(Bitmap thumbnail);
     public abstract Video build();
   }
 }

@@ -132,6 +132,11 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
     if (mPresenter != null) {
       mPresenter = null;
     }
+    if (mAdapter != null) {
+      mAdapter.clearMusics();
+      mAdapter.deregister();
+      mAdapter = null;
+    }
     if (mMusicLibraryComponent != null) {
       mMusicLibraryComponent = null;
     }

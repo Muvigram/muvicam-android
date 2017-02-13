@@ -120,6 +120,7 @@ public class VideoLibraryFragment extends Fragment implements VideoLibraryMvpVie
       mPresenter = null;
     }
     if (mAdapter != null) {
+      mAdapter.clearVideos();
       mAdapter.deregister();
       mAdapter = null;
     }
