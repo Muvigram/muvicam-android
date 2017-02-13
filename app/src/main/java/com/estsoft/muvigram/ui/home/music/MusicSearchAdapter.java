@@ -1,5 +1,6 @@
 package com.estsoft.muvigram.ui.home.music;
 
+import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,7 +42,12 @@ public class MusicSearchAdapter extends RecyclerView.Adapter<MusicSearchAdapter.
 
   public void clearMusics() {
     int size = this.mMusics.size();
+    for (int i = 0; i < size; i++) {
+      Bitmap bmp = mMusics.get(i).thumbnail();
+      if(bmp!=null) bmp.recycle();
+    }
     this.mMusics.clear();
+
     notifyItemRangeRemoved(0, size);
   }
 

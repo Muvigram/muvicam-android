@@ -45,15 +45,12 @@
         <!-- Task affinity : editor -->
         <activity
             android:name="com.estsoft.muvigram.ui.library.LibraryActivity"
-            android:screenOrientation="portrait"
-            android:taskAffinity="com.estsoft.muvicam.editor" />
+            android:screenOrientation="portrait"/>
         <activity
             android:name="com.estsoft.muvigram.ui.editor.EditorActivity"
-            android:screenOrientation="portrait"
-            android:taskAffinity="com.estsoft.muvicam.editor" />
+            android:screenOrientation="portrait"/>
         <activity
-            android:name="com.estsoft.muvigram.ui.common.StackRemoverActivity"
-            android:taskAffinity="com.estsoft.muvicam.editor" />
+            android:name="com.estsoft.muvigram.ui.common.StackRemoverActivity"/>
     </application>
 
 </manifest>

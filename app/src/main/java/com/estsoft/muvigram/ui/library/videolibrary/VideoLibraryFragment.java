@@ -18,6 +18,7 @@ import com.estsoft.muvigram.ui.library.LibraryActivity;
 import com.estsoft.muvigram.ui.library.musiclibrary.MusicLibraryFragment;
 import com.estsoft.muvigram.ui.library.videolibrary.injection.VideoLibraryComponent;
 import com.estsoft.muvigram.ui.library.videolibrary.injection.VideoLibraryModule;
+import com.estsoft.muvigram.util.BitmapViewUtil;
 import com.estsoft.muvigram.util.DialogFactory;
 
 import java.util.Collections;
@@ -110,6 +111,7 @@ public class VideoLibraryFragment extends Fragment implements VideoLibraryMvpVie
     if (mUnbinder != null) {
       mUnbinder = null;
     }
+    BitmapViewUtil.clearViewGroup(mRecyclerView);
     super.onDestroyView();
   }
 

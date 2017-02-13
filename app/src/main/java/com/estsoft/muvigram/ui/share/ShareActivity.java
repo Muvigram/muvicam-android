@@ -37,8 +37,9 @@ public class ShareActivity extends BaseSingleFragmentActivity {
     intent.putExtra(EXTRA_MUSIC_OFFSET, musicOffset);
     intent.putExtra(EXTRA_MUSIC_LENGTH, musicLength);
     intent.putExtra(EXTRA_FROM_CAMERA, fromEditor);
-    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    return intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+    return intent;
 
   }
 
@@ -52,7 +53,8 @@ public class ShareActivity extends BaseSingleFragmentActivity {
     intent.putExtra(EXTRA_MUSIC_LENGTH, musicLength);
     intent.putExtra(EXTRA_FROM_CAMERA, false);
 
-    return intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+    return intent;
   }
 
   private String[] mVideoPaths;

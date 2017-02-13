@@ -97,19 +97,15 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   private Unbinder mUnbinder;
 
   @BindView(R.id.camera_shoot_button)             ImageButton mShootButton;
-  @BindView(R.id.camera_music_button)
-  AlbumArtButton mMusicButton;
-  @BindView(R.id.camera_library_button)
-  LibraryThumbnailButton mLibraryButton;
+  @BindView(R.id.camera_music_button)             AlbumArtButton mMusicButton;
+  @BindView(R.id.camera_library_button)           LibraryThumbnailButton mLibraryButton;
   @BindView(R.id.camera_selfie_button)            ImageButton mSelfieButton;
   @BindView(R.id.camera_cut_button)               ImageButton mCutButton;
   @BindView(R.id.camera_ok_button)                ImageButton mOkButton;
-  @BindView(R.id.camera_texture_view)
-  ResizableTextureView mTextureView;
+  @BindView(R.id.camera_texture_view)             ResizableTextureView mTextureView;
   @BindView(R.id.camera_container_music_cut)      FrameLayout mMusicCutContainer;
   @BindView(R.id.camera_base_line)                View mBaseLineView;
-  @BindView(R.id.camera_stack_bar)
-  StackBar mStackBar;
+  @BindView(R.id.camera_stack_bar)                StackBar mStackBar;
   @BindView(R.id.camera_stack_trashbin_container) FrameLayout mStackTrashbinContainer;
 
   @OnClick(R.id.camera_cut_button)

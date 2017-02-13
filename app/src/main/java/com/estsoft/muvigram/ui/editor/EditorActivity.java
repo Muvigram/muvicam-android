@@ -36,7 +36,8 @@ public class EditorActivity extends BaseActivity implements VideoEditorResultFra
         args.putInt(EXTRA_MUSIC_OFFSET, musicOffset);
         args.putInt(EXTRA_MUSIC_LENGTH, musicLength);
         intent.putExtras(args);
-        return intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        return intent;
     }
 
     @Override

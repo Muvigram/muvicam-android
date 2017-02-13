@@ -13,11 +13,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 
+import com.estsoft.muvigram.R;
 import com.estsoft.muvigram.injection.component.DaggerLibraryComponent;
 import com.estsoft.muvigram.injection.component.LibraryComponent;
 import com.estsoft.muvigram.model.EditorVideo;
 import com.estsoft.muvigram.model.Video;
 import com.estsoft.muvigram.ui.base.BaseMultiFragmentActivity;
+import com.estsoft.muvigram.ui.common.BackToHomeDialogFragment;
 import com.estsoft.muvigram.ui.editor.EditorActivity;
 import com.estsoft.muvigram.ui.library.musiclibrary.MusicLibraryFragment;
 import com.estsoft.muvigram.ui.library.videolibrary.VideoLibraryFragment;
@@ -29,7 +31,10 @@ import java.util.List;
 public class LibraryActivity extends BaseMultiFragmentActivity {
 
   public static Intent newIntent(Context packageContext) {
-    return new Intent(packageContext, LibraryActivity.class);
+    Intent intent = new Intent(packageContext, LibraryActivity.class);
+    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+    return intent;
+
   }
 
   private LibraryComponent mLibraryComponent;
@@ -115,5 +120,12 @@ public class LibraryActivity extends BaseMultiFragmentActivity {
       }
     }
     return super.dispatchTouchEvent(event);
+  }
+
+  @Override
+  public void onBackPressed() {
+    BackToHomeDialogFragment fragment = BackToHomeDialogFragment.newInstance(
+        getResources().getString(R.string.dialog_back_to_home));
+    fragment.show(getSupportFragmentManager(), BackToHomeDialogFragment.TAG);
   }
 }
