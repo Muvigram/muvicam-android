@@ -53,7 +53,7 @@ public class LibraryThumbnailButton extends ImageButton {
 
     final Cursor videoCursor = getContext().getContentResolver().query(
         MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-        null, null, null, MediaStore.Video.Media.DATE_TAKEN + " ASC"
+        null, null, null, MediaStore.Video.Media.DATE_TAKEN + " DESC"
     );
 
     if (videoCursor == null) {
