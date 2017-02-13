@@ -95,7 +95,7 @@ public class AudioChannel {
         AudioSample sample = new AudioSample();
         sample.bufferIndex = bufferIndex;
         sample.presentationTimeUs = presentationTimeUs;
-        Timber.v("drainDecoderBufferAndQueue: index ... %d / time ... %ld ???? %d", bufferIndex, presentationTimeUs, DECODER_END_OF_STREAM);
+        Timber.v("drainDecoderBufferAndQueue: index ... %d / time ... %d ???? %d", bufferIndex, presentationTimeUs, DECODER_END_OF_STREAM);
         sample.data = data == null ? null : data.asShortBuffer();
 
         if (mOverFlowSample.data == null){
@@ -164,7 +164,7 @@ public class AudioChannel {
                                                 final boolean fromSample) {
         if ( timePerSample < 0 ) {
             timePerSample = ((float)MICROSECS_PER_SEC / sampleRate);
-            Timber.v("sampleCountToDurationUs: %d", timePerSample);
+            Timber.v("sampleCountToDurationUs: %f", timePerSample);
         }
 
         return (long)(sampleCount * timePerSample );

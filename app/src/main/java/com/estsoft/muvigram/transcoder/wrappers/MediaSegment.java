@@ -68,7 +68,7 @@ public class MediaSegment {
         long shortestDuration = getShortestDuration();
         this.mStartTimeUs = startTimeUs < 0 ? 0 : startTimeUs > shortestDuration ? shortestDuration : startTimeUs;
         this.mEndTimeUs = endTimeUs < 0 ? shortestDuration : endTimeUs > shortestDuration ? shortestDuration : endTimeUs;
-        Timber.d("MediaSegment: %ld/%ld/%ld", mStartTimeUs, mEndTimeUs, shortestDuration);
+        Timber.d("MediaSegment: %d/%d/%d", mStartTimeUs, mEndTimeUs, shortestDuration);
         this.CURRENT_MODE = transcodeMode;
     }
 
@@ -88,7 +88,7 @@ public class MediaSegment {
         long shortestDuration = getShortestDuration();
         this.mStartTimeUs = startTimeUs < 0 ? 0 : startTimeUs > shortestDuration ? shortestDuration : startTimeUs;
         this.mEndTimeUs = endTimeUs < 0 ? shortestDuration : endTimeUs > shortestDuration ? shortestDuration : endTimeUs;
-        Timber.d("MediaSegment: %ld/%ld/%ld", mStartTimeUs, mEndTimeUs, shortestDuration);
+        Timber.d("MediaSegment: %d/%d/%d", mStartTimeUs, mEndTimeUs, shortestDuration);
         this.CURRENT_MODE = transcodeMode;
         Timber.d("MediaSegment: %d", CURRENT_MODE);
     }
@@ -117,7 +117,7 @@ public class MediaSegment {
                 } while ( mExtractor.getSampleTrackIndex() != mVideoTrackIndex );
             }
         }
-        Timber.d("prepare: Seek Time ... %d/%ld/%d", CURRENT_MODE, mExtractor.getSampleTime(), mExtractor.getSampleTrackIndex());
+        Timber.d("prepare: Seek Time ... %d/%d/%d", CURRENT_MODE, mExtractor.getSampleTime(), mExtractor.getSampleTrackIndex());
     }
 
     public void setSmallSync(long videoSyncBufferTimeUs, long audioSyncBufferTimeUs ) {
@@ -202,14 +202,14 @@ public class MediaSegment {
         if ( mVideoCurrentExtractedUs > mEndTimeUs ) {
             mVideoTranscoder.forceStop();
             mVideoForceStoped = true;
-            Timber.v("checkTimeStamp: video extracting end at %ld", mVideoCurrentExtractedUs );
+            Timber.v("checkTimeStamp: video extracting end at %d", mVideoCurrentExtractedUs );
         }
     }
     private void checkForceStoppingAudio() {
         if (mAudioCurrentExtractedUs > mEndTimeUs ) {
             mAudioTranscoder.forceStop();
             mAudioForceStoped = true;
-            Timber.v("checkTimeStamp: audio extracting end at %ld", mAudioCurrentExtractedUs );
+            Timber.v("checkTimeStamp: audio extracting end at %d", mAudioCurrentExtractedUs );
         }
     }
 
@@ -217,7 +217,7 @@ public class MediaSegment {
         if ( mVideoCurrentExtractedUs > ( mStartTimeUs + mVideoSyncOffset - 2)) {
             mVideoTranscoder.encodeStart();
             mVideoEncodingStarted = true;
-            Timber.v("checkTimeStamp: video encode start at %ld", mVideoCurrentExtractedUs );
+            Timber.v("checkTimeStamp: video encode start at %d", mVideoCurrentExtractedUs );
         }
     }
 
@@ -225,7 +225,7 @@ public class MediaSegment {
         if ( mAudioCurrentExtractedUs > ( mStartTimeUs + mAudioSyncOffset - 2 ) ) {
             mAudioTranscoder.encodeStart();
             mAudioEncodingStarted = true;
-            Timber.v("checkTimeStamp: audio encode start at %ld", mAudioCurrentExtractedUs );
+            Timber.v("checkTimeStamp: audio encode start at %d", mAudioCurrentExtractedUs );
         }
     }
 

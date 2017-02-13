@@ -182,9 +182,9 @@ public class VideoTrackTranscoder implements TrackTranscoder {
         int index = mDecoder.dequeueInputBuffer( timeoutUs );
         if ( index < 0 ) return DRAIN_STATE_NONE;
         if ( track < 0 || forceExtractingStop) {
-            Timber.d("permitEncode: release! VIDEO %ld/%d",
+            Timber.d("permitEncode: release! VIDEO %d/%d",
                 mExtractedPresentationTimeUs, mExtractor.getSampleTrackIndex());
-            Timber.v("permitEncode: END OF EXTRACTING %ld", mExtractedPresentationTimeUs);
+            Timber.v("permitEncode: END OF EXTRACTING %d", mExtractedPresentationTimeUs);
             sawExtractorEOS = true;
             mDecoder.queueInputBuffer( index, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM );
             return DRAIN_STATE_NONE;
@@ -280,7 +280,7 @@ public class VideoTrackTranscoder implements TrackTranscoder {
     }
     public void encodeStart() {
         this.mEncodeStartPresentationTimeUs = mExtractedPresentationTimeUs;
-        Timber.d("permitEncode: VIDEO Start at %ld", mEncodeStartPresentationTimeUs);
+        Timber.d("permitEncode: VIDEO Start at %d", mEncodeStartPresentationTimeUs);
         this.mEncodePermitted = true;
     }
 }

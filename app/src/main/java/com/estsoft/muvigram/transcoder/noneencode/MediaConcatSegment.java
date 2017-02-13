@@ -89,7 +89,7 @@ public class MediaConcatSegment {
         // NOTE seeking start time
         mExtractor.seekTo( mStartTimeUs, MediaExtractor.SEEK_TO_CLOSEST_SYNC );
         mActualFirstExtractedTimeUs = mExtractor.getSampleTime();
-        Timber.v("prepare: Extractor seek ... %ld", mExtractor.getSampleTime());
+        Timber.v("prepare: Extractor seek ... %d", mExtractor.getSampleTime());
     }
 
     private boolean stepVideo() {

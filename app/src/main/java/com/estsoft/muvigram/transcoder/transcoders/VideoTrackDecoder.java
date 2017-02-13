@@ -52,7 +52,7 @@ public class VideoTrackDecoder implements TrackTranscoder {
         this.mExtractor = extractor;
         this.mTrackIndex = trackIndex;
         this.mTotalDuration = mExtractor.getTrackFormat( mTrackIndex ).getLong( MediaFormat.KEY_DURATION );
-        Timber.v("VideoTrackDecoder: %ld", mTotalDuration);
+        Timber.v("VideoTrackDecoder: %d", mTotalDuration);
         this.mOutputFormat = outputFormat;
         this.mFrameIntervalUs = frameIntervalUs;
         this.mBitmapListener = listener;
@@ -152,7 +152,7 @@ public class VideoTrackDecoder implements TrackTranscoder {
         mCurrentPositionUs += mFrameIntervalUs;
         if (mCurrentPositionUs >= mTotalDuration) {
             mCurrentPositionUs = mTotalDuration;
-            Timber.d("drainExtractor: %ld/%d", mCurrentPositionUs, mTotalDuration);
+            Timber.d("drainExtractor: %d/%d", mCurrentPositionUs, mTotalDuration);
             lastOneFlag ++;
         }
         if ( I_FRAME_EXTRACTING ) {
@@ -164,9 +164,9 @@ public class VideoTrackDecoder implements TrackTranscoder {
 //                    && mExtractor.getSampleTrackIndex() >= 0
                     && mExtractor.getSampleTime() < mTotalDuration - 100000) {
                 mExtractor.advance();
-                Timber.v("drainExtractor: %ld/%ld", mExtractor.getSampleTime(), mTotalDuration);
+                Timber.v("drainExtractor: %d/%d", mExtractor.getSampleTime(), mTotalDuration);
             }
-            Timber.v("drainExtractor:-------------------------------------------------------------- %ld", mExtractor.getSampleTime());
+            Timber.v("drainExtractor:-------------------------------------------------------------- %d", mExtractor.getSampleTime());
         }
         return DRAIN_STATE_CONSUMED;
     }
@@ -193,7 +193,7 @@ public class VideoTrackDecoder implements TrackTranscoder {
             decodedCount ++;
             mDecoderOutputSurfaceWrapper.awaitNewImage();
             mDecoderOutputSurfaceWrapper.drawImage( false );
-            Timber.v("drainDecoder: drained Position ... %ld/ e:%d / d:%d",
+            Timber.v("drainDecoder: drained Position ... %d/ e:%d / d:%d",
                 mBufferInfo.presentationTimeUs, extractedCount, decodedCount);
             ByteBuffer buffer = ByteBuffer.allocateDirect( 4 * mWidth * mHeight );
             buffer.rewind();

@@ -66,7 +66,7 @@ public class MuxerWrapper {
     public void setVideoParams( int frameRate ) {
         mVideoDefaultTimeGap = MICROSECS_PER_SEC / frameRate;
         mVideoTimeGapThreshold = mVideoDefaultTimeGap * 2;
-        Timber.d("setVideoParams: %ld", mVideoDefaultTimeGap);
+        Timber.d("setVideoParams: %d", mVideoDefaultTimeGap);
     }
     public void setAudioParams( int sampleRate ) {
 //        mAudioDefaultTimeGap = MICROSECS_PER_SEC / sampleRate;
@@ -168,7 +168,7 @@ public class MuxerWrapper {
     public long writeSampleData(SampleType type, ByteBuffer byteBuffer, MediaCodec.BufferInfo bufferInfo ) {
 
         long presentationTimeUs = calculatePresentationTime( type, bufferInfo.presentationTimeUs );
-        Timber.v("writeSampleData: %s ... %ld ... source ? %ld / %d / %d",
+        Timber.v("writeSampleData: %s ... %d ... source ? %d / %d / %d",
             type.toString(), presentationTimeUs, bufferInfo.presentationTimeUs, byteBuffer.remaining(), byteBuffer.capacity());
         bufferInfo.set(bufferInfo.offset, bufferInfo.size, presentationTimeUs, bufferInfo.flags);
         if (mMuxerStarted) {

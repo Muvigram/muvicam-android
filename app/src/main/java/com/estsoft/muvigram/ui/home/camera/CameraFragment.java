@@ -177,7 +177,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     }
     v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
       @Override public void onAnimationEnd(Animation animation) {
-        getActivity().startActivity(LibraryActivity.newIntent(getActivity()));
+        getActivity().startActivity(LibraryActivity.getIntent(getActivity()));
       }
     }));
   }
@@ -234,7 +234,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
     String mMusicPath = mMusic == null ? "" : mMusic.uri().toString();
 
-    Intent intent = ShareActivity.newIntent(getContext(), videoPaths, videoOffsets,
+    Intent intent = ShareActivity.getIntent(getContext(), videoPaths, videoOffsets,
         mMusicPath, mMusicPlayer.getOffset(), mMusicPlayer.getRelativePosition());
 
     getActivity().startActivity(intent);

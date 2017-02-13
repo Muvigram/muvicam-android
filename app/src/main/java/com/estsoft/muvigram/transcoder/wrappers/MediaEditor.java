@@ -82,9 +82,9 @@ class MediaEditor implements MediaTranscoder {
         if ( segment.getStartTimeUs() < segment.getEndTimeUs() ) {
             mSegmentLists.add(segment);
             mTotalEstimatedDuration += segment.getEndTimeUs() - segment.getStartTimeUs();
-            Timber.d("addSegment: Adding segment ... %s/%ld/%ld", inputFilePath, segment.getStartTimeUs(), segment.getEndTimeUs() );
+            Timber.d("addSegment: Adding segment ... %s/%d/%d", inputFilePath, segment.getStartTimeUs(), segment.getEndTimeUs() );
         } else {
-            Timber.d("addSegment: Skipping segment ... %s/%ld/%ld", inputFilePath, segment.getStartTimeUs(), segment.getEndTimeUs());
+            Timber.d("addSegment: Skipping segment ... %s/%d/%d", inputFilePath, segment.getStartTimeUs(), segment.getEndTimeUs());
         }
     }
 
@@ -101,9 +101,9 @@ class MediaEditor implements MediaTranscoder {
         if ( segment.getStartTimeUs() < segment.getEndTimeUs() ) {
             mSegmentLists.add(segment);
 //            mTotalEstimatedDuration += segment.getEndTimeUs() - segment.getStartTimeUs();
-            Timber.d("addSegment: Adding segment as logo ... %s/%ld/%ld", inputFile.toString(), segment.getStartTimeUs(), segment.getEndTimeUs() );
+            Timber.d("addSegment: Adding segment as logo ... %s/%d/%d", inputFile.toString(), segment.getStartTimeUs(), segment.getEndTimeUs() );
         } else {
-            Timber.d("addSegment: Skipping segment ... %s/%ld/%ld", inputFile.toString(), segment.getStartTimeUs(), segment.getEndTimeUs() );
+            Timber.d("addSegment: Skipping segment ... %s/%d/%d", inputFile.toString(), segment.getStartTimeUs(), segment.getEndTimeUs() );
         }
     }
 
@@ -116,7 +116,7 @@ class MediaEditor implements MediaTranscoder {
 //                offset,-1, audioVolume, MediaSegment.AUDIO_ONLY);
         mMusicSegment = new MediaSegment( mTarget, inputFilePath, mBufferListener,
                 offset, mTotalEstimatedDuration + offset, audioVolume, MediaSegment.AUDIO_ONLY);
-        Timber.d("addMusicSegment: %ld", mTotalEstimatedDuration);
+        Timber.d("addMusicSegment: %d", mTotalEstimatedDuration);
     }
     @Override
     public void startWork() {
@@ -149,7 +149,7 @@ class MediaEditor implements MediaTranscoder {
             videoSyncBufferTimeUs = (mMuxer.getVideoPresentationTimeUs() - mSegmentTargetDuration);
             audioSyncBufferTimeUs = (mMuxer.getAudioPresentationTimeUs() - mSegmentTargetDuration);
 
-            Timber.d("start: End of this segment ... target Duration is %ld", mSegmentTargetDuration );
+            Timber.d("start: End of this segment ... target Duration is %d", mSegmentTargetDuration );
             segment.release();
         }
 
