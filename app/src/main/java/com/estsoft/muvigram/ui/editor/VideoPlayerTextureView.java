@@ -79,7 +79,7 @@ public class VideoPlayerTextureView extends TextureView implements TextureView.S
                 muvicamMediaPlayer.prepare();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Timber.e(e, "m/onSurfaceTextureAvailable");
         }
     }
 

@@ -108,7 +108,6 @@ public class VideoLibraryAdapter extends RecyclerView.Adapter<VideoLibraryAdapte
 
       Observable.just(video.id())
           .subscribeOn(Schedulers.io())
-          .observeOn(Schedulers.io())
           .map((id) -> getThumbnail(id))
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(

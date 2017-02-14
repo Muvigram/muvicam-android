@@ -127,8 +127,10 @@ public class MusicCutFragment extends Fragment {
     mTitle.setText(mMusic.title());
     
     mWaveformView.setSoundFile(mMusic.uri(), UnitConversionUtil.millisecToSec(mOffset));
-    mWaveformView.setWaveformListener(mWaveformListener);
-    mWaveformView.setOnPreparedListener(this::startMusic);
+    mWaveformView.setOnPreparedListener(() -> {
+      mWaveformView.setWaveformListener(mWaveformListener);
+      startMusic();
+    });
   }
 
   @Override
@@ -149,6 +151,7 @@ public class MusicCutFragment extends Fragment {
 
   @Override
   public void onDestroyView() {
+    mWaveformView.unsubscribe();
     mUnbinder.unbind();
     super.onDestroyView();
   }
@@ -190,8 +193,8 @@ public class MusicCutFragment extends Fragment {
 
     mMusicPlayer.startPlayer();
     mSubscription = mMusicPlayer.startSubscribePlayer()
-        .observeOn(AndroidSchedulers.mainThread())
         .subscribeOn(Schedulers.newThread())
+        .observeOn(Schedulers.computation())
         .map(UnitConversionUtil::millisecToSec)
         .filter(sec -> {
           if (mWaveformView != null && mWaveformView.isValidRunningAt(sec)) {
@@ -202,6 +205,7 @@ public class MusicCutFragment extends Fragment {
             return false;
           }
         })
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
             mWaveformView::updateUi,
             Throwable::printStackTrace,

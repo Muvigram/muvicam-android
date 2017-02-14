@@ -79,7 +79,9 @@ public class ThumbnailUtil {
             if (!stepped) {
                 try {
                     Thread.sleep(20);
-                } catch ( Exception e ) { e.printStackTrace(); }
+                } catch ( Exception e ) {
+                    Timber.e(e, "m/runPipeline");
+                }
             }
         }
     }

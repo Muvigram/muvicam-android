@@ -136,7 +136,7 @@ public class TranscodeUtils {
             os.close();
         } catch ( IOException e ) {
             listener.onError( e );
-            e.printStackTrace();
+            Timber.e(e, "m/storeInGallery");
 
         }
         MediaScannerConnection.scanFile(context, new String[] { targetFile.getAbsolutePath() }, null, null);

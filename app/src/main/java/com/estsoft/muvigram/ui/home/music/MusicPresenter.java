@@ -53,8 +53,8 @@ public class MusicPresenter extends BasePresenter<MusicMvpView> {
     checkViewAttached();
     RxUtil.unsubscribe(mSubscription);
     mSubscription = mDataManager.getMusics(text)
-        .observeOn(AndroidSchedulers.mainThread())
         .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
             musics -> {
               stock.addAll(musics);

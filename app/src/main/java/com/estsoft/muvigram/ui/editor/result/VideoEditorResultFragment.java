@@ -227,9 +227,9 @@ public class VideoEditorResultFragment extends Fragment {
                 videoResultPlayer.setVolume(0, 0);
                 videoResultPlayer2.setVolume(0, 0);
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                Timber.e(e, "m/onCraete e/FileNotFoundException");
             } catch (IOException e) {
-                e.printStackTrace();
+                Timber.e(e, "m/onCraete e/IOException");
             }
 
             resultThread.start();
@@ -331,11 +331,8 @@ public class VideoEditorResultFragment extends Fragment {
                 musicResultPlayer.prepare();
                 videoSpaceFrameLayout.addView(videoResultTextureView);
                 fis.close();
-            } catch (IOException io) {
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                io.printStackTrace(pw);
-                Timber.d("editadaptor exception %s", sw.toString());
+            } catch (IOException ioe) {
+                Timber.e(ioe, "m/onViewCreated exception");
             }
 
         }
@@ -648,10 +645,10 @@ public class VideoEditorResultFragment extends Fragment {
             }
             fis.close();
 
-        } catch (FileNotFoundException ex) {
-            Timber.w(ex, "prepare got exception");
+        } catch (FileNotFoundException e) {
+            Timber.e(e, "m/prepareVideoPlayer e/FileNotFoundException");
         } catch (IOException e) {
-            e.printStackTrace();
+            Timber.e(e, "m/prepareVideoPlayer e/IOException");
         }
     }
 

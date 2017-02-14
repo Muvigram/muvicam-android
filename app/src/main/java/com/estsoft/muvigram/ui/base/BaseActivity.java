@@ -14,6 +14,8 @@ import com.estsoft.muvigram.injection.component.ActivityComponent;
 import com.estsoft.muvigram.injection.module.ActivityModule;
 import com.jakewharton.rxbinding.view.RxView;
 
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
@@ -73,11 +75,13 @@ public abstract class BaseActivity extends AppCompatActivity {
   public void setUpDecorView() {
     mDecorView = getWindow().getDecorView();
     RxView.systemUiVisibilityChanges(mDecorView)
+        .observeOn(Schedulers.computation())
         .map(visibility -> {
           Timber.v("onSystemUiVisibilityChange %08x / %08x", visibility, DEFAULT_UI_SETTING);
           return DEFAULT_UI_SETTING ^ visibility;
         })
         .filter(differ -> differ != 0 && mBackgroundHandler != null)
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe(differ -> {
           mBackgroundHandler.postDelayed(this::hideDecorView, 3000);
         });
@@ -111,7 +115,7 @@ public abstract class BaseActivity extends AppCompatActivity {
       mBackgroundHandler.removeCallbacksAndMessages(null);
       mBackgroundHandler = null;
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      Timber.e(e, "m/stopBackgroundThread");
     }
   }
 }

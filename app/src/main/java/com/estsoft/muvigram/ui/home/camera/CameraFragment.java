@@ -266,20 +266,22 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     final Observable<MotionEvent> sharedObservable = RxView.touches(mShootButton).share();
     // Start shooting
     sharedObservable
+        .observeOn(Schedulers.computation())
         .filter(e -> e.getAction() == MotionEvent.ACTION_DOWN)
         .filter(e -> mMusicPlayer.getRelativePosition() <= 14000)
         .filter(e -> isPreviewSessionReady)
         .filter(this::shootButtonDown)
         .debounce(400, TimeUnit.MILLISECONDS, Schedulers.newThread())
-        .subscribe(this::requestRecording, Throwable::printStackTrace);
+        .subscribe(this::requestRecording, e -> Timber.e(e, "m/onCreateView RxView.touches.ACTION_DOWN"));
 
     // Stop shooting
     sharedObservable
+        .observeOn(Schedulers.computation())
         .filter(e -> e.getAction() == MotionEvent.ACTION_UP ||
                      e.getAction() == MotionEvent.ACTION_OUTSIDE)
         .filter(e -> mMusicPlayer.getRelativePosition() <= 14000)
         .filter(this::preventRecording)
-        .subscribe(this::stopRecording, Throwable::printStackTrace);
+        .subscribe(this::stopRecording,e -> Timber.e(e, "m/onCreateView RxView.touches.ACTION_UP"));
 
     return view;
   }
@@ -410,7 +412,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       mVideoFile = File.createTempFile("muvigram", null, getContext().getCacheDir());
       if(BuildConfig.DEBUG) Timber.d("Create file %s\n", mVideoFile.toString());
     } catch (IOException e) {
-      e.printStackTrace();
+      Timber.e(e, "m/createVideoFile");
     }
   }
 
@@ -430,7 +432,8 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   public void setStackBarOnListen() {
     RxUtil.unsubscribe(mStackBarSubscription);
     mStackBarSubscription = mMusicPlayer.startSubscribePlayer()
-        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(Schedulers.newThread())
+        .observeOn(Schedulers.computation())
         .doOnSubscribe(() -> mUiThreadHandler.post(this::hideTrashbin))
         .map(millisec -> (millisec - mMusicPlayer.getOffset()))
         .filter(relMillisec -> {
@@ -440,10 +443,10 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           }
           return true;
         })
-        .subscribeOn(Schedulers.newThread())
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
             mStackBar::updateStackBar,
-            Throwable::printStackTrace,
+            e -> Timber.e(e, "m/setStackBarOnListen"),
             () -> {
               mStackBar.recordOffset();
               RxUtil.unsubscribe(mStackBarSubscription);
@@ -582,7 +585,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       mBackgroundThread = null;
       mBackgroundHandler = null;
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      Timber.e(e, "m/stopBackgroundThread");
     }
   }
 
@@ -612,8 +615,9 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       manager.openCamera(mCameraId, mStateCallback, mBackgroundHandler);
 
     } catch (CameraAccessException e) {
-      e.printStackTrace();
+      Timber.e(e, "m/openCamera e/CameraAccessException");
     } catch (InterruptedException e) {
+      Timber.e(e, "m/openCamera e/InterruptedException");
       throw new RuntimeException("Interrupted while trying to lock camera open ing.", e);
     }
   }
@@ -627,6 +631,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
         mCameraDevice = null;
       }
     } catch (InterruptedException e) {
+      Timber.e(e, "m/closeCamera e/InterruptedException");
       throw new RuntimeException("Interrupted while trying to lock camera closing.", e);
     } finally {
       mCameraOpenCloseLock.release();
@@ -721,7 +726,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       mCameraId = cameraId;
 
     } catch (CameraAccessException e) {
-      e.printStackTrace();
+      Timber.e(e, "m/setUpCameraOutputs e/CameraAccessException");
     }
   }
 
@@ -891,41 +896,37 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   private static final int MAXIMUM_VIDEO_LENGTH = 15000;
 
   private void delayStopRecording() {
-    new Thread() {
-      @Override
-      public void run() {
-        super.run();
-        if (Looper.myLooper() == null) {
-          Looper.prepare();
-        }
-
-        int delayTime = delayTime(mMusicPlayer.getRelativePosition(), mVideoOffset);
-
-        try {
-          Thread.sleep(delayTime);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        } finally {
-          // stop subscribing music player.
-          mMusicPlayer.stopSubscribePlayer();
-          mMusicPlayer.pausePlayer();
-
-          requestUiChange(UI_LOGIC_SHOW_PERIPHERAL_BUTTONS);
-          requestUiChange(UI_LOGIC_HOLD_SHOOT_BUTTON);
-        }
-
-        try {
-          Thread.sleep(FIXED_DELAY_LENGTH - delayTime);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        } finally {
-          requestUiChange(UI_LOGIC_RELEASE_SHOOT_BUTTON);
-          stopRecorder();
-          isRecording = false;
-          startPreviewing();
-        }
+    mBackgroundHandler.post(() -> {
+      if (Looper.myLooper() == null) {
+        Looper.prepare();
       }
-    }.run();
+
+      int delayTime = delayTime(mMusicPlayer.getRelativePosition(), mVideoOffset);
+
+      try {
+        Thread.sleep(delayTime);
+      } catch (InterruptedException e) {
+        Timber.e(e, "m/delayStopRecording e/InterruptedException");
+      } finally {
+        // stop subscribing music player.
+        mMusicPlayer.stopSubscribePlayer();
+        mMusicPlayer.pausePlayer();
+
+        requestUiChange(UI_LOGIC_SHOW_PERIPHERAL_BUTTONS);
+        requestUiChange(UI_LOGIC_HOLD_SHOOT_BUTTON);
+      }
+
+      try {
+        Thread.sleep(FIXED_DELAY_LENGTH - delayTime);
+      } catch (InterruptedException e) {
+        Timber.e(e, "m/delayStopRecording e/InterruptedException");
+      } finally {
+        requestUiChange(UI_LOGIC_RELEASE_SHOOT_BUTTON);
+        stopRecorder();
+        isRecording = false;
+        startPreviewing();
+      }
+    });
   }
 
   /**
@@ -971,7 +972,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
           mPreviewSessionStateCallback, mBackgroundHandler);
 
     } catch (CameraAccessException e) {
-      e.printStackTrace();
+      Timber.e(e, "m/createPreviewSession");
     }
   }
 
@@ -1027,7 +1028,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       try {
         mSession.setRepeatingRequest(mCaptureRequestBuilder.build(), null, mBackgroundHandler);
       } catch (CameraAccessException e) {
-        e.printStackTrace();
+        Timber.e(e, "m/PreviewSessionStateCallback#onConfigured");
       }
     }
 
@@ -1049,7 +1050,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       try {
         mSession.setRepeatingRequest(mCaptureRequestBuilder.build(), null, mBackgroundHandler);
       } catch (CameraAccessException e) {
-        e.printStackTrace();
+        Timber.e(e, "m/RecordSessionStateCallback#onConfigured");
       }
 
       if (!isSessionCreated) { // Prevent by method "preventRecording"
@@ -1113,8 +1114,8 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       mRecorder.prepare();
 
     } catch (IOException e) {
+      Timber.e(e, "m/setUpRecorder");
       mRecorder.reset();
-      e.printStackTrace();
     }
   }
 
@@ -1122,7 +1123,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     try {
       mRecorder.start();
     } catch (IllegalStateException e) {
-      e.printStackTrace();
+      Timber.e(e, "m/startRecorder");
       mRecorder.reset();
       setUpRecorder();
     }
@@ -1136,7 +1137,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       createVideoFile();
 
     } catch (IllegalStateException e) {
-      e.printStackTrace();
+      Timber.e(e, "m/stopRecorder");
     } catch (RuntimeException e) {
       Timber.w(e, "m/stopRecorder Recording length was too short.");
     } finally {

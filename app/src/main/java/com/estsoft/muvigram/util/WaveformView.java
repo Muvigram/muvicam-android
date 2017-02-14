@@ -12,6 +12,7 @@ import com.estsoft.muvigram.R;
 
 import java.io.File;
 
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
@@ -105,20 +106,27 @@ public class WaveformView extends View {
     return mSoundFile != null;
   }
 
+  private Subscription mSubscription;
+
+  public void unsubscribe() {
+    RxUtil.unsubscribe(mSubscription);
+  }
+
   public void setSoundFile(Uri uri, float offset) {
     mMusicUpdated = true;
     File file = new File(uri.toString());
     mOffset = offset;
 
-    MP3File.create(file)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+    RxUtil.unsubscribe(mSubscription);
+    mSubscription = MP3File.create(file)
+        .subscribeOn(Schedulers.computation())
         .map(MP3File::new) // TODO - Caching
         .map(mp3 -> (SoundFile) mp3)
         .filter(sound -> {
           sound.moderateGains();
           return true;
         })
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe( // TODO - parse only a 15-seconds-piece.
             sound -> {
               mSampleRate = sound.getSampleRate();
@@ -218,6 +226,8 @@ public class WaveformView extends View {
 
   @Override
   public boolean onTouchEvent(MotionEvent event) {
+    if (mWaveformListener == null) return false;
+
     switch (event.getAction()) {
       case MotionEvent.ACTION_DOWN:
         mWaveformListener.waveformTouchStart(event.getX());

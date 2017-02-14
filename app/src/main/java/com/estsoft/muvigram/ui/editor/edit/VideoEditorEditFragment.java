@@ -684,7 +684,7 @@ public class VideoEditorEditFragment extends Fragment {
 
                     }
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Timber.e(e, "m/getResultVideo");
                 }
             }
             if (musicPlayer != null) {

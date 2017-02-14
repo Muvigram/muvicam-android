@@ -93,6 +93,7 @@ public class MusicCutDialogFragment extends DialogFragment {
 
   @Override
   public void onDestroyView() {
+    mWaveformView.unsubscribe();
     mUnbinder.unbind();
     super.onDestroyView();
   }
@@ -134,8 +135,10 @@ public class MusicCutDialogFragment extends DialogFragment {
 
     // set waveform
     mWaveformView.setSoundFile(mMusic.uri(), UnitConversionUtil.millisecToSec(mOffset));
-    mWaveformView.setWaveformListener(mWaveformListener);
-    mWaveformView.setOnPreparedListener(this::startMusic);
+    mWaveformView.setOnPreparedListener(() -> {
+      mWaveformView.setWaveformListener(mWaveformListener);
+      startMusic();
+    });
 
     builder.setView(view)
         .setPositiveButton(android.R.string.ok, (dialog, id) -> {
@@ -177,8 +180,8 @@ public class MusicCutDialogFragment extends DialogFragment {
 
     mMusicPlayer.startPlayer();
     mSubscription = mMusicPlayer.startSubscribePlayer()
-        .observeOn(AndroidSchedulers.mainThread())
         .subscribeOn(Schedulers.newThread())
+        .observeOn(Schedulers.computation())
         .map(UnitConversionUtil::millisecToSec)
         .filter(currentSec -> { // check 15 sec limit.
           if (mWaveformView.isValidRunningAt(currentSec)) {
@@ -189,6 +192,7 @@ public class MusicCutDialogFragment extends DialogFragment {
             return false;
           }
         })
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe( //
             mWaveformView::updateUi,
             Throwable::printStackTrace,
