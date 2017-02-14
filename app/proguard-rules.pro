@@ -122,3 +122,13 @@
 -dontwarn java.nio.file.*
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
 -dontwarn okio.**
+
+# AutoValue
+-dontwarn javax.lang.**
+-dontwarn javax.tools.**
+-dontwarn javax.annotation.**
+-dontwarn autovalue.shaded.com.**
+-dontwarn com.google.auto.value.**
+# autovalue gson extension
+-keep class **.AutoParcelGson_*
+-keepnames @auto.parcelgson.AutoParcelGson class *
