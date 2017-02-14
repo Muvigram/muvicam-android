@@ -154,7 +154,7 @@ public class VideoLibraryFragment extends Fragment implements VideoLibraryMvpVie
   public void showError() {
     DialogFactory.createGenericErrorDialog(
         getActivity(),
-        getString(R.string.library_video_error_loading)
+        R.string.library_video_error_loading
     ).show();
   }
 

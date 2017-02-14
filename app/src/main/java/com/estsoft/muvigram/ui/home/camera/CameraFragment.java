@@ -407,7 +407,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   private void createVideoFile() {
     try {
-      mVideoFile = File.createTempFile("muvicam", null, getContext().getCacheDir());
+      mVideoFile = File.createTempFile("muvigram", null, getContext().getCacheDir());
       if(BuildConfig.DEBUG) Timber.d("Create file %s\n", mVideoFile.toString());
     } catch (IOException e) {
       e.printStackTrace();

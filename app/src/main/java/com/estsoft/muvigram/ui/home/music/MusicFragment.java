@@ -151,7 +151,7 @@ public class MusicFragment extends Fragment implements MusicMvpView {
   public void showError() {
     DialogFactory.createGenericErrorDialog(
         getActivity(),
-        getString(R.string.music_search_error_loading)
+        R.string.music_search_error_loading
     ).show();
   }
 

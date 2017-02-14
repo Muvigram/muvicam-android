@@ -15,7 +15,7 @@ import com.estsoft.muvigram.R;
 
 public final class DialogFactory {
 
-  public static Dialog createSimpleOkErrorDialog(Context context, String title, String message) {
+  private static Dialog createSimpleOkErrorDialog(Context context, String title, String message) {
     AlertDialog.Builder alertDialog = new AlertDialog.Builder(context)
         .setTitle(title)
         .setMessage(message)
@@ -32,7 +32,7 @@ public final class DialogFactory {
         context.getString(messageResource));
   }
 
-  public static Dialog createGenericErrorDialog(Context context, String message) {
+  private static Dialog createGenericErrorDialog(Context context, String message) {
     AlertDialog.Builder alertDialog = new AlertDialog.Builder(context)
         .setTitle(context.getString(R.string.dialog_error_title))
         .setMessage(message)
@@ -44,7 +44,7 @@ public final class DialogFactory {
     return createGenericErrorDialog(context, context.getString(messageResource));
   }
 
-  public static ProgressDialog createProgressDialog(Context context, String message) {
+  private static ProgressDialog createProgressDialog(Context context, String message) {
     ProgressDialog progressDialog = new ProgressDialog(context);
     progressDialog.setMessage(message);
     return progressDialog;
@@ -57,31 +57,26 @@ public final class DialogFactory {
 
 
   // clickListener : ok = -1; cancel = -2;
-    public static AlertDialog createOkCancelDialog( Context context, String title, String message,
-                                                    DialogInterface.OnClickListener clickListener) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage(message);
-        builder.setPositiveButton(context.getString(R.string.dialog_action_ok), clickListener);
-        builder.setNegativeButton(context.getString(R.string.dialog_action_cancel), clickListener);
+  private static AlertDialog createOkCancelDialog(Context context, String title, String message,
+                                                 DialogInterface.OnClickListener clickListener) {
+    AlertDialog.Builder alertDialog = new AlertDialog.Builder(context)
+        .setTitle(title)
+        .setMessage(message)
+        .setPositiveButton(context.getString(R.string.dialog_action_ok), clickListener)
+        .setNegativeButton(context.getString(R.string.dialog_action_cancel), clickListener);
 
-        AlertDialog alertDialog = builder.create();
-        if (title != null
-                && !title.equals("")
-                && !title.equals(context.getString(R.string.dialog_empty_title)))
-            alertDialog.setTitle( title );
-
-    return alertDialog;
+    return alertDialog.create();
   }
 
-    public static AlertDialog createOkCancelDialog( Context context,
-                                                  @StringRes int titleResource,
-                                                  @StringRes int messageResource,
-                                                  DialogInterface.OnClickListener clickListener) {
+  public static AlertDialog createOkCancelDialog(Context context,
+                                                 @StringRes int titleResource,
+                                                 @StringRes int messageResource,
+                                                 DialogInterface.OnClickListener clickListener) {
     return createOkCancelDialog(context,
-            context.getString(titleResource),
-            context.getString(messageResource),
-            clickListener);
-    }
+        context.getString(titleResource),
+        context.getString(messageResource),
+        clickListener);
+  }
 
 
 }

@@ -111,7 +111,7 @@ public class MusicCutFragment extends Fragment {
     if (mMusic == null) {
       DialogFactory.createGenericErrorDialog(
           getActivity(),
-          getString(R.string.music_cut_error_loading)
+          R.string.music_cut_error_loading
       ).show();
       return;
     }

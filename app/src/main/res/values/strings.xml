@@ -72,6 +72,10 @@
     <string name="library_music_empty_musics">There arn\'t any musics</string>
     <string name="library_music_error_loading">There was a problem loading the musics.</string>
 
+    <string name="library_music_skip_dialog_title">Skip buttion</string>
+    <string name="library_music_skip_dialog_desc">This feature will be added soon.</string>
+
+
     <!-- library video package -->
     <string name="library_video_title_text">My Videos</string>
     <string name="library_video_home_text">Home</string>
@@ -89,7 +93,7 @@
     <string name="facebook_package">com.facebook.katana</string>
     <string name="twitter_package">com.twitter.android</string>
     <string name="instagram_package">com.instagram.android</string>
-    <string name="export_hashtag">#Muvicam</string>
+    <string name="export_hashtag">#muvigram</string>
 
     <!-- sharing -->
     <string name="facebook_name"> Facebook </string>

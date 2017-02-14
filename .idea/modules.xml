@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/muvicam-android.iml" filepath="$PROJECT_DIR$/muvicam-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/muvigram-android.iml" filepath="$PROJECT_DIR$/muvigram-android.iml" />
     </modules>
   </component>
 </project>

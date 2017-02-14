@@ -72,8 +72,8 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
     // LibraryActivity.get(this).completeSelection(null, 0, 15000);
     DialogFactory
         .createSimpleOkErrorDialog(getActivity(),
-        "Skip button",
-        "This feature will be added soon.")
+        R.string.library_music_skip_dialog_title,
+        R.string.library_music_skip_dialog_desc)
         .show();
   }
 
@@ -166,7 +166,7 @@ public class MusicLibraryFragment extends Fragment implements MusicLibraryMvpVie
   public void showError() {
     DialogFactory.createGenericErrorDialog(
         getActivity(),
-        getString(R.string.music_search_error_loading)
+        R.string.music_search_error_loading
     ).show();
   }
 
