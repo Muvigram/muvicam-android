@@ -133,6 +133,7 @@ public class VideoLibraryAdapter extends RecyclerView.Adapter<VideoLibraryAdapte
           else onItemSelected(position);
         });
       } else { // unsupported aspect ratio (NOT 16:9)
+        Timber.v("Unsupported video [%d:%d], %s", video.width(), video.height(), video.uri());
         mLayoutUnsupported.setVisibility(View.VISIBLE);
         mLayoutMain.setOnClickListener(v -> {
           DialogFactory.createSimpleOkErrorDialog(mFragment.getActivity(),
@@ -153,6 +154,11 @@ public class VideoLibraryAdapter extends RecyclerView.Adapter<VideoLibraryAdapte
         mFragment.getContext().getContentResolver(),
         id, MediaStore.Video.Thumbnails.MINI_KIND, null);
   }
+
+//  TODO - More reasonable criteria is required.
+//  private static boolean isFlexibleSupportedRatio(int w, int h) {
+//    return Math.abs(w * 9 - h * 16) <= 16 || Math.abs(w * 16 - h * 9) <= 16;
+//  }
 
   private static boolean isSupportedRatio(int w, int h) {
     return w * 9 == h * 16 || w * 16 == h * 9;
