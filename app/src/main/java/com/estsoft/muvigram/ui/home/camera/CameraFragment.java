@@ -246,6 +246,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   private boolean isSubscribed = false;
   private boolean isSessionCreated = false;
   private boolean isRecording = false;
+  private boolean isOnStopRecording = false;
 
   @Override
   public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -266,7 +267,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     final Observable<MotionEvent> sharedObservable = RxView.touches(mShootButton).share();
     // Start shooting
     sharedObservable
-        .observeOn(Schedulers.computation())
         .filter(e -> e.getAction() == MotionEvent.ACTION_DOWN)
         .filter(e -> mMusicPlayer.getRelativePosition() <= 14000)
         .filter(e -> isPreviewSessionReady)
@@ -276,10 +276,10 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
     // Stop shooting
     sharedObservable
-        .observeOn(Schedulers.computation())
         .filter(e -> e.getAction() == MotionEvent.ACTION_UP ||
                      e.getAction() == MotionEvent.ACTION_OUTSIDE)
         .filter(e -> mMusicPlayer.getRelativePosition() <= 14000)
+        .filter(e -> !isOnStopRecording)
         .filter(this::preventRecording)
         .subscribe(this::stopRecording,e -> Timber.e(e, "m/onCreateView RxView.touches.ACTION_UP"));
 
@@ -340,14 +340,14 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   // STEP - VIDEO RECORDING BUTTON INTERACTION ////////////////////////////////////NEED REFACTORING
 
   public boolean shootButtonDown(MotionEvent motionEvent) {
-    if (isDown) throw new IllegalStateException("The button has already been held.");
+    // if (isDown) throw new IllegalStateException("The button has already been held.");
     requestUiChange(UI_LOGIC_HOLD_SHOOT_BUTTON); // Release -> Hold
     isDown = true;
     return true;
   }
 
   public void requestRecording(MotionEvent motionEvent) {
-    if (isSubscribed) throw new IllegalStateException("Recording request has already been subscribed.");
+    // if (isSubscribed) throw new IllegalStateException("Recording request has already been subscribed.");
     if (!isDown) {
       return;
     }
@@ -357,21 +357,23 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   }
 
   public boolean preventRecording(MotionEvent motionEvent) {
-    if (!isDown) throw new IllegalStateException("The button has not been held.");
+    // if (!isDown) throw new IllegalStateException("The button has not been held.");
 
     isSessionCreated = false;
     isSubscribed = false;
     isDown = false;
 
     if (!isRecording) {
+      requestUiChange(UI_LOGIC_SHOW_PERIPHERAL_BUTTONS);
       requestUiChange(UI_LOGIC_RELEASE_SHOOT_BUTTON);
     }
     return isRecording;
   }
 
   public void stopRecording(MotionEvent motionEvent) {
-    if (!isRecording) throw new IllegalStateException("Already recording is started.");
+    // if (!isRecording) throw new IllegalStateException("Already recording is started.");
     mBackgroundHandler.post(this::delayStopRecording);
+    isOnStopRecording = true;
   }
 
   public void stopRecording() {
@@ -379,6 +381,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     isSubscribed = false;
     isDown = false;
     mBackgroundHandler.post(this::delayStopRecording);
+    isOnStopRecording = true;
   }
 
   // STEP - MUSIC PLAYER //////////////////////////////////////////////////////////////////////DONE
@@ -925,6 +928,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
         stopRecorder();
         isRecording = false;
         startPreviewing();
+        isOnStopRecording = false;
       }
     });
   }
