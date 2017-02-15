@@ -49,8 +49,6 @@
         <activity
             android:name="com.estsoft.muvigram.ui.editor.EditorActivity"
             android:screenOrientation="portrait"/>
-        <activity
-            android:name="com.estsoft.muvigram.ui.common.StackRemoverActivity"/>
     </application>
 
 </manifest>
