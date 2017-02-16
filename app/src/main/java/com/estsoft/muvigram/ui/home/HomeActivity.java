@@ -13,9 +13,11 @@ import com.estsoft.muvigram.injection.component.HomeComponent;
 import com.estsoft.muvigram.R;
 import com.estsoft.muvigram.model.Music;
 import com.estsoft.muvigram.ui.base.BaseActivity;
+import com.estsoft.muvigram.ui.common.ExitDialogFragment;
 import com.estsoft.muvigram.ui.home.camera.CameraFragment;
 import com.estsoft.muvigram.ui.home.camera.MusicCutFragment;
 import com.estsoft.muvigram.ui.home.music.MusicFragment;
+import com.estsoft.muvigram.ui.library.musiclibrary.MusicCutDialogFragment;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -133,7 +135,8 @@ public class HomeActivity extends BaseActivity {
         MusicCutFragment fragment = (MusicCutFragment) cfm.findFragmentById(R.id.camera_container_music_cut);
         fragment._cancelMusicCut();
       } else {
-        super.onBackPressed();
+        ExitDialogFragment dialog = ExitDialogFragment.newInstance();
+        dialog.show(getSupportFragmentManager(), ExitDialogFragment.TAG);
       }
     } else {
       mViewPager.setCurrentItem(PAGE_CAMERA);

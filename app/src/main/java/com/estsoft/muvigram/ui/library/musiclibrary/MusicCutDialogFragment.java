@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import com.estsoft.muvigram.R;
 import com.estsoft.muvigram.model.Music;
-import com.estsoft.muvigram.ui.common.BackToHomeDialogFragment;
 import com.estsoft.muvigram.util.WaveformView;
 import com.estsoft.muvigram.ui.library.LibraryActivity;
 import com.estsoft.muvigram.util.MusicPlayer;
