@@ -46,13 +46,11 @@ public abstract class BaseActivity extends AppCompatActivity {
   @Override
   protected void onResume() {
     super.onResume();
-    startBackgroundThread();
-    hideDecorView();
+    mDecorView.setSystemUiVisibility(DEFAULT_UI_SETTING);
   }
 
   @Override
   protected void onPause() {
-    stopBackgroundThread();
     super.onPause();
   }
 
@@ -80,42 +78,27 @@ public abstract class BaseActivity extends AppCompatActivity {
           Timber.v("onSystemUiVisibilityChange %08x / %08x", visibility, DEFAULT_UI_SETTING);
           return DEFAULT_UI_SETTING ^ visibility;
         })
-        .filter(differ -> differ != 0 && mBackgroundHandler != null)
+        .filter(differ -> differ != 0)
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(differ -> {
-          mBackgroundHandler.postDelayed(this::hideDecorView, 3000);
+          new Thread(hideDecorView).start();
         });
   }
 
-  public void hideDecorView() {
-    new Handler(getMainLooper()).post(
-        () -> mDecorView.setSystemUiVisibility(DEFAULT_UI_SETTING)
-    );
-  }
+  Runnable hideDecorView = new Runnable() {
+    @Override
+    public void run() {
+      try {
+        Thread.sleep(3000);
+        new Handler(getMainLooper()).post(
+            () -> mDecorView.setSystemUiVisibility(DEFAULT_UI_SETTING)
+        );
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+  };
 
   // HANDLER ////////////////////////////////////////////////////////////////////////
 
-  private final static String BACKGROUND_HANDLER_THREAD = "BACKGROUND_HANDLER";
-
-  HandlerThread mBackgroundThread;
-  Handler mBackgroundHandler;
-
-  private void startBackgroundThread() {
-    mBackgroundThread = new HandlerThread(BACKGROUND_HANDLER_THREAD);
-    mBackgroundThread.start();
-    mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
-  }
-
-  private void stopBackgroundThread() {
-    mBackgroundThread.quitSafely();
-    try {
-      // Waits forever for this thread to die.
-      mBackgroundThread.join();
-      mBackgroundThread = null;
-      mBackgroundHandler.removeCallbacksAndMessages(null);
-      mBackgroundHandler = null;
-    } catch (InterruptedException e) {
-      Timber.e(e, "m/stopBackgroundThread");
-    }
-  }
 }
