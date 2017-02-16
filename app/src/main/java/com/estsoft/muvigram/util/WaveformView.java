@@ -267,12 +267,6 @@ public class WaveformView extends View {
     return (int) (1.0 * seconds * sampleRate / samplesPerFrame); // rounding up (1.9 frame -> 2 frame)
   }
 
-  private static float getScaledHeight(int i, int[] frameGain, int maxGain, int viewHeight) {
-    float scaledHeight = frameGain[i] * (viewHeight / 2.0f) / maxGain;
-
-    return scaledHeight < 1f ? 1f : scaledHeight;
-  }
-
   private static float getScaledHeight(int i, int[] frameGain, int maxGain, int minGain, int viewHeight) {
     return (frameGain[i] - minGain) * (viewHeight / 2.0f) / (maxGain - minGain);
   }
