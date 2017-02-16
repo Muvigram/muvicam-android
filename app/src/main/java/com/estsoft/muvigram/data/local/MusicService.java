@@ -46,21 +46,16 @@ public class MusicService {
         MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
         null, null, null, null
     );
-    initColumnIndex(musicCursor);
+    initColumnIndex(musicCursor);;
 
-    if (musicCursor == null || !musicCursor.moveToFirst()) {
-      return null;
-    }
-
-    return CursorObservable.create(musicCursor, true)
+    return CursorObservable.create(musicCursor)
         .filter(this::isValid)
         .map(cursor -> Music.builder()
             .setUri(getUri(cursor))
             .setTitle(getTitle(cursor))
             .setArtist(getArtist(cursor))
             .setThumbnail(getThumbnail(cursor))
-            .build())
-        .doOnCompleted(musicCursor::close);
+            .build());
   }
 
   public boolean isValid(Cursor cursor) {

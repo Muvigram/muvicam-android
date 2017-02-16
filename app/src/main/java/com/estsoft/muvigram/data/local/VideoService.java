@@ -52,11 +52,7 @@ public class VideoService {
 
     initColumnIndex(videoCursor);
 
-    if (videoCursor == null || !videoCursor.moveToFirst()) {
-      return null;
-    }
-
-    return CursorObservable.create(videoCursor, false)
+    return CursorObservable.create(videoCursor)
         .filter(this::isSupported)
         .map(cursor -> Video.builder()
             .setId(getId(cursor))
@@ -64,8 +60,7 @@ public class VideoService {
             .setDuration(getDuration(cursor))
             .setWidth(getWidth(cursor))
             .setHeight(getHeight(cursor))
-            .build())
-        .doOnCompleted(videoCursor::close);
+            .build());
   }
 
   private boolean isSupported(Cursor cursor) {

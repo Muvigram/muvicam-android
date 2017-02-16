@@ -30,7 +30,6 @@ public class UnsupportedDialogFragment extends DialogFragment {
         .setView(R.layout.dialog_unsupported)
         .setPositiveButton(R.string.dialog_unsupported_quit_button, (d, i) -> getActivity().finishAffinity())
         .create();
-    dialog.setCanceledOnTouchOutside(false);
     return dialog;
   }
 
