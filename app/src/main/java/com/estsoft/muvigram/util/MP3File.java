@@ -3,6 +3,7 @@ package com.estsoft.muvigram.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 import rx.Observable;
 import timber.log.Timber;
@@ -74,14 +75,59 @@ public class MP3File extends SoundFile {
         val = (mGlobalGains[i-2] + mGlobalGains[i-1] + mGlobalGains[i] + mGlobalGains[i+1] + mGlobalGains[i+2]) / 5;
       }
 
-      histogram[val] += 1;
-
-      mMaxGain = (val > mMaxGain) ? val : mMaxGain;
-      mMinGain = (val < mMinGain) ? val : mMinGain;
+      histogram[val]++;
 
       temp[i] = val;
     }
     mGlobalGains = temp;
+
+
+    int median = 0;
+    int mid = 256 / 2;
+
+    int sum = 0;
+    while (sum < mTotalFrameNum / 2) {
+      sum += histogram[median++];
+    }
+
+    for (int i = 0; i < mTotalFrameNum; i++) {
+      if (mGlobalGains[i] < median) {
+        mGlobalGains[i] = mid * mGlobalGains[i] / median;
+      } else {
+        mGlobalGains[i] = mid + (256 - mid) * (mGlobalGains[i] - median) / (256 - median);
+      }
+
+    }
+
+    int scaledMin;
+    int scaledMax;
+
+    scaledMin = 0;
+    int lowerSum = 0;
+    while (lowerSum < mTotalFrameNum * 5 / 100 && scaledMin < 100) {
+      lowerSum += histogram[scaledMin++];
+    }
+    scaledMin--;
+
+    scaledMax = 255;
+    int upperSum = 0;
+    while (upperSum < mTotalFrameNum * 5 / 100 && scaledMax > 155) {
+      upperSum += histogram[scaledMax--];
+    }
+    scaledMax++;
+
+    for (int i =0; i < mTotalFrameNum; i++) {
+      if (mGlobalGains[i] < scaledMin) {
+        mGlobalGains[i] = 0;
+      }else if (mGlobalGains[i] > scaledMax) {
+        mGlobalGains[i] = 255;
+      } else {  /* min <= item <= max */
+        mGlobalGains[i] = 255 * (mGlobalGains[i] - scaledMin) / (scaledMax - scaledMin);
+      }
+
+      mMaxGain = (mGlobalGains[i] > mMaxGain) ? mGlobalGains[i] : mMaxGain;
+      mMinGain = (mGlobalGains[i] < mMinGain) ? mGlobalGains[i] : mMinGain;
+    }
   }
 
   @Override
@@ -144,17 +190,18 @@ public class MP3File extends SoundFile {
 
     mBitrateSum = 0;
 
-    // No need to handle filesizes larger than can fit in a 32-bit int
-    mFileSize = (int)mInputFile.length();
+    // Integer can represents up to 2GB, so that it is enough to use int type.
+    mFileSize = (int) mInputFile.length();
 
     FileInputStream stream = new FileInputStream(mInputFile);
 
     int pos = 0;
     int offset = 0;
     byte[] buffer = new byte[BUFFER_LEN];
-    while (pos < mFileSize - BUFFER_LEN) {
+    while (pos + BUFFER_LEN < mFileSize) {
       int read = BUFFER_LEN;
-      // Read 12 bytes at a time and look for a sync code (0xFF)
+
+      // Reads up to 16 bytes at a time and looks for a sync code (0xFF)
       // Ex. FF FB E2 44 F1 06 07 F9 7E D3 93 6F
       while (offset < BUFFER_LEN) {
         offset += stream.read(buffer, offset, BUFFER_LEN - offset);
@@ -178,11 +225,20 @@ public class MP3File extends SoundFile {
       }
 
       // [Second byte] - Check for V1L3 or V2L3
-      int version = 0;
-      if (buffer[1] == xFA || buffer[1] == xFB) {
+      int version;
+      boolean crc;
+      if (buffer[1] == xFA) {
         version = MPEG_V1_L3; // xFA, xFB means 11 of position (20, 19) - V1 L3
-      } else if (buffer[1] == xF2|| buffer[1] == xF3) {
+        crc = true;
+      } else if (buffer[1] == xFB) {
+        version = MPEG_V1_L3; // xFA, xFB means 11 of position (20, 19) - V1 L3
+        crc = false;
+      } else if (buffer[1] == xF2) {
         version = MPEG_V2_L3; // xF2, xF3 means 10 of position (20, 19) - V2 L3
+        crc = true;
+      } else if (buffer[1] == xF3) {
+        version = MPEG_V2_L3; // xF2, xF3 means 10 of position (20, 19) - V2 L3
+        crc = false;
       } else { // Invalid MPEG version.
         bufferOffset = 1;
         for (int i = 0; i < BUFFER_LEN - bufferOffset; i++)
@@ -211,7 +267,6 @@ public class MP3File extends SoundFile {
         offset = BUFFER_LEN - bufferOffset;
         continue;
       }
-
       // Assume frame is valid after this line.
 
       mGlobalSampleRate = sampleRate;
@@ -222,7 +277,7 @@ public class MP3File extends SoundFile {
       int padding = (buffer[2] & 2) >> 1;
 
       // Frame length is length of a frame when compressed. It is calculated in slots.
-      // One slot is 4 bytes long for Layer I, and one byte long for Layer II and Layer III.
+      // One slot is 4-byte-long for Layer I, and one-byte-long for Layer II and Layer III.
       // When you are reading MPEG file you must calculate this to be able to find each
       // consecutive frame. Remember, frame length may change from frame to frame
       // due to padding or bitrate switching.
@@ -230,49 +285,73 @@ public class MP3File extends SoundFile {
 
       // (8) ignore private bit
 
-      // (7, 6) : Channel mode, ignore (5, 4) which is only used in joint stereo mode.
-      int globalGain;
+      // check the number of channels
       if ((buffer[3] & 0xC0) == 0xC0) { /* 11 - Single channel */
-        mGlobalChannels = 1;
-        if (version == MPEG_V1_L3) { /* 2 channels for 2 granule */
-          // First global gain from side information : [10:11] - 0000|0001|1111|1110
-          globalGain = 0;
-          for (int i = 0; i < 2 * mGlobalChannels; i++) {
-            globalGain += ((buffer[10] & 0x01) << 7) + ((buffer[11] & 0xFE) >> 1);
-            read += stream.skip(43L);
-            read += stream.read(buffer, 0, BUFFER_LEN);
-          }
-          globalGain /= (2 * mGlobalChannels);
+        mGlobalChannels = CHANNEL_SINGLE;
+      } else {
+        mGlobalChannels = CHANNEL_DUAL;
+      }
 
-        } else { /* MPEG_V2_L3 */
-          // First global gain from side information : [09:10] - 0000|0011|1111|1100
-          globalGain = ((buffer[9]  & 0x03) << 6) + ((buffer[10] & 0xFC) >> 2);
+      // skip remain bits in header, and CRC bits, so that go to side information bits.
+      int headerSize = 4;
+      if (crc) {
+        headerSize += 2;
+      }
+      read += skipBytes(buffer, headerSize, stream);
+
+      // get global gain
+      int globalGain = 0;
+      if (version == MPEG_V1_L3) {
+        if (mGlobalChannels == CHANNEL_SINGLE) {
+          // Bits(136) [9 5 4] [12 9 '8' 30] [12 9 '8' 30]
+          // |8|8|8|7 1| |7 1|8|8|8| |8|8|8|2 6| |2 6|8|8|8|
+          globalGain += ((buffer[3]  & 0x01) << 7) + ((buffer[4]  & (0xFF-0x01)) >> 1);
+          globalGain += ((buffer[11] & 0x3F) << 2) + ((buffer[12] & (0xFF-0x3F)) >> 6);
+          // globalGain += readBits(buffer[3], buffer[4], 1);
+          // globalGain += readBits(buffer[11], buffer[12], 6);
+
+          read += stream.skip(1L);
+          globalGain /= 2;
+        } else /* mGlobalChannels == CHANNEL_SINGLE */ {
+          // Bits(256) [9 3 8] [12 9 '8' 30] [12 9 '8' 30] [12 9 '8' 30] [12 9 '8' 30]
+          // |8|8|8| 8 | | 8 |1 7|1 7|8| |8|8|8| 8 | |4 4|4 4|8|8|
+          // |8|8|8|7 1| |7 1| 8 | 8 |8| |8|8|8|2 6| |2 6| 8 |8|8|
+          globalGain += ((buffer[5]  & 0x7F) << 1) + ((buffer[6]  & (0xFF-0x7F)) >> 7);
+          globalGain += ((buffer[12] & 0x0F) << 4) + ((buffer[13] & (0xFF-0x0F)) >> 4);
+          // globalGain += readBits(buffer[5], buffer[6], 7);
+          // globalGain += readBits(buffer[12], buffer[13], 4);
+          read += skipBytes(buffer, BUFFER_LEN, stream);
+          globalGain += ((buffer[3]  & 0x01) << 7) + ((buffer[4]  & (0xFF-0x01)) >> 1);
+          globalGain += ((buffer[11] & 0x3F) << 2) + ((buffer[12] & (0xFF-0x3F)) >> 6);
+          // globalGain += readBits(buffer[3], buffer[4], 1);
+          // globalGain += readBits(buffer[11], buffer[12], 6);
+
+          globalGain /= 4;
         }
+      } else { /* version == MPEG_V2_L3 */
+        if (mGlobalChannels == CHANNEL_SINGLE) {
+          // Bits(72) [8 1] [12 9 '8' 34]
+          // |8|8|8|6 2| |6 2|8|8|8|
+          // |8|
+          globalGain += ((buffer[3]  & 0x03) << 6) + ((buffer[4]  & (0xFF-0x03)) >> 2);
+          // globalGain += readBits(buffer[3],buffer[4], 2);
 
-      } else { /* else - dual channel, joint stereo, stereo */
-        mGlobalChannels = 2;
-        if (version == MPEG_V1_L3) {
-          // First global gain from side information : [11:12] - 0111|1111|1000|0000
-          globalGain = 0;
-          for (int i = 0; i < 2 * mGlobalChannels; i++) {
-            globalGain += ((buffer[11] & 0x7F) << 1) + ((buffer[12] & 0x80) >> 7);
-            read += stream.skip(47L);
-            read += stream.read(buffer, 0, BUFFER_LEN);
-          }
-          globalGain /= (2 * mGlobalChannels);
+          read += stream.skip(1L);
 
-        } else { /* MPEG_V2_L3 */
-          // First global gain from side information : [09:10] - 0000|0001|1111|1110
-          globalGain = 0;
-          for (int i = 0; i < mGlobalChannels; i++) {
-            globalGain += ((buffer[9]  & 0x01) << 1) + ((buffer[10] & 0xFE) >> 7);
-            read += stream.skip(47L);
-            read += stream.read(buffer, 0, BUFFER_LEN);
-          }
-          globalGain /= mGlobalChannels;
+        } else /* mGlobalChannels == CHANNEL_SINGLE */ {
+          // Bits(136) [8 2] [12 9 '8' 34] [12 9 '8' 34]
+          // |8|8|8|7 1| |7 1|8|8|8| |8|8|8|6 2| |6 2|8|8|8|
+          // |8|
+          globalGain += ((buffer[3]   & 0x01) << 7) + ((buffer[4]   & (0xFF-0x01)) >> 1);
+          globalGain += ((buffer[11]  & 0x03) << 6) + ((buffer[12]  & (0xFF-0x03)) >> 2);
+          // globalGain += readBits(buffer[3],buffer[4], 1);
+          // globalGain += readBits(buffer[11],buffer[12], 2);
 
-        } // if (version == MPEG_VI_L3)
-      } // if ((buffer[3] & 0xC0) == 0xC0)
+          read += stream.skip(1L);
+          globalGain /= 2;
+
+        }
+      }
 
       mMaxGain = (globalGain > mMaxGain) ? globalGain : mMaxGain;
       mMinGain = (globalGain < mMinGain) ? globalGain : mMinGain;
@@ -332,6 +411,9 @@ public class MP3File extends SoundFile {
   private final static int MPEG_V1_L3 = 1;
   private final static int MPEG_V2_L3 = 2;
 
+  private final static int CHANNEL_SINGLE = 1;
+  private final static int CHANNEL_DUAL = 2;
+
   static private int BITRATES_V1_L3[] = {
       0,  32,  40,  48,  56,  64,  80,  96,
       112, 128, 160, 192, 224, 256, 320,  0 };
@@ -351,6 +433,26 @@ public class MP3File extends SoundFile {
       throw iae;
     }
     return "mp3".equals(tokens[tokens.length - 1]);
+  }
+
+  public static void normalize(int[] items, float margin) {
+    // TODO
+  }
+
+  public static int skipBytes(byte[] buffer, int n, FileInputStream inputStream) throws IOException {
+    for (int i = 0; i < buffer.length- n; i++) {
+      buffer[i] = buffer[i + n];
+    }
+    int offset = buffer.length - n;
+
+    int read = 0;
+    while (offset < buffer.length) {
+      int cnt = inputStream.read(buffer, offset, buffer.length - offset);
+      offset += cnt;
+      read += cnt;
+    }
+
+    return read;
   }
 
 }

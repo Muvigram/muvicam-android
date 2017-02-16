@@ -94,7 +94,7 @@ public class WaveformView extends View {
   public void moveOffset(float displacement) {
     int frameOffset = getFrameNumber(displacement, mScaledInterval, mFrameOffset);
     Timber.v("[moveOffset] displacement : %10.4f, frameOffset : %d", displacement, frameOffset);
-    if (frameOffset < 0 || frameOffset + mFrameLength > mSoundFile.getTotalFrameNum()) {
+    if (frameOffset < 0 || frameOffset + mFrameLength >= mSoundFile.getTotalFrameNum()) {
       return;
     }
     mFrameOffset = frameOffset;
@@ -170,7 +170,7 @@ public class WaveformView extends View {
     float sx;
 
     for (int i = mFrameOffset; i < mFrameCur; i++) {
-      sh = getScaledHeight(i, mSoundFile.getGlobalGains(), mMaxGain, mAvgGain, h);
+      sh = getScaledHeight(i, mSoundFile.getGlobalGains(), mMaxGain, mMinGain, h);
       sx = getScaledXPosition(i, mFrameOffset, mFrameLength, w);
       canvas.drawLine(sx, h/2.0f - sh, sx, h/2.0f + sh, mBeforeHeadPaint);
     }
@@ -180,7 +180,7 @@ public class WaveformView extends View {
 //    canvas.drawLine(sx, 0f, sx, sh * 2.0f, mPlayheadPaint);
 
     for (int i = mFrameCur /*+ 1*/; i <= mFrameOffset + mFrameLength; i++) {
-      sh = getScaledHeight(i, mSoundFile.getGlobalGains(), mMaxGain, mAvgGain, h);
+      sh = getScaledHeight(i, mSoundFile.getGlobalGains(), mMaxGain, mMinGain, h);
       sx = getScaledXPosition(i, mFrameOffset, mFrameLength, w);
       canvas.drawLine(sx, h/2.0f - sh, sx, h/2.0f + sh, mAfterHeadPaint);
 
@@ -267,8 +267,14 @@ public class WaveformView extends View {
     return (int) (1.0 * seconds * sampleRate / samplesPerFrame); // rounding up (1.9 frame -> 2 frame)
   }
 
-  private static float getScaledHeight(int i, int[] frameGain, int maxGain, int avgGain, int viewHeight) {
-    return (frameGain[i] - avgGain) * (viewHeight / 2.0f) / (maxGain - avgGain);
+  private static float getScaledHeight(int i, int[] frameGain, int maxGain, int viewHeight) {
+    float scaledHeight = frameGain[i] * (viewHeight / 2.0f) / maxGain;
+
+    return scaledHeight < 1f ? 1f : scaledHeight;
+  }
+
+  private static float getScaledHeight(int i, int[] frameGain, int maxGain, int minGain, int viewHeight) {
+    return (frameGain[i] - minGain) * (viewHeight / 2.0f) / (maxGain - minGain);
   }
 
   private static float getScaledInterval(int frameLength, int viewWidth) {
