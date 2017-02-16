@@ -3,6 +3,7 @@ package com.estsoft.muvigram.ui.home.camera.view;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -59,15 +60,18 @@ public class LibraryThumbnailButton extends ImageButton {
     if (videoCursor == null) {
       return;
     }
-    while (videoCursor.moveToNext()) {
+
+    videoCursor.moveToNext();
+
+    if (videoCursor.moveToNext()) {
       String path = videoCursor.getString(
           videoCursor.getColumnIndex(MediaStore.Video.Media.DATA)
       );
       mThumbnail = ThumbnailUtils.createVideoThumbnail(path, MediaStore.Video.Thumbnails.MICRO_KIND);
-      if (mThumbnail != null) {
-        break;
-      }
+    } else {
+      mThumbnail = BitmapFactory.decodeResource(getResources(), R.drawable.music_item_no_album_art);
     }
+
     mSrcRect = new Rect(0, 0, mThumbnail.getWidth(), mThumbnail.getHeight());
     videoCursor.close();
 
