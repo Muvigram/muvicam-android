@@ -114,6 +114,13 @@
     <!-- video editor result -->
     <string name="editor_result_done_warning">Edit at least 1 video</string>
 
+    <!-- dialog exit -->
     <string name="dialog_exit_title">Exit</string>
     <string name="dialog_exit_text">Are you sure you want to exit muvigram?</string>
+
+    <!-- dialog_unsupported -->
+    <string name="dialog_unsupported_title">Unsupported</string>
+    <string name="dialog_unsupported_text">We currently do not support your device. Please wait for the next update. Thank you.</string>
+    <string name="dialog_unsupported_quit_button">Quit Application</string>
+
 </resources>

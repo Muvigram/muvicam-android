@@ -41,6 +41,7 @@ import android.widget.ImageButton;
 import com.estsoft.muvigram.BuildConfig;
 import com.estsoft.muvigram.R;
 import com.estsoft.muvigram.model.Music;
+import com.estsoft.muvigram.ui.common.UnsupportedDialogFragment;
 import com.estsoft.muvigram.ui.home.HomeActivity;
 import com.estsoft.muvigram.ui.home.camera.view.AlbumArtButton;
 import com.estsoft.muvigram.ui.home.camera.view.LibraryThumbnailButton;
@@ -694,6 +695,13 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
 
       mHardwareLevel = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
+      if (mHardwareLevel == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
+        UnsupportedDialogFragment dialogFragment = UnsupportedDialogFragment.newInstance();
+        dialogFragment.show(getFragmentManager(), UnsupportedDialogFragment.TAG);
+        dialogFragment.setCancelable(false);
+
+      }
+
 
       StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
       if (map == null) {
