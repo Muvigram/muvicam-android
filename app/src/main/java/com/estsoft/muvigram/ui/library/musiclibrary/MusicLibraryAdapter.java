@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.estsoft.muvigram.R;
 import com.estsoft.muvigram.model.Music;
 import com.estsoft.muvigram.ui.library.musiclibrary.injection.MusicLibraryScope;
+import com.estsoft.muvigram.util.thumbnail.ThumbnailLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,11 +82,10 @@ public class MusicLibraryAdapter extends RecyclerView.Adapter<MusicLibraryAdapte
     TextView mArtist;
 
     public void bindMusic(Music music) {
-      if (music.thumbnail() != null) {
-        mThumbnail.setImageBitmap(music.thumbnail());
-      } else {
-        mThumbnail.setImageResource(R.drawable.music_item_no_album_art);
-      }
+      ThumbnailLoader.musicThumbnailLoader(mThumbnail.getContext())
+          .load(music.uri())
+          .into(mThumbnail);
+
       mTitle.setText(music.title());
       mArtist.setText(music.artist());
       mMusicButton.setOnClickListener(v -> mFragment.showMusicCutDialog(music));

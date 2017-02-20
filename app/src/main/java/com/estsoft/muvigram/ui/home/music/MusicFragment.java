@@ -1,7 +1,5 @@
 package com.estsoft.muvigram.ui.home.music;
 
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -11,9 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.Collections;
@@ -31,7 +27,7 @@ import com.estsoft.muvigram.R;
 import com.estsoft.muvigram.ui.home.HomeActivity;
 import com.estsoft.muvigram.ui.home.music.injection.MusicComponent;
 import com.estsoft.muvigram.ui.home.music.injection.MusicModule;
-import com.estsoft.muvigram.util.BitmapViewUtil;
+import com.estsoft.muvigram.util.thumbnail.BitmapViewUtil;
 import com.estsoft.muvigram.util.DialogFactory;
 
 /**
@@ -110,7 +106,7 @@ public class MusicFragment extends Fragment implements MusicMvpView {
     if (mUnbinder != null) {
       mUnbinder = null;
     }
-    BitmapViewUtil.clearViewGroup(mRecyclerView);
+    // BitmapViewUtil.clearViewGroup(mRecyclerView);
     super.onDestroyView();
   }
 
@@ -121,7 +117,6 @@ public class MusicFragment extends Fragment implements MusicMvpView {
       mPresenter = null;
     }
     if (mAdapter != null) {
-      mAdapter.clearMusics();
       mAdapter = null;
     }
     if (mMusicComponent != null) {

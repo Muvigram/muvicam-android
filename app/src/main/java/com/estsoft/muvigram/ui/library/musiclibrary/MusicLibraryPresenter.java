@@ -6,7 +6,7 @@ import com.estsoft.muvigram.data.DataManager;
 import com.estsoft.muvigram.model.Music;
 import com.estsoft.muvigram.ui.base.BasePresenter;
 import com.estsoft.muvigram.ui.library.musiclibrary.injection.MusicLibraryScope;
-import com.estsoft.muvigram.util.RxUtil;
+import com.estsoft.muvigram.util.rx.RxUtil;
 
 import java.util.ArrayList;
 import java.util.List;

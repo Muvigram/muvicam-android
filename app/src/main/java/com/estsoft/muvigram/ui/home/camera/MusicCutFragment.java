@@ -1,5 +1,7 @@
 package com.estsoft.muvigram.ui.home.camera;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,9 +17,11 @@ import com.estsoft.muvigram.model.Music;
 import com.estsoft.muvigram.ui.home.HomeActivity;
 import com.estsoft.muvigram.util.DialogFactory;
 import com.estsoft.muvigram.util.MusicPlayer;
-import com.estsoft.muvigram.util.RxUtil;
+import com.estsoft.muvigram.util.rx.RxUtil;
 import com.estsoft.muvigram.util.UnitConversionUtil;
 import com.estsoft.muvigram.util.WaveformView;
+import com.estsoft.muvigram.util.thumbnail.BitmapViewUtil;
+import com.estsoft.muvigram.util.thumbnail.ThumbnailLoader;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -119,8 +123,9 @@ public class MusicCutFragment extends Fragment {
     mMusicPlayer.setMusic(mMusic.uri());
 
     // set music profile
-    if (mMusic.thumbnail() != null) {
-      mThumbnail.setImageBitmap(mMusic.thumbnail());
+    Bitmap albumArt = ThumbnailLoader.getThumbnail(mMusic);
+    if (albumArt != null) {
+      mThumbnail.setImageBitmap(albumArt);
     } else {
       mThumbnail.setImageResource(R.drawable.music_item_no_album_art);
     }
@@ -152,6 +157,7 @@ public class MusicCutFragment extends Fragment {
   @Override
   public void onDestroyView() {
     mWaveformView.unsubscribe();
+    BitmapViewUtil.clearViewGroup(mThumbnail);
     mUnbinder.unbind();
     super.onDestroyView();
   }

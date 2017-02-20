@@ -21,7 +21,6 @@ public abstract class Music implements Comparable<Music>, Parcelable {
   public abstract Uri uri();
   public abstract String title();
   public abstract String artist();
-  @Nullable public abstract Bitmap thumbnail();
 
   public static Music create(Music music) {
     return music;
@@ -46,7 +45,6 @@ public abstract class Music implements Comparable<Music>, Parcelable {
     public abstract Builder setUri(Uri uri);
     public abstract Builder setTitle(String title);
     public abstract Builder setArtist(String artist);
-    public abstract Builder setThumbnail(Bitmap thumbnail);
     public abstract Music build();
   }
 }

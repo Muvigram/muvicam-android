@@ -46,7 +46,7 @@ public class MusicService {
         MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
         null, null, null, null
     );
-    initColumnIndex(musicCursor);;
+    initColumnIndex(musicCursor);
 
     return CursorObservable.create(musicCursor)
         .filter(this::isValid)
@@ -54,7 +54,6 @@ public class MusicService {
             .setUri(getUri(cursor))
             .setTitle(getTitle(cursor))
             .setArtist(getArtist(cursor))
-            .setThumbnail(getThumbnail(cursor))
             .build());
   }
 
@@ -74,13 +73,4 @@ public class MusicService {
     return cursor.getString(mArtistColumn);
   }
 
-  public Bitmap getThumbnail(Cursor cursor) {
-    MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
-    metaRetriever.setDataSource(cursor.getString(mPathColumn));
-    byte[] art = metaRetriever.getEmbeddedPicture();
-    if (art == null) {
-      return null;
-    }
-    return BitmapFactory.decodeByteArray(art, 0, art.length);
-  }
 }

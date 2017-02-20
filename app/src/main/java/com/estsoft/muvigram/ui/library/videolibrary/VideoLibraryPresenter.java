@@ -4,7 +4,7 @@ import com.estsoft.muvigram.data.DataManager;
 import com.estsoft.muvigram.model.Video;
 import com.estsoft.muvigram.ui.base.BasePresenter;
 import com.estsoft.muvigram.ui.library.videolibrary.injection.VideoLibraryScope;
-import com.estsoft.muvigram.util.RxUtil;
+import com.estsoft.muvigram.util.rx.RxUtil;
 
 import java.util.ArrayList;
 import java.util.List;

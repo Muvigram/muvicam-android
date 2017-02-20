@@ -20,6 +20,7 @@ import com.estsoft.muvigram.R;
 import com.estsoft.muvigram.model.Music;
 import com.estsoft.muvigram.ui.home.HomeActivity;
 import com.estsoft.muvigram.ui.home.music.injection.MusicScope;
+import com.estsoft.muvigram.util.thumbnail.ThumbnailLoader;
 
 /**
  * Music search adapter
@@ -38,17 +39,6 @@ public class MusicSearchAdapter extends RecyclerView.Adapter<MusicSearchAdapter.
 
   public void setMusics(List<Music> musics) {
     mMusics = musics;
-  }
-
-  public void clearMusics() {
-    int size = this.mMusics.size();
-    for (int i = 0; i < size; i++) {
-      Bitmap bmp = mMusics.get(i).thumbnail();
-      if(bmp!=null) bmp.recycle();
-    }
-    this.mMusics.clear();
-
-    notifyItemRangeRemoved(0, size);
   }
 
   @Override
@@ -82,11 +72,10 @@ public class MusicSearchAdapter extends RecyclerView.Adapter<MusicSearchAdapter.
     TextView mArtist;
 
     public void bindMusic(Music music) {
-      if (music.thumbnail() != null) {
-        mThumbnail.setImageBitmap(music.thumbnail());
-      } else {
-        mThumbnail.setImageResource(R.drawable.music_item_no_album_art);
-      }
+      ThumbnailLoader.musicThumbnailLoader(mThumbnail.getContext())
+          .load(music.uri())
+          .into(mThumbnail);
+
       mTitle.setText(music.title());
       mArtist.setText(music.artist());
       mMusicButton.setOnClickListener(v ->

@@ -1,9 +1,5 @@
 package com.estsoft.muvigram.ui.library.videolibrary;
 
-import android.content.ContentUris;
-import android.graphics.Bitmap;
-import android.net.Uri;
-import android.provider.MediaStore;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,15 +8,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
-import com.bumptech.glide.Glide;
 import com.estsoft.muvigram.R;
 import com.estsoft.muvigram.model.Video;
 import com.estsoft.muvigram.ui.library.videolibrary.injection.VideoLibraryScope;
 import com.estsoft.muvigram.util.DialogFactory;
 import com.estsoft.muvigram.util.ThumbnailImageView;
-import com.squareup.picasso.Picasso;
+import com.estsoft.muvigram.util.thumbnail.ThumbnailLoader;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -29,13 +23,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import rx.Observable;
-import rx.Scheduler;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import timber.log.Timber;
-
-import static android.R.attr.thumbnail;
 
 @VideoLibraryScope
 public class VideoLibraryAdapter extends RecyclerView.Adapter<VideoLibraryAdapter.VideoViewHolder> {
@@ -106,14 +94,10 @@ public class VideoLibraryAdapter extends RecyclerView.Adapter<VideoLibraryAdapte
       // Main frame
       mLayoutMain.setVisibility(View.VISIBLE);
 
-      Observable.just(video.id())
-          .subscribeOn(Schedulers.io())
-          .map((id) -> getThumbnail(id))
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(
-              bitmap -> mVideoThumbnail.setImageBitmap(bitmap),
-              Throwable::printStackTrace
-          );
+      ThumbnailLoader.videoThumbnailLoader(mVideoThumbnail.getContext())
+          .load(video.uri())
+          .into(mVideoThumbnail);
+
       mVideoDuration.setText(getDurationFormat(video.duration()));
 
       // Selected frame
@@ -146,12 +130,6 @@ public class VideoLibraryAdapter extends RecyclerView.Adapter<VideoLibraryAdapte
       super(itemView);
       ButterKnife.bind(this, itemView);
     }
-  }
-
-  private Bitmap getThumbnail(long id) {
-    return MediaStore.Video.Thumbnails.getThumbnail(
-        mFragment.getContext().getContentResolver(),
-        id, MediaStore.Video.Thumbnails.MINI_KIND, null);
   }
 
 //  TODO - More reasonable criteria is required.

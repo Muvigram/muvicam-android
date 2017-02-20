@@ -1,4 +1,4 @@
-package com.estsoft.muvigram.util;
+package com.estsoft.muvigram.util.thumbnail;
 
 import android.graphics.drawable.BitmapDrawable;
 import android.view.View;
@@ -9,7 +9,7 @@ import android.widget.ImageView;
  * Created by jaylim on 13/02/2017.
  */
 
-public class BitmapViewUtil {
+final public class BitmapViewUtil {
   public static void clearViewGroup(View view) {
     if(view instanceof ImageView) {
       BitmapDrawable drawable = (BitmapDrawable) ((ImageView) view).getDrawable();

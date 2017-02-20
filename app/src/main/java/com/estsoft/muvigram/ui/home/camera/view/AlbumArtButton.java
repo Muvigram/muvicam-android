@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 
 import com.estsoft.muvigram.R;
 import com.estsoft.muvigram.model.Music;
+import com.estsoft.muvigram.util.thumbnail.ThumbnailLoader;
 
 /**
  * Created by jaylim on 12/16/2016.
@@ -55,7 +56,9 @@ public class AlbumArtButton extends ImageButton {
 
   // TODO - change parameter to bitmap
   public void setAlbumArt(@Nullable Music music) {
-    if (music == null || music.thumbnail() == null) {
+    Bitmap albumArt = ThumbnailLoader.getThumbnail(music);
+
+    if (music == null || albumArt == null) {
       isAlbumArt = false;
       if (mThumbnail != null) {
         mThumbnail.recycle();
@@ -63,11 +66,14 @@ public class AlbumArtButton extends ImageButton {
       }
       mSrcRect = null;
       invalidate();
+
     } else {
       isAlbumArt = true;
-      mThumbnail = AlbumArtButton.getCroppedBitmap(music.thumbnail());
+      mThumbnail = AlbumArtButton.getCroppedBitmap(albumArt);
       mSrcRect = new Rect(0, 0, mThumbnail.getWidth(), mThumbnail.getHeight());
       invalidate();
+
+      albumArt.recycle();
     }
   }
 

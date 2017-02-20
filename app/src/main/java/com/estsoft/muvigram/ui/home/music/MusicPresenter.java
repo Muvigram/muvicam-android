@@ -11,7 +11,7 @@ import com.estsoft.muvigram.data.DataManager;
 import com.estsoft.muvigram.model.Music;
 import com.estsoft.muvigram.ui.base.BasePresenter;
 import com.estsoft.muvigram.ui.home.music.injection.MusicScope;
-import com.estsoft.muvigram.util.RxUtil;
+import com.estsoft.muvigram.util.rx.RxUtil;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
