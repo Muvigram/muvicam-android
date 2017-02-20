@@ -9,6 +9,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.estsoft.muvigram.R;
+import com.estsoft.muvigram.util.rx.RxUtil;
 
 import java.io.File;
 
@@ -268,7 +269,8 @@ public class WaveformView extends View {
   }
 
   private static float getScaledHeight(int i, int[] frameGain, int maxGain, int minGain, int viewHeight) {
-    return (frameGain[i] - minGain) * (viewHeight / 2.0f) / (maxGain - minGain);
+    float scaledHeight = (frameGain[i] - minGain) * (viewHeight / 2.0f) / (maxGain - minGain);
+    return (scaledHeight < 1.0f) ? 1.0f : scaledHeight;
   }
 
   private static float getScaledInterval(int frameLength, int viewWidth) {
