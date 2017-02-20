@@ -9,7 +9,7 @@ import dagger.Provides;
 import com.estsoft.muvigram.injection.qualifier.ActivityContext;
 import com.estsoft.muvigram.injection.scope.ActivityScope;
 import com.estsoft.muvigram.ui.base.BaseActivity;
-import com.estsoft.muvigram.util.RxEventBus;
+import com.estsoft.muvigram.util.rx.RxEventBus;
 
 /**
  * Created by jaylim on 12/12/2016.

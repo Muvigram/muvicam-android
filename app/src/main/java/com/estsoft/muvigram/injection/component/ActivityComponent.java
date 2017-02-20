@@ -11,7 +11,7 @@ import com.estsoft.muvigram.injection.module.ActivityModule;
 import com.estsoft.muvigram.injection.qualifier.ActivityContext;
 import com.estsoft.muvigram.injection.qualifier.ApplicationContext;
 import com.estsoft.muvigram.injection.scope.ActivityScope;
-import com.estsoft.muvigram.util.RxEventBus;
+import com.estsoft.muvigram.util.rx.RxEventBus;
 
 /**
  * Created by jaylim on 12/12/2016.

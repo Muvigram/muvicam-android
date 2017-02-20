@@ -50,7 +50,7 @@ import com.estsoft.muvigram.ui.home.camera.view.StackBar;
 import com.estsoft.muvigram.ui.library.LibraryActivity;
 import com.estsoft.muvigram.ui.share.ShareActivity;
 import com.estsoft.muvigram.util.MusicPlayer;
-import com.estsoft.muvigram.util.RxUtil;
+import com.estsoft.muvigram.util.rx.RxUtil;
 import com.jakewharton.rxbinding.view.RxView;
 
 import java.io.File;
@@ -111,9 +111,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_cut_button)
   public void _musicCut(View v) {
-    if (!isPreviewSessionReady ||
-        mMusic == null         ||
-        !mVideoStack.isEmpty()) {
+    if (!isPreviewSessionReady || mMusic == null || !mVideoStack.isEmpty()) {
       return;
     }
 
@@ -136,8 +134,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_selfie_button)
   public void _shiftSelfieMode(View v) {
-    if (!isPreviewSessionReady ||
-        !mVideoStack.isEmpty()) {
+    if (!isPreviewSessionReady || !mVideoStack.isEmpty()) {
       return;
     }
 
@@ -154,9 +151,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_ok_button)
   public void _completeVideo(View v) {
-    if (!isPreviewSessionReady ||
-        mVideoStack.isEmpty()  ||
-        mMusicPlayer.getRelativePosition() < 5000) {
+    if (!isPreviewSessionReady || mVideoStack.isEmpty() || mMusicPlayer.getRelativePosition() < 5000) {
       return;
     }
     v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
@@ -172,8 +167,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_library_button)
   public void _goToLibrary(View v) {
-    if (!isPreviewSessionReady ||
-        !mVideoStack.isEmpty()) {
+    if (!isPreviewSessionReady || !mVideoStack.isEmpty()) {
       return;
     }
     v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
@@ -185,8 +179,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   // OnClick
   public void _deleteRecentVideo(View v) {
-    if (!isPreviewSessionReady ||
-        mVideoStack.isEmpty()) {
+    if (!isPreviewSessionReady || mVideoStack.isEmpty()) {
       return;
     }
     v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
@@ -205,25 +198,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     int i = 0;
     int j = 0;
     for (File file : mVideoStack.toArray(new File[mVideoStack.size()])) {
-      // If required to download each video segment, uncomment this codes.
-      // //////////////////////////////////////////////////////////////////////////////////////
-      //  String fileName = String.format(Locale.US, "%d_%d.mp4",
-      //      System.currentTimeMillis(), j++);
-      //  File newFile = new File(mDir, fileName);
-      //  new Thread() {
-      //    @Override
-      //    public void run() {
-      //      super.run();
-      //      try {
-      //        FileUtil.copyFile(file, newFile);
-      //      } catch (IOException e) {
-      //        e.printStackTrace();
-      //      } finally {
-      //        Timber.d("Save the file $$ dir : %s, file : %s\n", mDir.toString(), fileName);
-      //      }
-      //    }
-      //  }.run();
-      // //////////////////////////////////////////////////////////////////////////////////////
       videoPaths[i++] = file.toString();
     }
 

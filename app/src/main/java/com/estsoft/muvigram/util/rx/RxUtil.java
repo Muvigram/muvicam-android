@@ -1,4 +1,4 @@
-package com.estsoft.muvigram.util;
+package com.estsoft.muvigram.util.rx;
 
 import rx.Subscription;
 

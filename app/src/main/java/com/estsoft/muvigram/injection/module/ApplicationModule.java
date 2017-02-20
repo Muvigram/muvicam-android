@@ -8,7 +8,7 @@ import dagger.Provides;
 import com.estsoft.muvigram.data.local.MusicService;
 import com.estsoft.muvigram.data.local.VideoService;
 import com.estsoft.muvigram.injection.qualifier.ApplicationContext;
-import com.estsoft.muvigram.util.RxEventBus;
+import com.estsoft.muvigram.util.rx.RxEventBus;
 
 import javax.inject.Singleton;
 
