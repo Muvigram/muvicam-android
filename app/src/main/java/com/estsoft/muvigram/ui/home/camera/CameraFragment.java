@@ -639,6 +639,8 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   private int mHardwareLevel;
 
+  private final static int HARDWARE_LEGACY = CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY;
+
   private int mSensorOrientation;
 
   private Size mVideoSize;
@@ -658,10 +660,10 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
       mHardwareLevel = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
       if (mHardwareLevel == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
-        UnsupportedDialogFragment dialogFragment = UnsupportedDialogFragment.newInstance();
-        dialogFragment.show(getFragmentManager(), UnsupportedDialogFragment.TAG);
-        dialogFragment.setCancelable(false);
-
+//        UnsupportedDialogFragment dialogFragment = UnsupportedDialogFragment.newInstance();
+//        dialogFragment.show(getFragmentManager(), UnsupportedDialogFragment.TAG);
+//        dialogFragment.setCancelable(false);
+        Timber.w("m/setupCameraOutputs Hardware level LEGACY detected");
       }
 
 
@@ -900,6 +902,14 @@ public class CameraFragment extends Fragment implements CameraMvpView {
         Timber.e(e, "m/delayStopRecording e/InterruptedException");
       } finally {
         requestUiChange(UI_LOGIC_RELEASE_SHOOT_BUTTON);
+        if (mHardwareLevel == HARDWARE_LEGACY) {
+          try {
+            mSession.stopRepeating();
+            mSession.abortCaptures();
+          } catch (CameraAccessException e) {
+            e.printStackTrace();
+          }
+        }
         stopRecorder();
         isRecording = false;
         startPreviewing();
