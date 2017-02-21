@@ -29,8 +29,6 @@ public class SplashActivity extends BaseActivity {
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_splash);
-    //ImageView logoImage = (ImageView) findViewById(R.id.splash_logo_image);
-    //logoImage.setBackgroundResource(R.drawable.splash_w);
 
   }
 
@@ -87,10 +85,17 @@ public class SplashActivity extends BaseActivity {
   }
 
   public void startMainActivity() {
-    new Handler().postDelayed(() -> {
-      startActivity(HomeActivity.getIntent(SplashActivity.this));
-    }, SPLASH_TIME_OUT);
+    new Thread(startMainActivity).start();
   }
+
+  Runnable startMainActivity = () -> {
+    try {
+      Thread.sleep(SPLASH_TIME_OUT);
+      startActivity(HomeActivity.getIntent(SplashActivity.this));
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  };
 
   @Override
   public void onRequestPermissionsResult(int requestCode,
