@@ -111,7 +111,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_cut_button)
   public void _musicCut(View v) {
-    if (!isPreviewSessionReady || mMusic == null || !mVideoStack.isEmpty()) {
+    if (!isCompoundSessionReady || mMusic == null || !mVideoStack.isEmpty()) {
       return;
     }
 
@@ -134,7 +134,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_selfie_button)
   public void _shiftSelfieMode(View v) {
-    if (!isPreviewSessionReady || !mVideoStack.isEmpty()) {
+    if (!isCompoundSessionReady || !mVideoStack.isEmpty()) {
       return;
     }
 
@@ -151,7 +151,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_ok_button)
   public void _completeVideo(View v) {
-    if (!isPreviewSessionReady || mVideoStack.isEmpty() || mMusicPlayer.getRelativePosition() < 5000) {
+    if (!isCompoundSessionReady || mVideoStack.isEmpty() || mMusicPlayer.getRelativePosition() < 5000) {
       return;
     }
     v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
@@ -167,7 +167,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   @OnClick(R.id.camera_library_button)
   public void _goToLibrary(View v) {
-    if (!isPreviewSessionReady || !mVideoStack.isEmpty()) {
+    if (!isCompoundSessionReady || !mVideoStack.isEmpty()) {
       return;
     }
     v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
@@ -179,7 +179,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   // OnClick
   public void _deleteRecentVideo(View v) {
-    if (!isPreviewSessionReady || mVideoStack.isEmpty()) {
+    if (!isCompoundSessionReady || mVideoStack.isEmpty()) {
       return;
     }
     v.startAnimation(getClickingAnimation(getActivity(), new AnimationEndListener() {
@@ -218,8 +218,6 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   // STEP - VIEW BINDING //////////////////////////////////////////////////////////////////////////
 
   private boolean isDown = false;
-  private boolean isSubscribed = false;
-  private boolean isSessionCreated = false;
   private boolean isRecording = false;
   private boolean isOnStopRecording = false;
 
@@ -244,10 +242,13 @@ public class CameraFragment extends Fragment implements CameraMvpView {
     sharedObservable
         .filter(e -> e.getAction() == MotionEvent.ACTION_DOWN)
         .filter(e -> mMusicPlayer.getRelativePosition() <= 14000)
-        .filter(e -> isPreviewSessionReady)
+        .filter(e -> !isRecording && isCompoundSessionReady)
         .filter(this::shootButtonDown)
         .debounce(400, TimeUnit.MILLISECONDS, Schedulers.newThread())
-        .subscribe(this::requestRecording, e -> Timber.e(e, "m/onCreateView RxView.touches.ACTION_DOWN"));
+        .subscribe(
+            this::requestRecording,
+            e -> Timber.e(e, "m/onCreateView RxView.touches.ACTION_DOWN")
+        );
 
     // Stop shooting
     sharedObservable
@@ -315,27 +316,17 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   // STEP - VIDEO RECORDING BUTTON INTERACTION ////////////////////////////////////NEED REFACTORING
 
   public boolean shootButtonDown(MotionEvent motionEvent) {
-    // if (isDown) throw new IllegalStateException("The button has already been held.");
     requestUiChange(UI_LOGIC_HOLD_SHOOT_BUTTON); // Release -> Hold
     isDown = true;
     return true;
   }
 
   public void requestRecording(MotionEvent motionEvent) {
-    // if (isSubscribed) throw new IllegalStateException("Recording request has already been subscribed.");
-    if (!isDown) {
-      return;
-    }
-
-    isSubscribed = true;
+    if (!isDown) return;
     startRecording();
   }
 
   public boolean preventRecording(MotionEvent motionEvent) {
-    // if (!isDown) throw new IllegalStateException("The button has not been held.");
-
-    isSessionCreated = false;
-    isSubscribed = false;
     isDown = false;
 
     if (!isRecording) {
@@ -346,14 +337,11 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   }
 
   public void stopRecording(MotionEvent motionEvent) {
-    // if (!isRecording) throw new IllegalStateException("Already recording is started.");
     mBackgroundHandler.post(this::delayStopRecording);
     isOnStopRecording = true;
   }
 
   public void stopRecording() {
-    isSessionCreated = false;
-    isSubscribed = false;
     isDown = false;
     mBackgroundHandler.post(this::delayStopRecording);
     isOnStopRecording = true;
@@ -601,7 +589,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
   }
 
   private void closeCamera() {
-    closeSession(); // session
+    closeExistingSession(); // session
     try {
       mCameraOpenCloseLock.acquire();
       if (null != mCameraDevice) {
@@ -862,17 +850,22 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   // STEP - CONTROL PREVIEW ///////////////////////////////////////////////////////////////////////
 
-  private CaptureRequest.Builder mCaptureRequestBuilder;
-
   private void startPreviewing() {
-    createPreviewSession();
+    isCompoundSessionReady = false;
+    createCompoundSession();
   }
 
   private void startRecording() {
     requestUiChange(UI_LOGIC_LOCK_SHOOT_BUTTON);
     requestUiChange(UI_LOGIC_HIDE_PERIPHERAL_BUTTONS);
 
-    createRecordSession();
+    isRecording = true;
+    updateVideoOffset();
+    setStackBarOnListen();
+
+    // media recorder
+    startRecorder();
+    mMusicPlayer.startPlayer();
   }
 
   private static final int FIXED_DELAY_LENGTH = 1000;
@@ -937,32 +930,11 @@ public class CameraFragment extends Fragment implements CameraMvpView {
 
   private CameraCaptureSession mSession;
 
-  private boolean isPreviewSessionReady = false;
-  private boolean isRecordSessionReady = false;
+  private CaptureRequest.Builder mCaptureRequestBuilder;
 
-  private void createPreviewSession() {
-    try {
-      // Surface texture
-      SurfaceTexture texture = mTextureView.getSurfaceTexture();
-      assert texture != null;
-      texture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
-      Surface previewSurface = new Surface(texture);
+  private boolean isCompoundSessionReady = false;
 
-      mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-      mCaptureRequestBuilder.addTarget(previewSurface);
-
-      closeSession();
-      isRecordSessionReady = false;
-
-      mCameraDevice.createCaptureSession(Collections.singletonList(previewSurface),
-          mPreviewSessionStateCallback, mBackgroundHandler);
-
-    } catch (CameraAccessException e) {
-      Timber.e(e, "m/createPreviewSession");
-    }
-  }
-
-  private void createRecordSession() {
+  private void createCompoundSession() {
     try {
       // Surface texture
       SurfaceTexture texture = mTextureView.getSurfaceTexture();
@@ -977,86 +949,53 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       surfaces.add(previewSurface);
       surfaces.add(recorderSurface);
 
-      if (!isSubscribed) {
-        return;
-      }
-      isSessionCreated = true;
-
+      // Initialize captureRequestBuilder
       mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
       mCaptureRequestBuilder.addTarget(previewSurface);
       mCaptureRequestBuilder.addTarget(recorderSurface);
+      mCaptureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
 
-      closeSession();
-      isPreviewSessionReady = false;
+      closeExistingSession();
 
-      mCameraDevice.createCaptureSession(surfaces, mRecordSessionStateCallback, mBackgroundHandler);
+      mCameraDevice.createCaptureSession(surfaces, mCompoundSessionStateCallback, mBackgroundHandler);
+
     } catch (CameraAccessException e) {
-      Timber.e(e, "m/createRecordSession Exception when creating capture session for recording.");
+      Timber.e(e, "m/createCompoundSession Exception when creating capture session for recording.");
     }
   }
 
-  private void closeSession() {
+  private CameraCaptureSession.StateCallback mCompoundSessionStateCallback =
+      new CameraCaptureSession.StateCallback() {
+        @Override
+        public void onConfigured(@NonNull CameraCaptureSession session) {
+          try {
 
+            // Start preview
+            session.setRepeatingRequest(mCaptureRequestBuilder.build(), null, mBackgroundHandler);
+          } catch (CameraAccessException e) {
+            Timber.e(e, "m/RecordSessionStateCallback#onConfigured");
+            isCompoundSessionReady = false;
+            // startPreviewing();
+          }
+
+          mSession = session;
+          isCompoundSessionReady = true;
+        }
+
+        @Override
+        public void onConfigureFailed(@NonNull CameraCaptureSession session) {
+          Timber.w("compoundSessionStateCallback m/onConfigureFalied session failed");
+        }
+  };
+
+  private void closeExistingSession() {
     if (null != mSession) {
       mSession.close();
       mSession = null;
     }
+
+    isCompoundSessionReady = false;
   }
-
-  CameraCaptureSession.StateCallback mPreviewSessionStateCallback = new CameraCaptureSession.StateCallback() {
-    @Override
-    public void onConfigured(@NonNull CameraCaptureSession previewSession) {
-      isPreviewSessionReady = true;
-
-      mSession = previewSession;
-      // start capture request
-      mCaptureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
-      try {
-        mSession.setRepeatingRequest(mCaptureRequestBuilder.build(), null, mBackgroundHandler);
-      } catch (CameraAccessException e) {
-        Timber.e(e, "m/PreviewSessionStateCallback#onConfigured");
-      }
-    }
-
-    @Override
-    public void onConfigureFailed(@NonNull CameraCaptureSession previewSession) {
-    }
-  };
-
-  CameraCaptureSession.StateCallback mRecordSessionStateCallback = new CameraCaptureSession.StateCallback() {
-    @Override
-    public void onConfigured(@NonNull CameraCaptureSession recordSession) {
-      isRecordSessionReady = true;
-
-      mSession = recordSession;
-
-      // start capture request
-      mCaptureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
-      mCaptureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF);
-      try {
-        mSession.setRepeatingRequest(mCaptureRequestBuilder.build(), null, mBackgroundHandler);
-      } catch (CameraAccessException e) {
-        Timber.e(e, "m/RecordSessionStateCallback#onConfigured");
-      }
-
-      if (!isSessionCreated) { // Prevent by method "preventRecording"
-        startPreviewing();
-        return;
-      }
-      isRecording = true;
-
-      updateVideoOffset();
-      setStackBarOnListen();
-
-      // media recorder
-      startRecorder();
-      mMusicPlayer.startPlayer();
-    }
-
-    @Override
-    public void onConfigureFailed(@NonNull CameraCaptureSession recordSession) {
-    }
-  };
 
   // STEP - MEDIA RECORDER ////////////////////////////////////////////////////////////////////DONE
 
@@ -1112,6 +1051,7 @@ public class CameraFragment extends Fragment implements CameraMvpView {
       Timber.e(e, "m/startRecorder");
       mRecorder.reset();
       setUpRecorder();
+      mRecorder.start();
     }
   }
 
